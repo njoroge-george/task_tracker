@@ -1,0 +1,425 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ USER & AUTHENTICATION ============
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For email/password auth
+  role          UserRole  @default(USER)
+  
+  // Subscription & Billing
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  stripeCustomerId String?  @unique
+  stripeSubscriptionId String?  @unique
+  
+  // Preferences
+  timezone      String    @default("UTC")
+  dateFormat    String    @default("MM/DD/YYYY")
+  weekStart     Int       @default(0) // 0 = Sunday
+  theme         Theme     @default(SYSTEM)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  ownedWorkspaces Workspace[]
+  workspaceMembers WorkspaceMember[]
+  tasks         Task[]
+  projects      Project[]
+  comments      Comment[]
+  attachments   Attachment[]
+  activityLogs  ActivityLog[]
+  notifications Notification[]
+  sentMessages  Message[]  @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  ratings       Rating[]
+  
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============ WORKSPACE & TEAMS ============
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  slug        String   @unique
+  image       String?
+  
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  members     WorkspaceMember[]
+  projects    Project[]
+  tasks       Task[]
+  tags        Tag[]
+  
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  role        MemberRole @default(MEMBER)
+  
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  joinedAt    DateTime @default(now())
+  
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+// ============ PROJECTS ============
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String   @default("#3B82F6")
+  icon        String?
+  
+  status      ProjectStatus @default(ACTIVE)
+  visibility  Visibility @default(PRIVATE)
+  
+  startDate   DateTime?
+  dueDate     DateTime?
+  
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  tasks       Task[]
+  
+  @@index([workspaceId])
+  @@index([ownerId])
+}
+
+// ============ TASKS ============
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  
+  status      TaskStatus @default(TODO)
+  priority    Priority @default(MEDIUM)
+  
+  dueDate     DateTime?
+  startDate   DateTime?
+  completedAt DateTime?
+  
+  // Time tracking
+  estimatedTime Int?     // in minutes
+  actualTime    Int?     // in minutes
+  
+  // Positioning for Kanban
+  position    Int      @default(0)
+  
+  // Relations
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  assigneeId  String?
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+  
+  parentId    String?
+  parent      Task?    @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks    Task[]   @relation("SubTasks")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  tags        Tag[]
+  comments    Comment[]
+  attachments Attachment[]
+  activityLogs ActivityLog[]
+  
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+}
+
+// ============ TAGS ============
+model Tag {
+  id          String   @id @default(cuid())
+  name        String
+  color       String   @default("#6B7280")
+  
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([name, workspaceId])
+  @@index([workspaceId])
+}
+
+// ============ COMMENTS ============
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([taskId])
+  @@index([authorId])
+}
+
+// ============ ATTACHMENTS ============
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String
+  size      Int
+  
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  uploaderId String
+  uploader  User     @relation(fields: [uploaderId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@index([taskId])
+  @@index([uploaderId])
+}
+
+// ============ ACTIVITY LOG ============
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String   // e.g., "created", "updated", "deleted", "completed"
+  entity    String   // e.g., "task", "project", "comment"
+  metadata  Json?    // Store additional data
+  
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============ NOTIFICATIONS ============
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType
+  read      Boolean  @default(false)
+  link      String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// ============ MESSAGES ============
+model Message {
+  id        String   @id @default(cuid())
+  subject   String?
+  content   String
+  read      Boolean  @default(false)
+  messageType String @default("DIRECT") // DIRECT, TASK, PROJECT, CALL, CALL_MISSED, VOICE, VIDEO
+  
+  // Call metadata (for messageType = "CALL")
+  callType  String?  // "video" or "audio"
+  callDuration Int?  // Duration in seconds
+  
+  // Media metadata (for messageType = "VOICE" or "VIDEO")
+  mediaUrl  String?  // URL to audio/video file
+  mediaDuration Int? // Duration in seconds
+  mediaThumbnail String? // Thumbnail for video messages
+  
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId String
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  // Optional: Link to task or project
+  taskId    String?
+  projectId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([messageType])
+}
+
+// ============ RATINGS ============
+model Rating {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  comment   String?
+  
+  // What is being rated
+  entityType String  // e.g., "task", "project", "user"
+  entityId  String
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, entityType, entityId]) // One rating per user per entity
+  @@index([entityType, entityId])
+  @@index([userId])
+}
+
+// ============ ENUMS ============
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum Visibility {
+  PRIVATE
+  WORKSPACE
+  PUBLIC
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  TASK_DUE_SOON
+  COMMENT_ADDED
+  MENTION
+  PROJECT_INVITE
+  MESSAGE_RECEIVED
+  RATING_RECEIVED
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_RENEWED
+}

@@ -1,0 +1,71 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <circle cx="256" cy="256" r="256" fill="url(#mainGradient)" />
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6366F1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Main Task List Container -->
+  <g filter="url(#shadow)">
+    <!-- Container Background -->
+    <rect x="140" y="100" width="232" height="312" rx="24" fill="white" opacity="0.95"/>
+    
+    <!-- Task Items -->
+    <!-- Task 1 - Completed -->
+    <g>
+      <rect x="165" y="140" width="182" height="48" rx="12" fill="#F0F9FF"/>
+      <circle cx="185" cy="164" r="12" fill="#3B82F6"/>
+      <path d="M 181 164 L 184 167 L 189 160" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="210" y="154" width="120" height="8" rx="4" fill="#3B82F6" opacity="0.3"/>
+      <rect x="210" y="168" width="80" height="6" rx="3" fill="#3B82F6" opacity="0.2"/>
+    </g>
+    
+    <!-- Task 2 - Completed -->
+    <g>
+      <rect x="165" y="205" width="182" height="48" rx="12" fill="#F0F9FF"/>
+      <circle cx="185" cy="229" r="12" fill="#3B82F6"/>
+      <path d="M 181 229 L 184 232 L 189 225" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="210" y="219" width="100" height="8" rx="4" fill="#3B82F6" opacity="0.3"/>
+      <rect x="210" y="233" width="90" height="6" rx="3" fill="#3B82F6" opacity="0.2"/>
+    </g>
+    
+    <!-- Task 3 - In Progress -->
+    <g>
+      <rect x="165" y="270" width="182" height="48" rx="12" fill="#FEF3C7"/>
+      <circle cx="185" cy="294" r="12" fill="#F59E0B" stroke="#FCD34D" stroke-width="2"/>
+      <circle cx="185" cy="294" r="4" fill="white"/>
+      <rect x="210" y="284" width="110" height="8" rx="4" fill="#F59E0B" opacity="0.3"/>
+      <rect x="210" y="298" width="70" height="6" rx="3" fill="#F59E0B" opacity="0.2"/>
+    </g>
+    
+    <!-- Task 4 - Pending -->
+    <g>
+      <rect x="165" y="335" width="182" height="48" rx="12" fill="#F3F4F6"/>
+      <circle cx="185" cy="359" r="12" fill="white" stroke="#D1D5DB" stroke-width="2"/>
+      <rect x="210" y="349" width="130" height="8" rx="4" fill="#9CA3AF" opacity="0.2"/>
+      <rect x="210" y="363" width="85" height="6" rx="3" fill="#9CA3AF" opacity="0.15"/>
+    </g>
+  </g>
+  
+  <!-- AI Sparkles -->
+  <g opacity="0.9">
+    <path d="M 400 120 L 410 130 L 400 140 L 390 130 Z" fill="white"/>
+    <path d="M 420 100 L 426 106 L 420 112 L 414 106 Z" fill="white" opacity="0.8"/>
+    <path d="M 385 145 L 390 150 L 385 155 L 380 150 Z" fill="white" opacity="0.7"/>
+  </g>
+  
+  <g opacity="0.9">
+    <path d="M 112 380 L 122 390 L 112 400 L 102 390 Z" fill="white"/>
+    <path d="M 95 360 L 101 366 L 95 372 L 89 366 Z" fill="white" opacity="0.8"/>
+  </g>
+</svg>

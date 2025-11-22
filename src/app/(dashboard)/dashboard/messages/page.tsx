@@ -1,0 +1,124 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import DirectMessages from "@/components/messaging/DirectMessages";
+
+export default async function MessagesPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
+  }
+
+  // Get user's workspace to find team members
+  const workspaceMember = await prisma.workspaceMember.findFirst({
+    where: { userId: session.user.id },
+    include: {
+      workspace: {
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const users = workspaceMember?.workspace.members
+    .map((m) => m.user)
+    .filter((u) => u.id !== session.user.id) || [];
+
+  // Get all messages where user is sender or recipient
+  let messages: any[] = [];
+  try {
+    messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: session.user.id },
+          { receiverId: session.user.id },
+        ],
+        messageType: "DIRECT",
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    // Continue with empty messages array
+  }
+
+  // Group by conversation partner
+  const conversationsMap = new Map();
+
+  messages.forEach((message) => {
+    const otherUserId =
+      message.senderId === session.user.id
+        ? message.receiverId
+        : message.senderId;
+    const otherUser =
+      message.senderId === session.user.id
+        ? message.receiver
+        : message.sender;
+
+    if (!conversationsMap.has(otherUserId)) {
+      conversationsMap.set(otherUserId, {
+        user: otherUser,
+        lastMessage: message,
+        unreadCount: 0,
+      });
+    }
+
+    // Count unread messages from this user
+    if (message.receiverId === session.user.id && !message.read) {
+      const conv = conversationsMap.get(otherUserId);
+      conv.unreadCount++;
+    }
+  });
+
+  const conversations = Array.from(conversationsMap.values());
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-primary">Direct Messages</h1>
+        <p className="text-secondary mt-2">
+          Chat with your team members
+        </p>
+      </div>
+
+      <DirectMessages
+        currentUserId={session.user.id}
+        users={users}
+        initialConversations={conversations}
+      />
+    </div>
+  );
+}

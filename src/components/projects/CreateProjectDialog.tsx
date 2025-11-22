@@ -1,0 +1,195 @@
+'use client';
+
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  Typography,
+  IconButton,
+} from '@mui/material';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+interface CreateProjectDialogProps {
+  open: boolean;
+  onClose: () => void;
+  workspaceId?: string;
+}
+
+const COLORS = [
+  '#ef4444', // red
+  '#f97316', // orange
+  '#f59e0b', // amber
+  '#eab308', // yellow
+  '#84cc16', // lime
+  '#22c55e', // green
+  '#10b981', // emerald
+  '#14b8a6', // teal
+  '#06b6d4', // cyan
+  '#0ea5e9', // sky
+  '#3b82f6', // blue
+  '#6366f1', // indigo
+  '#8b5cf6', // violet
+  '#a855f7', // purple
+  '#d946ef', // fuchsia
+  '#ec4899', // pink
+];
+
+export default function CreateProjectDialog({ open, onClose, workspaceId }: CreateProjectDialogProps) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    color: COLORS[4], // Default to green
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          workspaceId: workspaceId || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create project');
+      }
+
+      // Reset form and close dialog
+      setFormData({
+        name: '',
+        description: '',
+        color: COLORS[4],
+      });
+      
+      onClose();
+      router.refresh(); // Refresh the page to show new project
+    } catch (err: any) {
+      console.error('Error creating project:', err);
+      setError(err.message || 'Failed to create project');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData({
+        name: '',
+        description: '',
+        color: COLORS[4],
+      });
+      setError('');
+      onClose();
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Create New Project</Typography>
+          <IconButton onClick={handleClose} size="small" disabled={isSubmitting}>
+            <X size={20} />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      
+      <form onSubmit={handleSubmit}>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {error && (
+              <Box
+                sx={{
+                  p: 2,
+                  backgroundColor: 'error.light',
+                  color: 'error.dark',
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body2">{error}</Typography>
+              </Box>
+            )}
+
+            <TextField
+              label="Project Name"
+              required
+              fullWidth
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={isSubmitting}
+              placeholder="Enter project name..."
+            />
+
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              disabled={isSubmitting}
+              placeholder="Add project description..."
+            />
+
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Project Color
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {COLORS.map((color) => (
+                  <Box
+                    key={color}
+                    onClick={() => !isSubmitting && setFormData({ ...formData, color })}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1,
+                      backgroundColor: color,
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                      border: formData.color === color ? '3px solid' : '2px solid transparent',
+                      borderColor: formData.color === color ? 'primary.main' : 'transparent',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        transform: isSubmitting ? 'none' : 'scale(1.1)',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={handleClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting || !formData.name.trim()}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Project'}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
+  );
+}
