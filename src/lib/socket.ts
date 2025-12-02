@@ -110,6 +110,60 @@ export const initSocketServer = (httpServer: HTTPServer) => {
       });
     });
 
+    // Notifications
+    socket.on('notification:join', (userId: string) => {
+      socket.join(`notifications:${userId}`);
+      console.log(`Socket ${socket.id} joined notifications:${userId}`);
+    });
+
+    socket.on('notification:send', (data: { userId: string; notification: any }) => {
+      // Broadcast to all user's connected devices
+      io.to(`notifications:${data.userId}`).emit('notification:new', data.notification);
+    });
+
+    socket.on('notification:read', (data: { userId: string; notificationId: string }) => {
+      // Broadcast to user's other devices
+      socket.to(`notifications:${data.userId}`).emit('notification:marked-read', {
+        notificationId: data.notificationId,
+      });
+    });
+
+    // Discussions
+    socket.on('discussion:join', (discussionId: string) => {
+      socket.join(`discussion:${discussionId}`);
+      console.log(`Socket ${socket.id} joined discussion:${discussionId}`);
+    });
+
+    socket.on('discussion:leave', (discussionId: string) => {
+      socket.leave(`discussion:${discussionId}`);
+    });
+
+    socket.on('discussion:comment', (data: { discussionId: string; comment: any }) => {
+      // Broadcast new comment to all viewers
+      socket.to(`discussion:${data.discussionId}`).emit('discussion:new-comment', data.comment);
+    });
+
+    socket.on('discussion:reply', (data: { discussionId: string; parentCommentId: string; reply: any }) => {
+      // Broadcast new reply to all viewers
+      socket.to(`discussion:${data.discussionId}`).emit('discussion:new-reply', {
+        parentCommentId: data.parentCommentId,
+        reply: data.reply,
+      });
+    });
+
+    socket.on('discussion:update', (data: { discussionId: string; update: any }) => {
+      // Broadcast discussion updates
+      socket.to(`discussion:${data.discussionId}`).emit('discussion:updated', data.update);
+    });
+
+    socket.on('discussion:watch', (data: { discussionId: string; userId: string }) => {
+      // Broadcast new watcher
+      socket.to(`discussion:${data.discussionId}`).emit('discussion:new-watcher', {
+        userId: data.userId,
+      });
+    });
+
+
     // WebRTC Call Signaling
     socket.on('call:initiate', (data: { 
       to: string; 

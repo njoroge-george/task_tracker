@@ -15,6 +15,7 @@ const taskUpdateSchema = z.object({
   estimatedTime: z.number().optional(),
   actualTime: z.number().optional(),
   tagIds: z.array(z.string()).optional(),
+  position: z.number().optional(),
 });
 
 // GET /api/tasks/[id] - Get single task
@@ -127,12 +128,13 @@ export async function PATCH(
     const body = await request.json();
     const validatedData = taskUpdateSchema.parse(body);
 
-    const { tagIds, ...updateData } = validatedData;
+  const { tagIds, position, ...updateData } = validatedData;
 
     const task = await prisma.task.update({
       where: { id },
       data: {
         ...updateData,
+        ...(position !== undefined && { position }),
         ...(validatedData.dueDate && {
           dueDate: new Date(validatedData.dueDate),
         }),

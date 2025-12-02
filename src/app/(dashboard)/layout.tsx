@@ -7,6 +7,10 @@ import { RealtimeProvider } from "@/contexts/RealtimeContext";
 import { CallProviderWrapper } from "@/components/providers/CallProviderWrapper";
 import RealtimeNotifications from "@/components/realtime/RealtimeNotifications";
 import KeyboardShortcutsProvider from "@/contexts/KeyboardShortcutsContext";
+import { SidebarProvider } from "@/contexts/SidebarContext";
+import { DashboardLayoutClient } from "@/components/dashboard/DashboardLayoutClient";
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import FloatingScreenShare from "@/components/screen-share/FloatingScreenShare";
 
 export default async function DashboardLayout({
   children,
@@ -31,25 +35,32 @@ export default async function DashboardLayout({
       workspaceId={workspaceMember?.workspaceId}
     >
       <CallProviderWrapper>
-        <KeyboardShortcutsProvider>
-          <div className="min-h-screen bg-primary">
-            {/* Top Navigation */}
-            <DashboardNav user={session.user} />
+        <WorkspaceProvider>
+          <KeyboardShortcutsProvider>
+            <SidebarProvider>
+              <div className="min-h-screen bg-primary">
+                {/* Top Navigation */}
+                <DashboardNav user={session.user} />
 
-            <div className="flex">
-              {/* Sidebar */}
-              <Sidebar />
+                <div className="flex">
+                  {/* Sidebar */}
+                  <Sidebar />
 
-              {/* Main Content */}
-              <main className="flex-1 p-4 sm:p-6 lg:p-8 ml-0 lg:ml-64 mt-16">
-                {children}
-              </main>
-            </div>
+                  {/* Main Content */}
+                  <DashboardLayoutClient>
+                    {children}
+                  </DashboardLayoutClient>
+                </div>
 
-            {/* Real-time notifications */}
-            <RealtimeNotifications />
-          </div>
-        </KeyboardShortcutsProvider>
+                {/* Real-time notifications */}
+                <RealtimeNotifications />
+                
+                {/* Global Screen Sharing Button */}
+                <FloatingScreenShare />
+              </div>
+            </SidebarProvider>
+          </KeyboardShortcutsProvider>
+        </WorkspaceProvider>
       </CallProviderWrapper>
     </RealtimeProvider>
   );

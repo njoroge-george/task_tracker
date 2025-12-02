@@ -20,6 +20,7 @@ type Task = {
   title: string;
   description: string | null;
   status: string;
+  position?: number;
   priority: string;
   dueDate: Date | null;
   assignee: {
@@ -96,6 +97,15 @@ export default function KanbanBoard({ tasks, projects }: Props) {
       }
     });
 
+    // Sort each status list by position if available
+    (Object.keys(grouped) as Array<keyof typeof grouped>).forEach((k) => {
+      grouped[k] = grouped[k].slice().sort((a, b) => {
+        const ap = a.position ?? 0;
+        const bp = b.position ?? 0;
+        return ap - bp;
+      });
+    });
+
     return grouped;
   }, [filteredTasks]);
 
@@ -112,27 +122,48 @@ export default function KanbanBoard({ tasks, projects }: Props) {
     }
 
     const taskId = active.id as string;
-    const newStatus = over.id as string;
+    const overId = over.id as string;
+    // Determine destination status: if dropped over another task, use that task's status; otherwise use the column id
+  const overTask = tasks.find((t) => t.id === overId);
+    const newStatus = overTask ? overTask.status : overId;
+
+    const allowedStatuses = new Set(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
+    if (!allowedStatuses.has(newStatus)) {
+      console.warn("Ignoring drop: destination is not a valid status", { overId, inferredStatus: newStatus });
+      setActiveId(null);
+      return;
+    }
 
     // Find the task
     const task = tasks.find((t) => t.id === taskId);
-    if (!task || task.status === newStatus) {
+    const sameColumn = !!task && task.status === newStatus;
+    if (!task) {
       setActiveId(null);
       return;
     }
 
     // Update task status via API
     try {
+      // Compute next position: if reordering within same column and over a task, place after it; otherwise append to end
+      const destList = tasksByStatus[newStatus] ?? [];
+      const maxPos = destList.reduce((m, t) => Math.max(m, t.position ?? 0), 0);
+      const nextPosition = sameColumn && overTask && (overTask.position ?? maxPos) + 1 || maxPos + 1;
+
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, position: nextPosition }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update task");
+        let msg = "Failed to update task";
+        try {
+          const err = await response.json();
+          if (err?.error) msg = err.error;
+        } catch {}
+        throw new Error(msg);
       }
 
       // Emit real-time update
@@ -142,7 +173,7 @@ export default function KanbanBoard({ tasks, projects }: Props) {
       window.location.reload();
     } catch (error) {
       console.error("Error updating task:", error);
-      alert("Failed to update task status");
+      alert((error as Error).message || "Failed to update task status");
     }
 
     setActiveId(null);

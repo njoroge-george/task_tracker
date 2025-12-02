@@ -285,6 +285,23 @@ export default function TaskDetailView({ task, currentUserId, members }: Props) 
                     {task.title}
                   </Typography>
                   {task.description && <Typography variant="body1">{task.description}</Typography>}
+                  {task.tags.length > 0 && (
+                    <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}>
+                      <TagIcon size={16} style={{ marginTop: 4 }} />
+                      {task.tags.map((tag) => (
+                        <Chip
+                          key={tag.id}
+                          label={tag.name}
+                          size="small"
+                          sx={{
+                            bgcolor: tag.color || "#6B7280",
+                            color: "white",
+                            fontWeight: 500,
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  )}
                 </Box>
               }
               action={

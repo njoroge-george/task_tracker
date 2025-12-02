@@ -2,7 +2,17 @@
 
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  createdAt: Date;
+}
 
 interface DashboardNavProps {
   user: {
@@ -16,6 +26,49 @@ interface DashboardNavProps {
 export default function DashboardNav({ user }: DashboardNavProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/notifications');
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read: true }),
+      });
+
+      if (response.ok) {
+        setNotifications(prev =>
+          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        );
+      }
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const getInitials = (name: string) => {
     return name
@@ -120,6 +173,9 @@ export default function DashboardNav({ user }: DashboardNavProps) {
 
           {/* Right Side Icons */}
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Quick Add */}
             <button className="p-2 text-primary hover:bg-secondary rounded-lg">
               <svg
@@ -138,22 +194,131 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             </button>
 
             {/* Notifications */}
-            <button className="relative p-2 text-primary hover:bg-secondary rounded-lg">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-primary hover:bg-secondary rounded-lg"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowNotifications(false)}
+                  ></div>
+                  <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg border border-default py-2 z-20 max-h-96 overflow-y-auto">
+                    <div className="px-4 py-3 border-b border-default flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-primary">
+                        Notifications
+                      </h3>
+                      {unreadCount > 0 && (
+                        <span className="text-xs text-secondary">
+                          {unreadCount} unread
+                        </span>
+                      )}
+                    </div>
+
+                    {loading ? (
+                      <div className="px-4 py-8 text-center">
+                        <div className="inline-block w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs text-secondary mt-2">Loading...</p>
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="px-4 py-8 text-center">
+                        <svg
+                          className="w-12 h-12 mx-auto text-secondary opacity-50"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                          />
+                        </svg>
+                        <p className="text-sm text-secondary mt-2">
+                          No notifications yet
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-default">
+                        {notifications.map((notification) => (
+                          <button
+                            key={notification.id}
+                            onClick={() => {
+                              if (!notification.read) {
+                                markAsRead(notification.id);
+                              }
+                            }}
+                            className={`w-full px-4 py-3 text-left hover:bg-secondary transition-colors ${
+                              !notification.read ? 'bg-accent/5' : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                                !notification.read ? 'bg-accent' : 'bg-transparent'
+                              }`}></div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm ${
+                                  !notification.read ? 'font-semibold text-primary' : 'font-medium text-primary'
+                                }`}>
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-secondary mt-1 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-tertiary mt-1">
+                                  {new Date(notification.createdAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {notifications.length > 0 && (
+                      <div className="px-4 py-2 border-t border-default">
+                        <Link
+                          href="/dashboard"
+                          className="text-xs text-accent hover:text-accent-hover font-medium"
+                          onClick={() => setShowNotifications(false)}
+                        >
+                          View all notifications
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* User Menu */}
             <div className="relative">

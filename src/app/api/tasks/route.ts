@@ -147,6 +147,7 @@ export async function POST(request: Request) {
         metadata: { title: task.title },
         userId: session.user.id,
         taskId: task.id,
+        workspaceId: workspaceMember.workspaceId,
       },
     });
 

@@ -18,17 +18,27 @@ model User {
   password      String?   // For email/password auth
   role          UserRole  @default(USER)
   
+  // Password Reset
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  
   // Subscription & Billing
   plan          Plan      @default(FREE)
   planExpiresAt DateTime?
-  stripeCustomerId String?  @unique
-  stripeSubscriptionId String?  @unique
+  trialEndsAt   DateTime? // Free trial expiration (does not change plan field)
+  phoneNumber   String?   // For M-Pesa payments
   
   // Preferences
   timezone      String    @default("UTC")
   dateFormat    String    @default("MM/DD/YYYY")
   weekStart     Int       @default(0) // 0 = Sunday
   theme         Theme     @default(SYSTEM)
+  
+  // Notification Preferences (JSON)
+  notificationPreferences Json? @default("{\"email\":true,\"push\":true,\"taskAssigned\":true,\"taskCompleted\":false,\"taskDueSoon\":true,\"comments\":true,\"mentions\":true}")
+  
+  // Task Reminder Settings (JSON) - hours before due date to send reminder
+  reminderSettings Json? @default("{\"enabled\":true,\"intervals\":[24,1]}")
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -47,6 +57,13 @@ model User {
   sentMessages  Message[]  @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
   ratings       Rating[]
+  sentInvitations WorkspaceInvitation[] @relation("SentInvitations")
+  discussions   Discussion[]
+  discussionComments DiscussionComment[]
+  discussionWatchers DiscussionWatcher[]
+  commentReactions CommentReaction[]
+  playgroundSnippets PlaygroundSnippet[]
+  paymentRecords ManualPayment[]
   
   @@index([email])
 }
@@ -107,6 +124,8 @@ model Workspace {
   projects    Project[]
   tasks       Task[]
   tags        Tag[]
+  invitations WorkspaceInvitation[]
+  discussions Discussion[]
   
   @@index([ownerId])
   @@index([slug])
@@ -127,6 +146,28 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([workspaceId])
   @@index([userId])
+}
+
+model WorkspaceInvitation {
+  id          String   @id @default(cuid())
+  email       String
+  token       String   @unique
+  role        MemberRole @default(MEMBER)
+  status      InvitationStatus @default(PENDING)
+  
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  invitedBy   String
+  invitedByUser User   @relation("SentInvitations", fields: [invitedBy], references: [id])
+  
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([workspaceId])
+  @@index([email])
+  @@index([token])
 }
 
 // ============ PROJECTS ============
@@ -153,6 +194,7 @@ model Project {
   updatedAt   DateTime @updatedAt
   
   tasks       Task[]
+  discussions Discussion[]
   
   @@index([workspaceId])
   @@index([ownerId])
@@ -270,15 +312,21 @@ model ActivityLog {
   entity    String   // e.g., "task", "project", "comment"
   metadata  Json?    // Store additional data
   
+  workspaceId String?
+  
   taskId    String?
   task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  projectId String?
   
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   
   createdAt DateTime @default(now())
   
+  @@index([workspaceId])
   @@index([taskId])
+  @@index([projectId])
   @@index([userId])
   @@index([createdAt])
 }
@@ -291,6 +339,11 @@ model Notification {
   type      NotificationType
   read      Boolean  @default(false)
   link      String?
+  metadata  Json?    // Additional data (taskId, projectId, mentions, etc.)
+  
+  // Push notification tracking
+  pushSent  Boolean  @default(false)
+  emailSent Boolean  @default(false)
   
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -300,6 +353,7 @@ model Notification {
   @@index([userId])
   @@index([read])
   @@index([createdAt])
+  @@index([type])
 }
 
 // ============ MESSAGES ============
@@ -359,7 +413,151 @@ model Rating {
   @@index([userId])
 }
 
+// ============ PLAYGROUND SNIPPETS ============
+model PlaygroundSnippet {
+  id        String   @id @default(cuid())
+  title     String?
+  html      String   @default("")
+  css       String   @default("")
+  js        String   @default("")
+  python    String   @default("")
+  isPublic  Boolean  @default(true)
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
 // ============ ENUMS ============
+// ============ DISCUSSIONS ============
+model Discussion {
+  id           String   @id @default(cuid())
+  title        String
+  content      String
+  category     DiscussionCategory @default(GENERAL)
+  tags         String[] @default([])
+  isPinned     Boolean  @default(false)
+  isClosed     Boolean  @default(false)
+  isResolved   Boolean  @default(false)
+  isLocked     Boolean  @default(false)
+  
+  workspaceId  String?
+  workspace    Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  projectId    String?
+  project      Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  comments     DiscussionComment[]
+  watchers     DiscussionWatcher[]
+  relatedItems DiscussionRelatedItem[]
+
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([authorId])
+  @@index([category])
+  @@index([isPinned])
+  @@index([isResolved])
+}
+
+model DiscussionWatcher {
+  id           String   @id @default(cuid())
+  discussionId String
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([discussionId, userId])
+  @@index([discussionId])
+  @@index([userId])
+}
+
+model DiscussionComment {
+  id           String   @id @default(cuid())
+  content      String
+  discussionId String
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  
+  // Threading support
+  parentCommentId String?
+  parentComment   DiscussionComment? @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         DiscussionComment[] @relation("CommentReplies")
+  
+  // Reactions
+  reactions    CommentReaction[]
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([discussionId])
+  @@index([authorId])
+  @@index([parentCommentId])
+}
+
+model CommentReaction {
+  id        String   @id @default(cuid())
+  emoji     String   // The emoji reaction (👍, ❤️, 😄, etc.)
+  commentId String
+  comment   DiscussionComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId, emoji]) // One reaction type per user per comment
+  @@index([commentId])
+  @@index([userId])
+}
+
+model DiscussionRelatedItem {
+  id           String   @id @default(cuid())
+  discussionId String
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  type         RelatedItemType
+  title        String
+  url          String
+  status       String?
+  createdAt    DateTime @default(now())
+
+  @@index([discussionId])
+}
+
+// ============ PAYMENTS ============
+// Simple manual payment tracking for paybill/account number payments
+model ManualPayment {
+  id          String   @id @default(cuid())
+  reference   String   @unique // User-provided payment reference/transaction code
+  amount      Int      // Amount paid in KES
+  plan        Plan     // Plan being purchased
+  status      ManualPaymentStatus @default(PENDING)
+  
+  // Payment details
+  phoneNumber String?   // M-Pesa phone number used
+  transactionCode String? // M-Pesa transaction code
+  paymentMethod String  @default("PAYBILL") // PAYBILL or ACCOUNT_NUMBER
+  notes       String?   // Admin notes
+  
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  verifiedAt  DateTime? // When admin verified payment
+  verifiedBy  String?   // Admin who verified (could be admin email/id)
+  
+  @@index([userId])
+  @@index([reference])
+  @@index([status])
+  @@index([createdAt])
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -382,6 +580,13 @@ enum MemberRole {
   ADMIN
   MEMBER
   VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }
 
 enum ProjectStatus {
@@ -415,6 +620,7 @@ enum NotificationType {
   TASK_ASSIGNED
   TASK_COMPLETED
   TASK_DUE_SOON
+  TASK_REMINDER
   COMMENT_ADDED
   MENTION
   PROJECT_INVITE
@@ -422,4 +628,35 @@ enum NotificationType {
   RATING_RECEIVED
   SUBSCRIPTION_EXPIRING
   SUBSCRIPTION_RENEWED
+  DISCUSSION_CREATED
+  DISCUSSION_COMMENT
+  DISCUSSION_MENTION
+  DISCUSSION_WATCHED
+  DISCUSSION_REPLY
+  COMMENT_REACTION
+}
+
+enum DiscussionCategory {
+  GENERAL
+  TASK_DISCUSSION
+  PROJECT_TOPIC
+  MODULE_DISCUSSION
+  QUESTION
+  ANNOUNCEMENT
+  URGENT
+  FEATURE_REQUEST
+  BUG_REPORT
+}
+
+enum RelatedItemType {
+  TASK
+  FILE
+  DISCUSSION
+}
+
+enum ManualPaymentStatus {
+  PENDING      // Awaiting verification
+  VERIFIED     // Admin verified payment
+  REJECTED     // Payment verification rejected
+  EXPIRED      // Payment reference expired
 }

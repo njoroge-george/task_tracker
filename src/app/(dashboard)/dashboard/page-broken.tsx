@@ -1,0 +1,1157 @@
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { format, startOfDay, addDays } from "date-fns";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+
+async function getDashboardData(userId: string) {
+  const now = new Date();
+  const today = startOfDay(now);
+  const tomorrow = addDays(today, 1);
+  const endOfWeek = addDays(today, 7);
+
+  const [
+    tasks,
+    projects,
+    notifications,
+    todayTasks,
+    overdueTasks,
+    weekTasks,
+    completedToday,
+    recentlyCreated,
+    teamActivity,
+  ] = await Promise.all([
+    prisma.task.findMany({
+      where: { assigneeId: userId },
+      include: {
+        project: true,
+        tags: true,
+        assignee: { select: { id: true, name: true, image: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.project.findMany({
+      where: { ownerId: userId },
+      include: {
+        _count: { select: { tasks: true } },
+        tasks: {
+          where: { status: "DONE" },
+          select: { id: true },
+        },
+      },
+      take: 6,
+    }),
+    prisma.notification.findMany({
+      where: { userId, read: false },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        dueDate: { gte: today, lt: tomorrow },
+        status: { notIn: ["DONE", "ARCHIVED"] },
+      },
+      include: { project: true },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        dueDate: { lt: now },
+        status: { notIn: ["DONE", "ARCHIVED"] },
+      },
+      include: { project: true },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        dueDate: { gte: today, lte: endOfWeek },
+        status: { notIn: ["DONE", "ARCHIVED"] },
+      },
+      include: { project: true },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        status: "DONE",
+        updatedAt: { gte: today },
+      },
+      include: { assignee: { select: { name: true, image: true } } },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: { assigneeId: userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.task.findMany({
+      where: {
+        OR: [{ assigneeId: userId }, { project: { ownerId: userId } }],
+      },
+      include: {
+        assignee: { select: { id: true, name: true, image: true } },
+        project: { select: { name: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 8,
+    }),
+  ]);
+
+  const stats = {
+    totalTasks: await prisma.task.count({ where: { assigneeId: userId } }),
+    completedTasks: await prisma.task.count({
+      where: { assigneeId: userId, status: "DONE" },
+    }),
+    inProgressTasks: await prisma.task.count({
+      where: { assigneeId: userId, status: "IN_PROGRESS" },
+    }),
+    overdueTasks: await prisma.task.count({
+      where: {
+        assigneeId: userId,
+        dueDate: { lt: now },
+        status: { notIn: ["DONE", "ARCHIVED"] },
+      },
+    }),
+    todoTasks: await prisma.task.count({
+      where: { assigneeId: userId, status: "TODO" },
+    }),
+    inReviewTasks: await prisma.task.count({
+      where: { assigneeId: userId, status: "IN_REVIEW" },
+    }),
+    upcomingDeadlines: await prisma.task.count({
+      where: {
+        assigneeId: userId,
+        dueDate: { gte: now, lte: endOfWeek },
+        status: { notIn: ["DONE", "ARCHIVED"] },
+      },
+    }),
+  };
+
+  const priorityStats = {
+    low: await prisma.task.count({
+      where: { assigneeId: userId, priority: "LOW" },
+    }),
+    medium: await prisma.task.count({
+      where: { assigneeId: userId, priority: "MEDIUM" },
+    }),
+    high: await prisma.task.count({
+      where: { assigneeId: userId, priority: "HIGH" },
+    }),
+    urgent: await prisma.task.count({
+      where: { assigneeId: userId, priority: "URGENT" },
+    }),
+  };
+
+  return {
+    tasks,
+    projects,
+    notifications,
+    stats,
+    todayTasks,
+    overdueTasks,
+    weekTasks,
+    completedToday,
+    recentlyCreated,
+    teamActivity,
+    priorityStats,
+  };
+}
+
+export default async function DashboardPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
+  }
+
+  const userId = session.user.id;
+  const {
+    tasks,
+    projects,
+    notifications,
+    stats,
+    todayTasks,
+    overdueTasks,
+    weekTasks,
+    completedToday,
+    recentlyCreated,
+    teamActivity,
+    priorityStats,
+  } = await getDashboardData(userId);
+
+  const currentDate = format(new Date(), "EEEE, MMMM d, yyyy");
+  const greetingTime = new Date().getHours();
+  const greeting =
+    greetingTime < 12
+      ? "Good morning"
+      : greetingTime < 18
+      ? "Good afternoon"
+      : "Good evening";
+
+  return (
+    <DashboardContent
+      userName={session.user.name || "User"}
+      currentDate={currentDate}
+      greeting={greeting}
+      stats={stats}
+      todayTasks={todayTasks}
+      overdueTasks={overdueTasks}
+      weekTasks={weekTasks}
+      completedToday={completedToday}
+      projects={projects}
+      teamActivity={teamActivity}
+      priorityStats={priorityStats}
+      notifications={notifications}
+    />
+  );
+}
+
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white shadow-lg">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            {/* Greeting & Date */}
+            <div>
+              <h1 className="text-3xl font-bold">
+                {greeting}, {session.user.name}! 👋
+              </h1>
+              <p className="text-blue-100 mt-1">{currentDate}</p>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              <Link
+                href="/dashboard/tasks?action=new"
+                className="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow flex items-center gap-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Add Task
+              </Link>
+              <Link
+                href="/dashboard/projects?action=new"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-all backdrop-blur-sm flex items-center gap-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                  />
+                </svg>
+                New Project
+              </Link>
+              <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-all backdrop-blur-sm flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                Search
+              </button>
+              <Link
+                href="/dashboard/notifications"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-all backdrop-blur-sm flex items-center gap-2 relative"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {notifications.length}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* KPI Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Total Tasks
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {stats.totalTasks}
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  All time
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Completed
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {stats.completedTasks}
+                </p>
+                <p className="mt-1 text-xs text-green-600 dark:text-green-400 font-medium">
+                  {stats.totalTasks > 0
+                    ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
+                    : 0}
+                  % done
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-green-600 dark:text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  In Progress
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {stats.inProgressTasks}
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Active now
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-orange-600 dark:text-orange-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Overdue
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {stats.overdueTasks}
+                </p>
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
+                  {stats.overdueTasks > 0 ? "Needs attention!" : "All caught up!"}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Upcoming
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {stats.upcomingDeadlines}
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Due this week
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-purple-600 dark:text-purple-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Tasks Overview & Projects */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Task Overview Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Task Overview
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Today's Tasks */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Today's Tasks
+                      </h3>
+                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                        {todayTasks.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {todayTasks.length === 0 ? (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          No tasks due today
+                        </p>
+                      ) : (
+                        todayTasks.slice(0, 3).map((task) => (
+                          <div
+                            key={task.id}
+                            className="text-xs text-gray-700 dark:text-gray-300 truncate"
+                          >
+                            • {task.title}
+                          </div>
+                        ))
+                      )}
+                      {todayTasks.length > 3 && (
+                        <Link
+                          href="/dashboard/tasks?filter=today"
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          +{todayTasks.length - 3} more
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Overdue Tasks */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Overdue
+                      </h3>
+                      <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-full">
+                        {overdueTasks.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {overdueTasks.length === 0 ? (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          No overdue tasks! 🎉
+                        </p>
+                      ) : (
+                        overdueTasks.slice(0, 3).map((task) => (
+                          <div
+                            key={task.id}
+                            className="text-xs text-gray-700 dark:text-gray-300 truncate"
+                          >
+                            • {task.title}
+                          </div>
+                        ))
+                      )}
+                      {overdueTasks.length > 3 && (
+                        <Link
+                          href="/dashboard/tasks?filter=overdue"
+                          className="text-xs text-red-600 dark:text-red-400 hover:underline"
+                        >
+                          +{overdueTasks.length - 3} more
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Due This Week */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                        Due This Week
+                      </h3>
+                      <span className="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded-full">
+                        {weekTasks.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {weekTasks.length === 0 ? (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          No tasks due this week
+                        </p>
+                      ) : (
+                        weekTasks.slice(0, 3).map((task) => (
+                          <div
+                            key={task.id}
+                            className="text-xs text-gray-700 dark:text-gray-300 truncate"
+                          >
+                            • {task.title}
+                          </div>
+                        ))
+                      )}
+                      {weekTasks.length > 3 && (
+                        <Link
+                          href="/dashboard/tasks?filter=week"
+                          className="text-xs text-orange-600 dark:text-orange-400 hover:underline"
+                        >
+                          +{weekTasks.length - 3} more
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Completed Today */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Completed Today
+                      </h3>
+                      <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                        {completedToday.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {completedToday.length === 0 ? (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          No tasks completed yet
+                        </p>
+                      ) : (
+                        completedToday.slice(0, 3).map((task) => (
+                          <div
+                            key={task.id}
+                            className="text-xs text-gray-700 dark:text-gray-300 truncate line-through"
+                          >
+                            • {task.title}
+                          </div>
+                        ))
+                      )}
+                      {completedToday.length > 3 && (
+                        <Link
+                          href="/dashboard/tasks?filter=completed-today"
+                          className="text-xs text-green-600 dark:text-green-400 hover:underline"
+                        >
+                          +{completedToday.length - 3} more
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Projects Overview */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Active Projects
+                </h2>
+                <Link
+                  href="/dashboard/projects"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {projects.length === 0 ? (
+                    <div className="col-span-2 text-center py-8">
+                      <p className="text-gray-500 dark:text-gray-400">
+                        No projects yet. Create your first project!
+                      </p>
+                    </div>
+                  ) : (
+                    projects.map((project) => {
+                      const progress =
+                        project._count.tasks > 0
+                          ? Math.round(
+                              (project.tasks.length / project._count.tasks) * 100
+                            )
+                          : 0;
+                      return (
+                        <Link
+                          key={project.id}
+                          href={`/dashboard/projects/${project.id}`}
+                          className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-all hover:border-blue-300 dark:hover:border-blue-700"
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                                style={{
+                                  backgroundColor: project.color + "30",
+                                }}
+                              >
+                                {project.icon || "📁"}
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  {project.name}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {project._count.tasks} tasks
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-600 dark:text-gray-400">
+                                Progress
+                              </span>
+                              <span className="font-semibold text-gray-900 dark:text-white">
+                                {progress}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div
+                                className="h-2 rounded-full transition-all"
+                                style={{
+                                  width: `${progress}%`,
+                                  backgroundColor: project.color,
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Team Activity Feed */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Team Activity
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {teamActivity.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                      No recent activity
+                    </p>
+                  ) : (
+                    teamActivity.slice(0, 5).map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex items-start gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {task.assignee?.name?.charAt(0).toUpperCase() || "?"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            <span className="font-semibold">
+                              {task.assignee?.name || "Someone"}
+                            </span>{" "}
+                            {task.status === "DONE" ? "completed" : "updated"}{" "}
+                            <span className="font-medium">{task.title}</span>
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {task.project && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {task.project.name}
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-400">
+                              {formatDistanceToNow(new Date(task.updatedAt), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Charts, Quick Actions & More */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Task Status Chart */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Task Status
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      To Do
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {stats.todoTasks}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      In Progress
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {stats.inProgressTasks}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-sm"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      In Review
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {stats.inReviewTasks}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Completed
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {stats.completedTasks}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Priority Distribution */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Priority Distribution
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Low
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {priorityStats.low}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="h-2 bg-gray-400 rounded-full transition-all"
+                      style={{
+                        width: `${
+                          totalPriority > 0
+                            ? (priorityStats.low / totalPriority) * 100
+                            : 0
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Medium
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {priorityStats.medium}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="h-2 bg-blue-500 rounded-full transition-all"
+                      style={{
+                        width: `${
+                          totalPriority > 0
+                            ? (priorityStats.medium / totalPriority) * 100
+                            : 0
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      High
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {priorityStats.high}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="h-2 bg-orange-500 rounded-full transition-all"
+                      style={{
+                        width: `${
+                          totalPriority > 0
+                            ? (priorityStats.high / totalPriority) * 100
+                            : 0
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Urgent
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {priorityStats.urgent}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="h-2 bg-red-500 rounded-full transition-all"
+                      style={{
+                        width: `${
+                          totalPriority > 0
+                            ? (priorityStats.urgent / totalPriority) * 100
+                            : 0
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Action Panel */}
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Link
+                  href="/dashboard/tasks?action=new"
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-3 text-center transition-all"
+                >
+                  <svg
+                    className="w-6 h-6 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">Add Task</span>
+                </Link>
+                <Link
+                  href="/dashboard/projects?action=new"
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-3 text-center transition-all"
+                >
+                  <svg
+                    className="w-6 h-6 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">New Project</span>
+                </Link>
+                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-3 text-center transition-all">
+                  <svg
+                    className="w-6 h-6 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">Add Tag</span>
+                </button>
+                <Link
+                  href="/dashboard/tasks"
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-3 text-center transition-all"
+                >
+                  <svg
+                    className="w-6 h-6 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">Task Manager</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Saved Views / Filters */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Saved Views
+              </h3>
+              <div className="space-y-2">
+                <Link
+                  href="/dashboard/tasks?filter=my-tasks"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    My Tasks
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  href="/dashboard/tasks?filter=high-priority"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    High Priority
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  href="/dashboard/tasks?filter=due-soon"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Due Soon
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  href="/dashboard/tasks?filter=all"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    All Tasks
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+                <Link
+                  href="/dashboard/tasks?filter=completed"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Completed Tasks
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+
+            {/* Notifications Preview */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Notifications
+                </h3>
+                <Link
+                  href="/dashboard/notifications"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {notifications.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                      No new notifications
+                    </p>
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800"
+                      >
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          {notification.message}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

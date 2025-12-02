@@ -15,27 +15,39 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaces = await prisma.workspace.findMany({
+    // Get workspaces where user is a member
+    const workspaceMembers = await prisma.workspaceMember.findMany({
       where: {
-        members: {
-          some: { id: session.user.id },
-        },
+        userId: session.user.id,
       },
       include: {
-        owner: {
-          select: { id: true, name: true, email: true, image: true },
-        },
-        _count: {
-          select: {
-            members: true,
-            projects: true,
+        workspace: {
+          include: {
+            _count: {
+              select: {
+                members: true,
+              },
+            },
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        workspace: {
+          name: 'asc',
+        },
+      },
     });
 
-    return NextResponse.json(workspaces);
+    const workspaces = workspaceMembers.map((wm) => ({
+      id: wm.workspace.id,
+      name: wm.workspace.name,
+      description: wm.workspace.description,
+      role: wm.role,
+      memberCount: wm.workspace._count.members,
+      createdAt: wm.workspace.createdAt,
+    }));
+
+    return NextResponse.json({ workspaces });
   } catch (error) {
     console.error("Error fetching workspaces:", error);
     return NextResponse.json(
@@ -61,27 +73,37 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
-    const workspace = await prisma.workspace.create({
-      data: {
-        name: validatedData.name,
-        slug: slug,
-        description: validatedData.description,
-        ownerId: session.user.id,
-        members: {
-          create: {
-            userId: session.user.id,
-            role: 'ADMIN',
-          },
+    // Create workspace and add creator as owner in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const workspace = await tx.workspace.create({
+        data: {
+          name: validatedData.name,
+          slug: slug,
+          description: validatedData.description,
+          ownerId: session.user!.id,
         },
-      },
-      include: {
-        owner: {
-          select: { id: true, name: true, email: true, image: true },
+      });
+
+      const member = await tx.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: session.user!.id,
+          role: 'OWNER',
         },
-      },
+      });
+
+      return { workspace, member };
     });
 
-    return NextResponse.json(workspace, { status: 201 });
+    return NextResponse.json({
+      message: 'Workspace created successfully',
+      workspace: {
+        id: result.workspace.id,
+        name: result.workspace.name,
+        description: result.workspace.description,
+        role: result.member.role,
+      },
+    }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type User = {
   plan: string;
   planExpiresAt: Date | null;
+  phoneNumber?: string | null;
 };
 
 type Props = {
   user: User;
 };
 
+type Payment = {
+  id: string;
+  reference: string;
+  amount: number;
+  currency: string;
+  plan: string;
+  status: string;
+  createdAt: string;
+  completedAt?: string;
+};
+
 const plans = [
   {
     name: "FREE",
-    price: "$0",
+    price: "KES 0",
     period: "forever",
     features: [
       "Up to 3 workspaces",
@@ -28,7 +40,7 @@ const plans = [
   },
   {
     name: "PRO",
-    price: "$12",
+    price: "KES 3,000",
     period: "per month",
     features: [
       "Unlimited workspaces",
@@ -46,7 +58,7 @@ const plans = [
   },
   {
     name: "ENTERPRISE",
-    price: "$49",
+    price: "KES 10,000",
     period: "per month",
     features: [
       "Everything in Pro",
@@ -64,11 +76,44 @@ const plans = [
 ];
 
 export default function BillingTab({ user }: Props) {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
-    "monthly"
-  );
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+
+  useEffect(() => {
+    fetchPaymentHistory();
+  }, []);
+
+  const fetchPaymentHistory = async () => {
+    try {
+      const response = await fetch("/api/payments/history");
+      if (response.ok) {
+        const data = await response.json();
+        setPayments(data.payments || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch payment history:", error);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
 
   const currentPlan = plans.find((p) => p.name === user.plan) || plans[0];
+
+  const getStatusBadge = (status: string) => {
+    const statusColors: Record<string, string> = {
+      COMPLETED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      PROCESSING: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      FAILED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      CANCELLED: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+    };
+
+    return (
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[status] || statusColors.PENDING}`}>
+        {status}
+      </span>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -80,7 +125,7 @@ export default function BillingTab({ user }: Props) {
               Current Plan
             </h3>
             <p className="text-sm text-secondary mt-1">
-              Manage your subscription and billing
+              Manage your subscription via M-Pesa
             </p>
           </div>
           <span className="px-4 py-2 bg-accent text-white rounded-lg font-semibold">
@@ -88,51 +133,21 @@ export default function BillingTab({ user }: Props) {
           </span>
         </div>
         {user.planExpiresAt && (
-          <p className="text-sm text-secondary">
-            Renews on {new Date(user.planExpiresAt).toLocaleDateString()}
+          <p className="text-sm text-secondary" suppressHydrationWarning>
+            Expires on {new Date(user.planExpiresAt).toLocaleDateString()}
           </p>
         )}
-      </div>
-
-      {/* Billing Cycle Toggle */}
-      <div className="flex items-center justify-center gap-4">
-        <button
-          onClick={() => setBillingCycle("monthly")}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            billingCycle === "monthly"
-              ? "bg-accent text-white"
-              : "bg-secondary text-primary"
-          }`}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setBillingCycle("yearly")}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            billingCycle === "yearly"
-              ? "bg-accent text-white"
-              : "bg-secondary text-primary"
-          }`}
-        >
-          Yearly
-          <span className="ml-2 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
-            Save 20%
-          </span>
-        </button>
+        {user.phoneNumber && (
+          <p className="text-sm text-secondary mt-1">
+            Payment number: {user.phoneNumber}
+          </p>
+        )}
       </div>
 
       {/* Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => {
           const isCurrentPlan = plan.name === user.plan;
-          const price =
-            billingCycle === "yearly" && plan.price !== "$0"
-              ? `$${Math.round(parseFloat(plan.price.slice(1)) * 12 * 0.8)}`
-              : plan.price;
-          const period =
-            billingCycle === "yearly" && plan.price !== "$0"
-              ? "per year"
-              : plan.period;
 
           return (
             <div
@@ -163,12 +178,12 @@ export default function BillingTab({ user }: Props) {
                 </h4>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-4xl font-bold text-primary">
-                    {price}
-                  </span>
-                  <span className="text-sm text-secondary">
-                    / {period}
+                    {plan.price}
                   </span>
                 </div>
+                <span className="text-sm text-secondary">
+                  {plan.period}
+                </span>
               </div>
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, index) => (
@@ -194,6 +209,7 @@ export default function BillingTab({ user }: Props) {
               </ul>
               <button
                 disabled={isCurrentPlan}
+                onClick={() => window.location.href = "/dashboard/subscription"}
                 className={`w-full py-2 rounded-lg font-medium transition-colors ${
                   isCurrentPlan
                     ? "bg-secondary text-secondary cursor-not-allowed"
@@ -212,7 +228,7 @@ export default function BillingTab({ user }: Props) {
       {/* Billing History */}
       <div className="pt-6 border-t border-default">
         <h3 className="text-lg font-medium text-primary mb-4">
-          Billing History
+          Payment History
         </h3>
         <div className="bg-primary border border-default rounded-lg overflow-hidden">
           <table className="w-full">
@@ -222,7 +238,7 @@ export default function BillingTab({ user }: Props) {
                   Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                  Description
+                  Plan
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
                   Amount
@@ -231,16 +247,44 @@ export default function BillingTab({ user }: Props) {
                   Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-secondary uppercase tracking-wider">
-                  Invoice
+                  Reference
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-secondary">
-                  No billing history available
-                </td>
-              </tr>
+              {loadingPayments ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-secondary">
+                    Loading payment history...
+                  </td>
+                </tr>
+              ) : payments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-secondary">
+                    No payment history available
+                  </td>
+                </tr>
+              ) : (
+                payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-primary" suppressHydrationWarning>
+                      {new Date(payment.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                      {payment.plan}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-primary" suppressHydrationWarning>
+                      {payment.currency} {payment.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {getStatusBadge(payment.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-secondary font-mono">
+                      {payment.reference.slice(0, 12)}...
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -252,20 +296,17 @@ export default function BillingTab({ user }: Props) {
           <h3 className="text-lg font-medium text-primary">
             Payment Method
           </h3>
-          <button className="text-sm text-accent hover:underline">
-            Update
-          </button>
         </div>
         <div className="flex items-center gap-4 p-4 bg-gray-50 bg-card/50 rounded-lg">
-          <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center text-white text-xs font-bold">
-            VISA
+          <div className="w-12 h-8 bg-gradient-to-r from-green-600 to-green-800 rounded flex items-center justify-center text-white text-xs font-bold">
+            M-PESA
           </div>
           <div>
             <p className="text-sm font-medium text-primary">
-              •••• •••• •••• 4242
+              M-Pesa Mobile Money
             </p>
             <p className="text-xs text-secondary">
-              Expires 12/2025
+              {user.phoneNumber || "No phone number registered"}
             </p>
           </div>
         </div>

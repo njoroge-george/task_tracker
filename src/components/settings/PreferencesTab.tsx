@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications, isPushNotificationEnabled } from "@/lib/push-notifications";
 
 type User = {
   timezone: string;
   dateFormat: string;
   weekStart: number;
   theme: string;
+  notificationPreferences?: any;
+  reminderSettings?: any;
 };
 
 type Props = {
@@ -14,23 +17,70 @@ type Props = {
 };
 
 export default function PreferencesTab({ user }: Props) {
+  const [pushEnabled, setPushEnabled] = useState(false);
+
+  const defaultNotifications = {
+    email: true,
+    push: true,
+    taskAssigned: true,
+    taskCompleted: false,
+    taskDueSoon: true,
+    comments: true,
+    mentions: true,
+  };
+
+  const defaultReminders = {
+    enabled: true,
+    intervals: [24, 1], // 24 hours and 1 hour before due date
+  };
+
   const [formData, setFormData] = useState({
     timezone: user.timezone,
     dateFormat: user.dateFormat,
     weekStart: user.weekStart,
     theme: user.theme,
-    notifications: {
-      email: true,
-      push: true,
-      taskAssigned: true,
-      taskCompleted: false,
-      taskDueSoon: true,
-      comments: true,
-    },
+    notifications: user.notificationPreferences || defaultNotifications,
+    reminders: user.reminderSettings || defaultReminders,
   });
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    // Check if push notifications are enabled
+    isPushNotificationEnabled().then(setPushEnabled);
+  }, []);
+
+  const handlePushToggle = async (enabled: boolean) => {
+    try {
+      if (enabled) {
+        const subscription = await subscribeToPushNotifications();
+        if (subscription) {
+          setPushEnabled(true);
+          setFormData(prev => ({
+            ...prev,
+            notifications: { ...prev.notifications, push: true },
+          }));
+          setMessage("Push notifications enabled!");
+        } else {
+          setMessage("Failed to enable push notifications. Please check permissions.");
+        }
+      } else {
+        const success = await unsubscribeFromPushNotifications();
+        if (success) {
+          setPushEnabled(false);
+          setFormData(prev => ({
+            ...prev,
+            notifications: { ...prev.notifications, push: false },
+          }));
+          setMessage("Push notifications disabled.");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling push notifications:", error);
+      setMessage("Failed to update push notification settings.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +88,26 @@ export default function PreferencesTab({ user }: Props) {
     setMessage("");
 
     try {
-      // TODO: Implement API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/user/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timezone: formData.timezone,
+          dateFormat: formData.dateFormat,
+          weekStart: formData.weekStart,
+          theme: formData.theme,
+          notificationPreferences: formData.notifications,
+          reminderSettings: formData.reminders,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update preferences');
+      }
+
       setMessage("Preferences updated successfully!");
     } catch (error) {
+      console.error("Error updating preferences:", error);
       setMessage("Failed to update preferences. Please try again.");
     } finally {
       setSaving(false);
@@ -324,6 +390,111 @@ export default function PreferencesTab({ user }: Props) {
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
             </label>
           </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-primary">
+                Mentions
+              </p>
+              <p className="text-xs text-secondary">
+                When someone @mentions you in a comment
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.notifications.mentions}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    notifications: {
+                      ...formData.notifications,
+                      mentions: e.target.checked,
+                    },
+                  })
+                }
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Task Reminders */}
+      <div className="pt-6 border-t border-default">
+        <h3 className="text-lg font-medium text-primary mb-4">
+          Task Reminders
+        </h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-primary">
+                Enable Reminders
+              </p>
+              <p className="text-xs text-secondary">
+                Automatically remind you before tasks are due
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.reminders.enabled}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    reminders: {
+                      ...formData.reminders,
+                      enabled: e.target.checked,
+                    },
+                  })
+                }
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+            </label>
+          </div>
+
+          {formData.reminders.enabled && (
+            <div>
+              <label className="block text-sm font-medium text-primary mb-2">
+                Reminder Times
+              </label>
+              <p className="text-xs text-secondary mb-3">
+                Get notified at these intervals before a task is due
+              </p>
+              <div className="space-y-2">
+                {[
+                  { value: 168, label: '1 week before' },
+                  { value: 72, label: '3 days before' },
+                  { value: 24, label: '1 day before' },
+                  { value: 6, label: '6 hours before' },
+                  { value: 1, label: '1 hour before' },
+                ].map((interval) => (
+                  <label key={interval.value} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.reminders.intervals.includes(interval.value)}
+                      onChange={(e) => {
+                        const newIntervals = e.target.checked
+                          ? [...formData.reminders.intervals, interval.value].sort((a: number, b: number) => b - a)
+                          : formData.reminders.intervals.filter((i: number) => i !== interval.value);
+                        setFormData({
+                          ...formData,
+                          reminders: {
+                            ...formData.reminders,
+                            intervals: newIntervals,
+                          },
+                        });
+                      }}
+                      className="w-4 h-4 text-accent bg-card border-default rounded focus:ring-accent"
+                    />
+                    <span className="text-sm text-primary">{interval.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

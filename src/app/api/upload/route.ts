@@ -13,19 +13,35 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const type = formData.get("type") as string; // "voice" or "video"
+    const type = formData.get("type") as string; // "voice", "video", "image", or "attachment"
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    // Validate file size (10MB max for images/attachments, 50MB for voice/video)
+    const maxSize = (type === 'image' || type === 'attachment') ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return NextResponse.json({ 
+        error: `File too large (max ${maxSize / 1024 / 1024}MB)` 
+      }, { status: 400 });
     }
 
     // Validate file type
     const validTypes = {
       voice: ["audio/webm", "audio/mp4", "audio/mpeg", "audio/ogg"],
       video: ["video/webm", "video/mp4", "video/quicktime"],
+      image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+      attachment: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "application/zip",
+      ],
     };
 
-    const allowedTypes = type === "voice" ? validTypes.voice : validTypes.video;
+    const allowedTypes = validTypes[type as keyof typeof validTypes] || [];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: `Invalid file type. Allowed: ${allowedTypes.join(", ")}` },
@@ -41,8 +57,11 @@ export async function POST(req: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const ext = file.name.split(".").pop();
-    const filename = `${session.user.id}_${timestamp}.${ext}`;
+    const filename = type === 'image' || type === 'attachment' 
+      ? `${timestamp}-${sanitizedName}`
+      : `${session.user.id}_${timestamp}.${ext}`;
     const filepath = path.join(uploadDir, filename);
 
     // Convert file to buffer and save
@@ -57,6 +76,7 @@ export async function POST(req: NextRequest) {
       success: true,
       url,
       filename,
+      name: file.name,
       size: file.size,
       type: file.type,
     });

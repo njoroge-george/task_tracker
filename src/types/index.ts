@@ -9,6 +9,9 @@ import {
   Attachment, 
   ActivityLog,
   Notification,
+  Discussion,
+  DiscussionComment,
+  DiscussionWatcher,
   UserRole,
   Plan,
   MemberRole,
@@ -16,7 +19,8 @@ import {
   Visibility,
   TaskStatus,
   Priority,
-  NotificationType
+  NotificationType,
+  DiscussionCategory,
 } from '@prisma/client';
 
 // ============ EXTENDED TYPES ============
@@ -80,6 +84,33 @@ export type ActivityLogWithUser = ActivityLog & {
 };
 
 export type NotificationWithData = Notification;
+
+// ============ DISCUSSION TYPES ============
+
+export type DiscussionWithRelations = Discussion & {
+  author: User;
+  workspace?: Workspace | null;
+  project?: Project | null;
+  comments: DiscussionComment[];
+  watchers: DiscussionWatcher[];
+  _count?: {
+    comments: number;
+    watchers: number;
+  };
+};
+
+export type DiscussionCommentWithAuthor = DiscussionComment & {
+  author: User;
+};
+
+export type DiscussionFormData = {
+  title: string;
+  content: string;
+  category: DiscussionCategory;
+  tags: string[];
+  workspaceId?: string;
+  projectId?: string;
+};
 
 // ============ API RESPONSE TYPES ============
 
@@ -215,12 +246,36 @@ export type UsageLimits = {
 
 // ============ NOTIFICATION TYPES ============
 
+export type NotificationPreferences = {
+  email: boolean;
+  push: boolean;
+  taskAssigned: boolean;
+  taskCompleted: boolean;
+  taskDueSoon: boolean;
+  comments: boolean;
+  mentions: boolean;
+};
+
+export type ReminderSettings = {
+  enabled: boolean;
+  intervals: number[]; // hours before due date [24, 1] means 1 day and 1 hour before
+};
+
 export type NotificationData = {
   type: NotificationType;
   title: string;
   message: string;
   link?: string;
   actionLabel?: string;
+  metadata?: Record<string, any>;
+};
+
+export type PushSubscription = {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 };
 
 // ============ ACTIVITY TYPES ============
@@ -267,4 +322,5 @@ export {
   TaskStatus,
   Priority,
   NotificationType,
+  DiscussionCategory,
 };

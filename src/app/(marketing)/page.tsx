@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import NextLink from "next/link";
 import {
   ArrowRight,
@@ -228,6 +229,16 @@ const footerColumns: FooterColumn[] = [
 ];
 
 export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <Box
       sx={{

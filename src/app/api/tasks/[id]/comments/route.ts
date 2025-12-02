@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { notifyUser } from "@/lib/notifications";
+import { extractMentions } from "@/lib/mentions";
 import { z } from "zod";
 
 const commentSchema = z.object({
@@ -61,6 +63,23 @@ export async function POST(
     const body = await request.json();
     const validatedData = commentSchema.parse(body);
 
+    // Get task details for notifications
+    const task = await prisma.task.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        assigneeId: true,
+        assignee: {
+          select: { name: true, email: true },
+        },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
     const comment = await prisma.comment.create({
       data: {
         content: validatedData.content,
@@ -88,6 +107,46 @@ export async function POST(
         userId: session.user.id,
       },
     });
+
+    // Extract mentions from comment
+    const mentionedUserIds = extractMentions(validatedData.content);
+    const currentUserName = session.user.name || session.user.email || 'Someone';
+
+    // Send mention notifications
+    for (const mentionedUserId of mentionedUserIds) {
+      if (mentionedUserId !== session.user.id) {
+        await notifyUser({
+          userId: mentionedUserId,
+          title: `${currentUserName} mentioned you`,
+          message: `You were mentioned in a comment on "${task.title}"`,
+          type: 'MENTION',
+          link: `/dashboard/tasks/${id}`,
+          metadata: {
+            taskId: id,
+            taskTitle: task.title,
+            commentId: comment.id,
+            mentionedBy: session.user.id,
+          },
+        });
+      }
+    }
+
+    // Notify task assignee about comment (if not the commenter)
+    if (task.assigneeId && task.assigneeId !== session.user.id) {
+      await notifyUser({
+        userId: task.assigneeId,
+        title: `New comment on "${task.title}"`,
+        message: `${currentUserName} commented: ${validatedData.content.slice(0, 100)}${validatedData.content.length > 100 ? '...' : ''}`,
+        type: 'COMMENT_ADDED',
+        link: `/dashboard/tasks/${id}`,
+        metadata: {
+          taskId: id,
+          taskTitle: task.title,
+          commentId: comment.id,
+          commentedBy: session.user.id,
+        },
+      });
+    }
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
+import { hasFeature } from '@/lib/plan-features';
 import {
   Box,
   Paper,
@@ -25,6 +27,7 @@ import {
   Popover,
   Tabs,
   Tab,
+  Tooltip,
 } from '@mui/material';
 import {
   Send,
@@ -90,6 +93,11 @@ type Props = {
 };
 
 export default function DirectMessages({ currentUserId, users, initialConversations }: Props) {
+  const { data: session } = useSession();
+  const userPlan = session?.user?.plan;
+  const hasVoiceMessages = hasFeature(userPlan, 'voiceMessages');
+  const hasVideoMessages = hasFeature(userPlan, 'videoMessages');
+  
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -685,20 +693,40 @@ export default function DirectMessages({ currentUserId, users, initialConversati
             {/* Input Area */}
             <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-                <IconButton 
-                  size="small"
-                  onClick={() => setShowVoiceRecorder(true)}
-                  title="Voice message"
-                >
-                  <Mic size={20} />
-                </IconButton>
-                <IconButton 
-                  size="small"
-                  onClick={() => setShowVideoRecorder(true)}
-                  title="Video message"
-                >
-                  <VideoIcon size={20} />
-                </IconButton>
+                <Tooltip title={!hasVoiceMessages ? "🔒 PRO Feature - Upgrade to send voice messages" : "Voice message"}>
+                  <span>
+                    <IconButton 
+                      size="small"
+                      onClick={() => hasVoiceMessages ? setShowVoiceRecorder(true) : window.location.href = '/dashboard/pricing'}
+                      disabled={!hasVoiceMessages}
+                      sx={{
+                        color: !hasVoiceMessages ? 'text.disabled' : 'primary.main',
+                        '&:hover': {
+                          bgcolor: !hasVoiceMessages ? 'transparent' : 'action.hover',
+                        }
+                      }}
+                    >
+                      <Mic size={20} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title={!hasVideoMessages ? "🔒 PRO Feature - Upgrade to send video messages" : "Video message"}>
+                  <span>
+                    <IconButton 
+                      size="small"
+                      onClick={() => hasVideoMessages ? setShowVideoRecorder(true) : window.location.href = '/dashboard/pricing'}
+                      disabled={!hasVideoMessages}
+                      sx={{
+                        color: !hasVideoMessages ? 'text.disabled' : 'primary.main',
+                        '&:hover': {
+                          bgcolor: !hasVideoMessages ? 'transparent' : 'action.hover',
+                        }
+                      }}
+                    >
+                      <VideoIcon size={20} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
                 <IconButton size="small">
                   <Paperclip size={20} />
                 </IconButton>
@@ -789,10 +817,18 @@ export default function DirectMessages({ currentUserId, users, initialConversati
         onClose={() => setShowNewChatDialog(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.paper',
+            border: '2px solid',
+            borderColor: 'divider',
+            boxShadow: 24,
+          }
+        }}
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Start New Conversation</Typography>
+            <Typography variant="h6" sx={{ color: 'text.primary' }}>Start New Conversation</Typography>
             <IconButton onClick={() => setShowNewChatDialog(false)} size="small">
               <X size={20} />
             </IconButton>

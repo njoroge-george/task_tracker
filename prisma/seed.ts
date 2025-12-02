@@ -185,23 +185,91 @@ async function main() {
 
   console.log("📊 Created 2 projects");
 
-  // Create tasks
+  // Helper function to get random date in past N days
+  const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const randomUser = () => [demoUser, alice, bob, carol, david][Math.floor(Math.random() * 5)];
+
+  // Create comprehensive tasks with varied dates for analytics
   const tasks = [
+    // COMPLETED TASKS (Last 30 days)
+    ...Array.from({ length: 45 }, (_, i) => ({
+      title: `Completed Task ${i + 1}`,
+      description: `Task completed ${30 - (i % 30)} days ago`,
+      status: "DONE" as const,
+      priority: ["LOW", "MEDIUM", "HIGH", "URGENT"][Math.floor(Math.random() * 4)] as any,
+      projectId: i % 2 === 0 ? webAppProject.id : mobileAppProject.id,
+      assigneeId: randomUser().id,
+      createdAt: daysAgo(35 + (i % 30)),
+      completedAt: daysAgo(30 - (i % 30)),
+      dueDate: daysAgo(28 - (i % 30)),
+      estimatedTime: 120 + Math.floor(Math.random() * 360),
+      actualTime: 100 + Math.floor(Math.random() * 300),
+    })),
+
+    // IN PROGRESS TASKS
+    ...Array.from({ length: 15 }, (_, i) => ({
+      title: `In Progress Task ${i + 1}`,
+      description: `Currently being worked on`,
+      status: "IN_PROGRESS" as const,
+      priority: ["MEDIUM", "HIGH", "URGENT"][Math.floor(Math.random() * 3)] as any,
+      projectId: i % 2 === 0 ? webAppProject.id : mobileAppProject.id,
+      assigneeId: randomUser().id,
+      createdAt: daysAgo(5 + i),
+      dueDate: new Date(Date.now() + (5 + i) * 24 * 60 * 60 * 1000),
+      estimatedTime: 240 + Math.floor(Math.random() * 480),
+      actualTime: 100 + Math.floor(Math.random() * 200),
+    })),
+
+    // TODO TASKS
+    ...Array.from({ length: 20 }, (_, i) => ({
+      title: `Todo Task ${i + 1}`,
+      description: `Waiting to be started`,
+      status: "TODO" as const,
+      priority: ["LOW", "MEDIUM", "HIGH"][Math.floor(Math.random() * 3)] as any,
+      projectId: i % 2 === 0 ? webAppProject.id : mobileAppProject.id,
+      assigneeId: randomUser().id,
+      createdAt: daysAgo(3 + (i % 10)),
+      dueDate: new Date(Date.now() + (10 + i) * 24 * 60 * 60 * 1000),
+      estimatedTime: 120 + Math.floor(Math.random() * 360),
+    })),
+
+    // OVERDUE TASKS (for drama!)
+    ...Array.from({ length: 5 }, (_, i) => ({
+      title: `Overdue Task ${i + 1}`,
+      description: `This task is overdue!`,
+      status: "TODO" as const,
+      priority: "URGENT" as const,
+      projectId: webAppProject.id,
+      assigneeId: randomUser().id,
+      createdAt: daysAgo(15 + i),
+      dueDate: daysAgo(3 + i),
+      estimatedTime: 240,
+    })),
+
+    // IN REVIEW TASKS
+    ...Array.from({ length: 8 }, (_, i) => ({
+      title: `In Review Task ${i + 1}`,
+      description: `Pending review`,
+      status: "IN_REVIEW" as const,
+      priority: ["MEDIUM", "HIGH"][Math.floor(Math.random() * 2)] as any,
+      projectId: i % 2 === 0 ? webAppProject.id : mobileAppProject.id,
+      assigneeId: randomUser().id,
+      createdAt: daysAgo(7 + i),
+      dueDate: new Date(Date.now() + (3 + i) * 24 * 60 * 60 * 1000),
+      estimatedTime: 180 + Math.floor(Math.random() * 300),
+    })),
+
+    // Specific important tasks
     {
       title: "Set up Next.js project",
       description: "Initialize Next.js with TypeScript and configure ESLint",
       status: "DONE" as const,
       priority: "HIGH" as const,
       projectId: webAppProject.id,
-      completedAt: new Date("2025-10-15"),
-    },
-    {
-      title: "Design database schema",
-      description: "Create comprehensive Prisma schema with all models",
-      status: "DONE" as const,
-      priority: "HIGH" as const,
-      projectId: webAppProject.id,
-      completedAt: new Date("2025-10-20"),
+      assigneeId: demoUser.id,
+      createdAt: daysAgo(35),
+      completedAt: daysAgo(33),
+      dueDate: daysAgo(32),
     },
     {
       title: "Implement authentication",
@@ -209,51 +277,23 @@ async function main() {
       status: "IN_PROGRESS" as const,
       priority: "URGENT" as const,
       projectId: webAppProject.id,
-      dueDate: new Date("2025-11-05"),
-      estimatedTime: 480, // 8 hours
-      actualTime: 240, // 4 hours so far
+      assigneeId: alice.id,
+      createdAt: daysAgo(10),
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      estimatedTime: 480,
+      actualTime: 240,
     },
     {
-      title: "Build task management UI",
-      description: "Create task list, kanban board, and detail views",
+      title: "Build Analytics Dashboard",
+      description: "Create comprehensive analytics with charts",
       status: "IN_PROGRESS" as const,
       priority: "HIGH" as const,
       projectId: webAppProject.id,
-      dueDate: new Date("2025-11-10"),
-      estimatedTime: 960, // 16 hours
-    },
-    {
-      title: "Add real-time collaboration",
-      description: "Implement WebSocket for real-time updates",
-      status: "TODO" as const,
-      priority: "MEDIUM" as const,
-      projectId: webAppProject.id,
-      dueDate: new Date("2025-11-20"),
-      estimatedTime: 720, // 12 hours
-    },
-    {
-      title: "Integrate Stripe payments",
-      description: "Set up subscription plans and billing",
-      status: "TODO" as const,
-      priority: "HIGH" as const,
-      projectId: webAppProject.id,
-      dueDate: new Date("2025-11-15"),
-    },
-    {
-      title: "Design mobile UI mockups",
-      description: "Create Figma designs for iOS and Android",
-      status: "IN_REVIEW" as const,
-      priority: "MEDIUM" as const,
-      projectId: mobileAppProject.id,
-      dueDate: new Date("2025-11-08"),
-    },
-    {
-      title: "Fix login bug",
-      description: "Users are experiencing issues with OAuth login flow",
-      status: "TODO" as const,
-      priority: "URGENT" as const,
-      projectId: webAppProject.id,
-      dueDate: new Date("2025-11-01"),
+      assigneeId: demoUser.id,
+      createdAt: daysAgo(3),
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      estimatedTime: 960,
+      actualTime: 480,
     },
   ];
 
@@ -263,13 +303,12 @@ async function main() {
         data: {
           ...task,
           workspaceId: workspace.id,
-          assigneeId: demoUser.id,
         },
       })
     )
   );
 
-  console.log("✅ Created", createdTasks.length, "tasks");
+  console.log("✅ Created", createdTasks.length, "tasks across all statuses and dates");
 
   // Connect tags to tasks
   await prisma.task.update({

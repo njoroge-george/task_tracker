@@ -62,7 +62,7 @@ async function getTransporter() {
   return transporterPromise;
 }
 
-async function sendEmail({ to, subject, html, text }: MailPayload) {
+export async function sendEmail({ to, subject, html, text }: MailPayload) {
   if (!isEmailConfigured()) {
     console.warn(
       "Email not sent. SMTP configuration is missing. Check your environment variables."
