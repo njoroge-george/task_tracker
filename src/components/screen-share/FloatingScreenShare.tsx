@@ -23,7 +23,7 @@ export default function FloatingScreenShare() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!session?.user) return null;
+  if (!session?.user || !pathname) return null;
 
   // Determine context from current route
   const getContext = () => {

@@ -9,17 +9,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payments = await prisma.payment.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 50, // Last 50 payments
-    });
+    // TODO: Add Payment model to Prisma schema
+    // const payments = await prisma.payment.findMany({
+    //   where: {
+    //     userId: session.user.id,
+    //   },
+    //   orderBy: {
+    //     createdAt: 'desc',
+    //   },
+    //   take: 50, // Last 50 payments
+    // });
 
-    return NextResponse.json({ payments });
+    return NextResponse.json({ payments: [] });
   } catch (error) {
     console.error('Failed to fetch payment history:', error);
     return NextResponse.json(

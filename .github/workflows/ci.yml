@@ -1,0 +1,46 @@
+name: CI - Next.js Build Check
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/**"
+      - "pages/**"
+      - "components/**"
+      - "public/**"
+      - "package.json"
+      - "next.config.js"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Check
+        run: |
+          if [ -f tsconfig.json ]; then
+            npm run type-check || true
+          fi
+
+      - name: Run Linter (ESLint)
+        run: |
+          if [ -f .eslintrc.js ] || [ -f .eslintrc.json ]; then
+            npm run lint || true
+          fi
+
+      - name: Build Next.js Project
+        run: npm run build

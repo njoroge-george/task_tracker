@@ -31,6 +31,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useScreenShare, ScreenShareOptions } from '@/hooks/use-screen-share';
 import { hasFeature } from '@/lib/plan-features';
+import Link from 'next/link';
 import {
   MonitorUp,
   MonitorStop,
@@ -134,15 +135,15 @@ export default function ScreenShare({
               </p>
             </div>
             <div className="flex gap-3 mt-2">
-              <Button asChild variant="default" className="gap-2">
-                <a href="/dashboard/pricing">
+              <Link href="/dashboard/pricing">
+                <Button variant="default" className="gap-2">
                   <Crown className="h-4 w-4" />
                   Upgrade to PRO
-                </a>
-              </Button>
-              <Button asChild variant="outline">
-                <a href="/dashboard/pricing">View Plans</a>
-              </Button>
+                </Button>
+              </Link>
+              <Link href="/dashboard/pricing">
+                <Button variant="outline">View Plans</Button>
+              </Link>
             </div>
             <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/30">
               <p className="text-xs text-secondary">

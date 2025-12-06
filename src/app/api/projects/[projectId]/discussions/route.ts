@@ -3,11 +3,11 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
-export async function GET(request: NextRequest, { params }: { params: { projectId: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ projectId: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { projectId } = params;
+  const { projectId } = await context.params;
   if (!projectId) return NextResponse.json({ error: 'Missing projectId' }, { status: 400 });
 
   // Verify project belongs to user's workspace
@@ -26,7 +26,6 @@ export async function GET(request: NextRequest, { params }: { params: { projectI
     return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussions = await prisma.discussion.findMany({
     where: { projectId },
     orderBy: { createdAt: 'desc' },
@@ -43,11 +42,11 @@ const createDiscussionSchema = z.object({
   content: z.string().min(1),
 });
 
-export async function POST(request: NextRequest, { params }: { params: { projectId: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ projectId: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { projectId } = params;
+  const { projectId } = await context.params;
   if (!projectId) return NextResponse.json({ error: 'Missing projectId' }, { status: 400 });
 
   const body = await request.json();
@@ -72,7 +71,6 @@ export async function POST(request: NextRequest, { params }: { params: { project
     return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussion = await prisma.discussion.create({
     data: {
       title,

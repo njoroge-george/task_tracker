@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const updateProjectSchema = z.object({
@@ -14,8 +14,8 @@ const updateProjectSchema = z.object({
 });
 
 export async function GET(
-  request: Request,
-  { params }: { params: { projectId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await context.params;
 
     // Get user's workspace via WorkspaceMember
     const workspaceMember = await prisma.workspaceMember.findFirst({
@@ -91,8 +91,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { projectId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -100,7 +100,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await context.params;
     const body = await request.json();
     const validatedData = updateProjectSchema.parse(body);
 
@@ -162,8 +162,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { projectId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -171,7 +171,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await context.params;
 
     // Get user's workspace via WorkspaceMember
     const workspaceMember = await prisma.workspaceMember.findFirst({

@@ -45,6 +45,7 @@ type Comment = {
   id: string;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
   author: CommentAuthor;
   reactions: Reaction[];
   replies?: Comment[];
@@ -61,7 +62,7 @@ type Discussion = {
   isClosed: boolean;
   isResolved?: boolean;
   isLocked?: boolean;
-  projectId?: string;
+  projectId?: string | null;
   author: {
     id: string;
     name: string | null;
@@ -77,7 +78,7 @@ type Discussion = {
   project?: {
     id: string;
     name: string;
-  };
+  } | null;
 };
 
 type Props = {

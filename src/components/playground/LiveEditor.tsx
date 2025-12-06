@@ -137,8 +137,8 @@ export default function LiveEditor() {
 
   // Load snippet from query if provided
   useEffect(() => {
-    const id = searchParams.get("snippet");
-    const fork = searchParams.get("fork");
+    const id = searchParams?.get("snippet") ?? null;
+    const fork = searchParams?.get("fork") ?? null;
     if (id && id !== "undefined" && id !== "null" && id !== snippetId) {
       void loadSnippet(id, { fork: fork === "1" });
     }

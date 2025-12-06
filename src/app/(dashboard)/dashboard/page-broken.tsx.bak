@@ -80,7 +80,7 @@ async function getDashboardData(userId: string) {
         status: "DONE",
         updatedAt: { gte: today },
       },
-      include: { assignee: { select: { name: true, image: true } } },
+      include: { assignee: { select: { id: true, name: true, image: true } } },
       take: 5,
     }),
     prisma.task.findMany({

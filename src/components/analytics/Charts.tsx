@@ -228,7 +228,6 @@ export function DistributionPieChart({ data, title }: DistributionChartProps) {
       <ResponsiveContainer>
         <PieChart>
           <Pie
-            activeIndex={activeIndex}
             activeShape={renderActiveShape}
             data={enhancedData.filter(d => d.value > 0)}
             cx="50%"

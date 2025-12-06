@@ -16,7 +16,6 @@ export async function GET(
   if (!discussionId) return NextResponse.json({ error: 'Missing discussionId' }, { status: 400 });
 
   // Ensure user has access to this discussion by checking workspace membership
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussion = await prisma.discussion.findUnique({
     where: { id: discussionId },
     select: { id: true, workspaceId: true, projectId: true },
@@ -43,7 +42,6 @@ export async function GET(
     if (!member) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const comments = await prisma.discussionComment.findMany({
     where: { 
       discussionId,
@@ -129,7 +127,6 @@ export async function POST(
   }
 
   // Ensure user has access
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussion = await prisma.discussion.findUnique({
     where: { id: discussionId },
     select: { 
@@ -161,7 +158,6 @@ export async function POST(
     if (!member) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const comment = await prisma.discussionComment.create({
     data: {
       discussionId,

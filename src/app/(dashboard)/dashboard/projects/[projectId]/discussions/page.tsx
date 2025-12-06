@@ -24,7 +24,7 @@ interface DiscussionComment {
 
 export default function ProjectDiscussionsPage() {
   const params = useParams();
-  const projectId = typeof params.projectId === "string" ? params.projectId : Array.isArray(params.projectId) ? params.projectId[0] : undefined;
+  const projectId = params && typeof params.projectId === "string" ? params.projectId : params && Array.isArray(params.projectId) ? params.projectId[0] : undefined;
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTitle, setNewTitle] = useState("");

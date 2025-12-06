@@ -176,7 +176,7 @@ export function DiscussionSidebar({
 
     try {
       await onAddRelatedItem({
-        type: newLinkType.toUpperCase() as 'TASK' | 'FILE' | 'DISCUSSION',
+        type: newLinkType as 'task' | 'file' | 'discussion',
         title: newLinkTitle,
         url: newLinkUrl,
       });

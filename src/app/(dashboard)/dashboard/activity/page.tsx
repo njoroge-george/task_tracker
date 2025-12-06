@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function ActivityPage() {
   const { currentWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
-  const limitParam = searchParams.get("limit");
+  const limitParam = searchParams?.get("limit") ?? null;
 
   const headerSubtitle = useMemo(() => {
     const parts: string[] = [];

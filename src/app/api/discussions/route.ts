@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No workspace found' }, { status: 400 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussions = await prisma.discussion.findMany({
     where: { workspaceId: workspaceMember.workspaceId },
     orderBy: { createdAt: 'desc' },
@@ -54,7 +53,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No workspace found' }, { status: 400 });
   }
 
-  // @ts-expect-error Prisma Client generated model available after migrate
   const discussion = await prisma.discussion.create({
     data: {
       title,

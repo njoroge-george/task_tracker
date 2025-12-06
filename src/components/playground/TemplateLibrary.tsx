@@ -17,6 +17,10 @@ export interface Template {
   python?: string;
 }
 
+interface TemplateLibraryProps {
+  onSelect: (template: Template) => void;
+}
+
 const TEMPLATES: Template[] = [
   // ==================== BEGINNER TEMPLATES ====================
   {
