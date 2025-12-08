@@ -68,6 +68,28 @@ export default function DashboardNav({ user }: DashboardNavProps) {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter(n => !n.read);
+      
+      // Mark all unread notifications as read
+      await Promise.all(
+        unreadNotifications.map(notification =>
+          fetch(`/api/notifications/${notification.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ read: true }),
+          })
+        )
+      );
+
+      // Update local state
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const getInitials = (name: string) => {
@@ -232,9 +254,12 @@ export default function DashboardNav({ user }: DashboardNavProps) {
                         Notifications
                       </h3>
                       {unreadCount > 0 && (
-                        <span className="text-xs text-secondary">
-                          {unreadCount} unread
-                        </span>
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-xs text-accent hover:text-accent-hover font-medium"
+                        >
+                          Mark all as read
+                        </button>
                       )}
                     </div>
 
