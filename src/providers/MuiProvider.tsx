@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material";
 import { CacheProvider } from "@emotion/react";
 import { useTheme as useNextTheme } from "next-themes";
 import getMuiTheme, { type ColorMode } from "@/theme/muiTheme";
@@ -25,7 +25,6 @@ export default function MuiProvider({ children }: { children: React.ReactNode })
     return (
       <CacheProvider value={clientSideEmotionCache}>
         <MuiThemeProvider theme={getMuiTheme("light")}>
-          <CssBaseline />
           {children}
         </MuiThemeProvider>
       </CacheProvider>
@@ -35,7 +34,6 @@ export default function MuiProvider({ children }: { children: React.ReactNode })
   return (
     <CacheProvider value={clientSideEmotionCache}>
       <MuiThemeProvider theme={muiTheme}>
-        <CssBaseline />
         {children}
       </MuiThemeProvider>
     </CacheProvider>

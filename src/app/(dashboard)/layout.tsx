@@ -1,16 +1,12 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import DashboardNav from "@/components/dashboard/DashboardNav";
-import Sidebar from "@/components/dashboard/Sidebar";
 import { RealtimeProvider } from "@/contexts/RealtimeContext";
 import { CallProviderWrapper } from "@/components/providers/CallProviderWrapper";
-import RealtimeNotifications from "@/components/realtime/RealtimeNotifications";
 import KeyboardShortcutsProvider from "@/contexts/KeyboardShortcutsContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { DashboardLayoutClient } from "@/components/dashboard/DashboardLayoutClient";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
-import FloatingScreenShare from "@/components/screen-share/FloatingScreenShare";
 
 export default async function DashboardLayout({
   children,
@@ -38,26 +34,9 @@ export default async function DashboardLayout({
         <WorkspaceProvider>
           <KeyboardShortcutsProvider>
             <SidebarProvider>
-              <div className="min-h-screen bg-primary">
-                {/* Top Navigation */}
-                <DashboardNav user={session.user} />
-
-                <div className="flex">
-                  {/* Sidebar */}
-                  <Sidebar />
-
-                  {/* Main Content */}
-                  <DashboardLayoutClient>
-                    {children}
-                  </DashboardLayoutClient>
-                </div>
-
-                {/* Real-time notifications */}
-                <RealtimeNotifications />
-                
-                {/* Global Screen Sharing Button */}
-                <FloatingScreenShare />
-              </div>
+              <DashboardLayoutClient session={session} workspaceId={workspaceMember?.workspaceId}>
+                {children}
+              </DashboardLayoutClient>
             </SidebarProvider>
           </KeyboardShortcutsProvider>
         </WorkspaceProvider>
