@@ -304,7 +304,7 @@ export default function Sidebar() {
       <aside
         className={`lg:hidden fixed inset-y-0 left-0 z-40 w-64 transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out bg-primary border-r border-default pt-16`}
+        } transition-transform duration-300 ease-in-out bg-primary pt-16`}
       >
         <div className="flex flex-col flex-grow overflow-y-auto h-full">
           {/* Workspace Selector - Mobile */}
@@ -413,7 +413,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:pt-16 border-r border-default bg-primary transition-all duration-300 ${
+      <aside className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:pt-16 bg-primary transition-all duration-300 ${
         collapsed ? 'lg:w-20' : 'lg:w-64'
       }`}>
         {/* Collapse Toggle Button */}

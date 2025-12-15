@@ -151,6 +151,12 @@ export async function POST(request: Request) {
       },
     });
 
+    // Send assignment notification if task is assigned to someone else
+    if (task.assigneeId && task.assigneeId !== session.user.id) {
+      const { notifyTaskAssignment } = await import('@/lib/notification-scheduler');
+      notifyTaskAssignment(task.id, session.user.id, task.assigneeId).catch(console.error);
+    }
+
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

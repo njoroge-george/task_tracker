@@ -102,7 +102,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary border-b border-default">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary">
       <div className="px-4 lg:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Mobile Menu Button */}

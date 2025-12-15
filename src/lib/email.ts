@@ -185,55 +185,6 @@ export async function sendWelcomeEmail(to: string, name: string) {
   });
 }
 
-export async function sendTaskAssignmentEmail(
-  to: string,
-  taskTitle: string,
-  assignedBy: string,
-  projectName: string,
-  taskUrl: string
-) {
-  await sendEmail({
-    to,
-    subject: `New Task Assigned: ${taskTitle}`,
-    html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">📋 New Task Assigned</h1>
-            </div>
-            
-            <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
-              <p style="font-size: 16px; margin-bottom: 20px;">
-                <strong>${assignedBy}</strong> has assigned you a new task:
-              </p>
-              
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #667eea;">
-                <h3 style="margin: 0 0 10px 0; color: #333;">${taskTitle}</h3>
-                <p style="color: #666; margin: 0; font-size: 14px;">Project: ${projectName}</p>
-              </div>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${taskUrl}" 
-                   style="display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                  View Task
-                </a>
-              </div>
-            </div>
-            
-            <div style="text-align: center; padding: 20px; font-size: 12px; color: #999;">
-              <p>© 2025 TaskFlow. All rights reserved.</p>
-            </div>
-          </body>
-        </html>
-      `,
-  });
-}
-
 export async function sendCommentNotificationEmail(
   to: string,
   commenterName: string,
@@ -335,5 +286,223 @@ export async function sendSubscriptionConfirmationEmail(
           </body>
         </html>
       `,
+  });
+}
+
+// Enhanced email templates for task notifications
+
+type TaskEmailData = {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: Date | null;
+  priority: string;
+  projectName: string;
+  workspaceName: string;
+};
+
+export async function sendTaskAssignmentEmail({
+  to,
+  userName,
+  assignerName,
+  task,
+}: {
+  to: string;
+  userName: string;
+  assignerName: string;
+  task: TaskEmailData;
+}) {
+  const taskUrl = `${process.env.NEXTAUTH_URL}/dashboard/tasks/${task.id}`;
+  const priorityColors: Record<string, string> = {
+    URGENT: '#ef4444',
+    HIGH: '#f59e0b',
+    MEDIUM: '#3b82f6',
+    LOW: '#10b981',
+  };
+
+  await sendEmail({
+    to,
+    subject: `New Task Assigned: ${task.title}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 24px; border-radius: 12px 12px 0 0; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 22px;">📋 New Task Assigned</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 24px; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 15px; margin-bottom: 16px;">Hi ${userName},</p>
+            
+            <p style="font-size: 15px; margin-bottom: 20px;">
+              <strong>${assignerName}</strong> has assigned you a new task:
+            </p>
+            
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${priorityColors[task.priority] || '#3b82f6'};">
+              <h2 style="margin: 0 0 12px 0; color: #111827; font-size: 18px;">${task.title}</h2>
+              ${task.description ? `<p style="color: #6b7280; margin: 0 0 12px 0; font-size: 14px;">${task.description}</p>` : ''}
+              
+              <div style="margin-top: 16px; font-size: 13px;">
+                <p style="margin: 6px 0; color: #6b7280;">
+                  <strong>Priority:</strong> 
+                  <span style="background: ${priorityColors[task.priority] || '#3b82f6'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
+                    ${task.priority}
+                  </span>
+                </p>
+                ${task.dueDate ? `<p style="margin: 6px 0; color: #6b7280;"><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>` : ''}
+                <p style="margin: 6px 0; color: #6b7280;"><strong>Project:</strong> ${task.projectName}</p>
+                <p style="margin: 6px 0; color: #6b7280;"><strong>Workspace:</strong> ${task.workspaceName}</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${taskUrl}" 
+                 style="display: inline-block; background: #3b82f6; color: white; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                View Task
+              </a>
+            </div>
+          </div>
+          
+          <p style="margin-top: 24px; font-size: 12px; color: #6b7280; text-align: center;">
+            © ${new Date().getFullYear()} TaskFlow. All rights reserved.
+          </p>
+        </body>
+      </html>
+    `,
+  });
+}
+
+export async function sendTaskReminderEmail({
+  to,
+  userName,
+  task,
+  hoursUntilDue,
+}: {
+  to: string;
+  userName: string;
+  task: TaskEmailData;
+  hoursUntilDue: number;
+}) {
+  const taskUrl = `${process.env.NEXTAUTH_URL}/dashboard/tasks/${task.id}`;
+  const timeText = hoursUntilDue >= 24 
+    ? `${Math.floor(hoursUntilDue / 24)} day(s)` 
+    : `${hoursUntilDue} hour(s)`;
+
+  await sendEmail({
+    to,
+    subject: `⏰ Reminder: "${task.title}" is due in ${timeText}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 24px; border-radius: 12px 12px 0 0; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 22px;">⏰ Task Due Soon</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 24px; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 15px; margin-bottom: 16px;">Hi ${userName},</p>
+            
+            <p style="font-size: 15px; margin-bottom: 20px;">
+              This is a friendly reminder that your task is due in <strong>${timeText}</strong>:
+            </p>
+            
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h2 style="margin: 0 0 12px 0; color: #111827; font-size: 18px;">${task.title}</h2>
+              ${task.description ? `<p style="color: #78350f; margin: 0 0 12px 0; font-size: 14px;">${task.description}</p>` : ''}
+              
+              <div style="margin-top: 16px; font-size: 13px; color: #78350f;">
+                ${task.dueDate ? `<p style="margin: 6px 0;"><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+                <p style="margin: 6px 0;"><strong>Project:</strong> ${task.projectName}</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${taskUrl}" 
+                 style="display: inline-block; background: #f59e0b; color: white; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                View Task
+              </a>
+            </div>
+            
+            <p style="font-size: 13px; color: #6b7280; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+              💡 <strong>Tip:</strong> You can manage your reminder preferences in your account settings.
+            </p>
+          </div>
+          
+          <p style="margin-top: 24px; font-size: 12px; color: #6b7280; text-align: center;">
+            © ${new Date().getFullYear()} TaskFlow. All rights reserved.
+          </p>
+        </body>
+      </html>
+    `,
+  });
+}
+
+export async function sendTaskDueSoonEmail({
+  to,
+  userName,
+  task,
+  hoursUntilDue,
+}: {
+  to: string;
+  userName: string;
+  task: TaskEmailData;
+  hoursUntilDue: number;
+}) {
+  const taskUrl = `${process.env.NEXTAUTH_URL}/dashboard/tasks/${task.id}`;
+
+  await sendEmail({
+    to,
+    subject: `🔔 Task Due in ${hoursUntilDue} hours: ${task.title}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 24px; border-radius: 12px 12px 0 0; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 22px;">🔔 Task Due Soon!</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 24px; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 15px; margin-bottom: 16px;">Hi ${userName},</p>
+            
+            <p style="font-size: 15px; margin-bottom: 20px;">
+              Your task is due in <strong>${hoursUntilDue} hours</strong>. Don't forget to complete it!
+            </p>
+            
+            <div style="background: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+              <h2 style="margin: 0 0 12px 0; color: #111827; font-size: 18px;">${task.title}</h2>
+              ${task.description ? `<p style="color: #991b1b; margin: 0 0 12px 0; font-size: 14px;">${task.description}</p>` : ''}
+              
+              <div style="margin-top: 16px; font-size: 13px; color: #991b1b;">
+                ${task.dueDate ? `<p style="margin: 6px 0;"><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+                <p style="margin: 6px 0;"><strong>Project:</strong> ${task.projectName}</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${taskUrl}" 
+                 style="display: inline-block; background: #ef4444; color: white; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                Complete Task Now
+              </a>
+            </div>
+          </div>
+          
+          <p style="margin-top: 24px; font-size: 12px; color: #6b7280; text-align: center;">
+            © ${new Date().getFullYear()} TaskFlow. All rights reserved.
+          </p>
+        </body>
+      </html>
+    `,
   });
 }
