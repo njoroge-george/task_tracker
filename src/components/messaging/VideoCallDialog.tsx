@@ -47,7 +47,7 @@ export const VideoCallDialog: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const waitingOscillatorRef = useRef<OscillatorNode | null>(null);
   const waitingGainRef = useRef<GainNode | null>(null);
-  const waitingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const waitingIntervalRef = useRef<number | null>(null);
 
   // Set local stream - with retry logic
   useEffect(() => {
