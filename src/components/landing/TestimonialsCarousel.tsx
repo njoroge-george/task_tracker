@@ -111,7 +111,7 @@ export default function TestimonialsCarousel() {
         overflow: "hidden",
         py: { xs: 8, md: 10 },
         backgroundImage:
-          "linear-gradient(to bottom, transparent 0%, rgba(var(--accent-primary), 0.08) 50%, transparent 100%)",
+          "linear-gradient(to bottom, transparent 0%, rgb(var(--accent-primary) / 0.08) 50%, transparent 100%)",
       }}
     >
       <Box
@@ -131,7 +131,7 @@ export default function TestimonialsCarousel() {
             px: 2,
             py: 1,
             borderRadius: 999,
-            backgroundColor: "rgba(var(--accent-primary), 0.16)",
+            backgroundColor: "rgb(var(--accent-primary) / 0.16)",
             backdropFilter: "blur(8px)",
           }}
         >
@@ -142,7 +142,7 @@ export default function TestimonialsCarousel() {
               borderRadius: "50%",
               backgroundColor: isAutoPlaying
                 ? "rgb(var(--status-success))"
-                : "rgba(var(--foreground-muted), 0.6)",
+                : "rgb(var(--foreground-muted) / 0.6)",
               animation: isAutoPlaying ? `${pulse} 1.6s ease-in-out infinite` : "none",
             }}
           />
@@ -196,7 +196,7 @@ export default function TestimonialsCarousel() {
                   maxWidth: 640,
                   border: testimonial.isActive
                     ? "2px solid rgb(var(--accent-primary))"
-                    : "1px solid rgba(var(--border), 0.5)",
+                    : "1px solid rgb(var(--border) / 0.5)",
                   backgroundColor: (theme) =>
                     theme.palette.mode === "dark" ? "#1f2937" : "#fff",
                   boxShadow: (theme) =>
@@ -222,11 +222,11 @@ export default function TestimonialsCarousel() {
                             fill:
                               starIndex < testimonial.rating
                                 ? "rgb(250, 204, 21)"
-                                : "rgba(var(--border), 0.6)",
+                                : "rgb(var(--border) / 0.6)",
                             color:
                               starIndex < testimonial.rating
                                 ? "rgb(250, 204, 21)"
-                                : "rgba(var(--border), 0.6)",
+                                : "rgb(var(--border) / 0.6)",
                           }}
                         />
                       ))}
@@ -318,9 +318,9 @@ export default function TestimonialsCarousel() {
               backgroundColor:
                 index === currentIndex
                   ? "rgb(var(--accent-primary))"
-                  : "rgba(var(--foreground-muted), 0.4)",
+                  : "rgb(var(--foreground-muted) / 0.4)",
               "&:hover": {
-                backgroundColor: "rgba(var(--accent-primary), 0.65)",
+                backgroundColor: "rgb(var(--accent-primary) / 0.65)",
               },
             }}
           />

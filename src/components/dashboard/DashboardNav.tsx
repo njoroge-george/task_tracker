@@ -1,9 +1,40 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Divider,
+  IconButton,
+  InputBase,
+  Menu,
+  MenuItem,
+  Paper,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+import {
+  Activity,
+  Bell,
+  Check,
+  ChevronDown,
+  CreditCard,
+  Home,
+  LogOut,
+  Menu as MenuIcon,
+  Search,
+  Settings,
+} from "lucide-react";
 
 interface Notification {
   id: string;
@@ -24,24 +55,44 @@ interface DashboardNavProps {
 }
 
 export default function DashboardNav({ user }: DashboardNavProps) {
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const theme = useTheme();
+  const [mobileAnchor, setMobileAnchor] = useState<null | HTMLElement>(null);
+  const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
+  const [userAnchor, setUserAnchor] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch notifications
+  const navBackground = useMemo(
+    () =>
+      theme.palette.mode === "dark"
+        ? `linear-gradient(90deg, ${theme.palette.background.default} 0%, ${alpha(
+            theme.palette.primary.dark,
+            0.25
+          )} 50%, ${theme.palette.background.default} 100%)`
+        : `linear-gradient(90deg, ${alpha(theme.palette.primary.dark, 0.1)} 0%, ${
+            theme.palette.background.default
+          } 30%, ${theme.palette.background.default} 100%)`,
+    [theme]
+  );
+
+  const dividerColor = alpha(
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.common.black,
+    theme.palette.mode === "dark" ? 0.12 : 0.08
+  );
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/notifications');
+        const response = await fetch("/api/notifications");
         if (response.ok) {
           const data = await response.json();
           setNotifications(data);
         }
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        console.error("Failed to fetch notifications:", error);
       } finally {
         setLoading(false);
       }
@@ -50,425 +101,345 @@ export default function DashboardNav({ user }: DashboardNavProps) {
     fetchNotifications();
   }, []);
 
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   const markAsRead = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
       });
 
       if (response.ok) {
-        setNotifications(prev =>
-          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notificationId ? { ...n, read: true } : n
+          )
         );
       }
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const markAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter(n => !n.read);
-      
-      // Mark all unread notifications as read
+      const unreadNotifications = notifications.filter((n) => !n.read);
       await Promise.all(
-        unreadNotifications.map(notification =>
+        unreadNotifications.map((notification) =>
           fetch(`/api/notifications/${notification.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ read: true }),
           })
         )
       );
-
-      // Update local state
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string) =>
+    name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
 
   return (
-    <nav className="navbar-professional fixed top-0 left-0 right-0 z-50">
-      <div className="px-4 lg:px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo and Mobile Menu Button */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+    <>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          backgroundImage: navBackground,
+          borderBottom: `1px solid ${dividerColor}`,
+          color: theme.palette.text.primary,
+          backdropFilter: "blur(18px)",
+        }}
+      >
+        <Toolbar sx={{ minHeight: 64, px: { xs: 2, lg: 3 }, justifyContent: "space-between" }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <IconButton
+              color="inherit"
+              onClick={(event) => setMobileAnchor(event.currentTarget)}
+              sx={{ display: { lg: "none" } }}
             >
-              <svg
-                className="w-6 h-6 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <MenuIcon size={20} />
+            </IconButton>
+            <Stack
+              component={Link}
+              href="/dashboard"
+              direction="row"
+              spacing={1.5}
+              alignItems="center"
+              sx={{ textDecoration: "none", color: "inherit" }}
+            >
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                  boxShadow: theme.shadows[4],
+                  color: theme.palette.primary.contrastText,
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-sm">
-                <svg
-                  className="w-5 h-5 text-white dark:text-gray-900"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-primary">
+                <Activity size={18} />
+              </Box>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ display: { xs: "none", sm: "block" } }}
+              >
                 TaskTracker
-              </span>
-            </Link>
-
-            {/* Home Button */}
-            <Link
+              </Typography>
+            </Stack>
+            <Button
+              component={Link}
               href="/"
-              className="hidden md:flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-primary hover:bg-secondary rounded-lg transition-colors"
+              startIcon={<Home size={16} />}
+              sx={{
+                display: { xs: "none", md: "inline-flex" },
+                borderRadius: 2,
+                textTransform: "none",
+                color: theme.palette.text.primary,
+              }}
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
               Home
-            </Link>
-          </div>
+            </Button>
+          </Stack>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
+          <Box
+            sx={{
+              flex: 1,
+              maxWidth: 480,
+              mx: { md: 4 },
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Paper
+              component="form"
+              onSubmit={(event) => event.preventDefault()}
+              sx={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                px: 1.5,
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                border: `1px solid ${dividerColor}`,
+              }}
+              elevation={0}
+            >
+              <IconButton size="small">
+                <Search size={18} />
+              </IconButton>
+              <InputBase
                 placeholder="Search tasks, projects..."
-                className="w-full px-4 py-2 pl-10 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-primary text-primary placeholder-muted"
+                sx={{ ml: 1, flex: 1 }}
               />
-              <svg
-                className="absolute left-3 top-2.5 w-5 h-5 text-muted"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-          </div>
+            </Paper>
+          </Box>
 
-          {/* Right Side Icons */}
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
+          <Stack direction="row" spacing={1} alignItems="center">
             <ThemeToggle />
-
-            {/* Quick Add */}
-            <button className="p-2 text-primary hover:bg-secondary rounded-lg transition-colors">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <IconButton
+              color="primary"
+              onClick={(event) => setNotificationsAnchor(event.currentTarget)}
+            >
+              <Badge color="error" badgeContent={unreadCount > 9 ? "9+" : unreadCount || null}>
+                <Bell size={20} />
+              </Badge>
+            </IconButton>
+            <Button
+              onClick={(event) => setUserAnchor(event.currentTarget)}
+              endIcon={<ChevronDown size={16} />}
+              sx={{
+                textTransform: "none",
+                borderRadius: 999,
+                color: theme.palette.text.primary,
+              }}
+            >
+              <Avatar
+                src={user.image || undefined}
+                alt={user.name || "User"}
+                sx={{ width: 32, height: 32, mr: 1 }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
+                {getInitials(user.name || user.email || "U")}
+              </Avatar>
+              <Typography variant="body2" sx={{ display: { xs: "none", md: "inline" } }}>
+                {user.name || "User"}
+              </Typography>
+            </Button>
+          </Stack>
+        </Toolbar>
+      </AppBar>
 
-            {/* Notifications */}
-            <div className="relative">
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-primary hover:bg-secondary rounded-lg transition-colors"
+      {/* Mobile menu */}
+      <Menu
+        anchorEl={mobileAnchor}
+        open={Boolean(mobileAnchor)}
+        onClose={() => setMobileAnchor(null)}
+        PaperProps={{
+          sx: {
+            width: 220,
+            mt: 1,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 2,
+            boxShadow: theme.shadows[6],
+          },
+        }}
+      >
+        <MenuItem component={Link} href="/dashboard" onClick={() => setMobileAnchor(null)}>
+          Dashboard
+        </MenuItem>
+        <MenuItem component={Link} href="/dashboard/settings" onClick={() => setMobileAnchor(null)}>
+          Settings
+        </MenuItem>
+        <MenuItem component={Link} href="/dashboard/billing" onClick={() => setMobileAnchor(null)}>
+          Billing
+        </MenuItem>
+      </Menu>
+
+      {/* Notifications */}
+      <Menu
+        anchorEl={notificationsAnchor}
+        open={Boolean(notificationsAnchor)}
+        onClose={() => setNotificationsAnchor(null)}
+        PaperProps={{
+          sx: {
+            width: 360,
+            mt: 1,
+            borderRadius: 3,
+            boxShadow: theme.shadows[8],
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="subtitle2">Notifications</Typography>
+          {unreadCount > 0 && (
+            <Button size="small" onClick={markAllAsRead}>
+              Mark all as read
+            </Button>
+          )}
+        </Box>
+        <Divider />
+        <Box sx={{ maxHeight: 320, overflowY: "auto" }}>
+          {loading ? (
+            <Stack alignItems="center" justifyContent="center" py={4} spacing={1}>
+              <CircularProgress size={20} />
+              <Typography variant="caption" color="text.secondary">
+                Loading...
+              </Typography>
+            </Stack>
+          ) : notifications.length === 0 ? (
+            <Stack alignItems="center" justifyContent="center" py={4} spacing={1}>
+              <Bell size={32} opacity={0.5} />
+              <Typography variant="body2" color="text.secondary">
+                No notifications yet
+              </Typography>
+            </Stack>
+          ) : (
+            notifications.map((notification) => (
+              <MenuItem
+                key={notification.id}
+                onClick={() => {
+                  if (!notification.read) markAsRead(notification.id);
+                }}
+                sx={{
+                  alignItems: "flex-start",
+                  gap: 1.5,
+                  backgroundColor: !notification.read
+                    ? alpha(theme.palette.primary.main, 0.08)
+                    : "transparent",
+                }}
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-sm">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
+                <Stack alignItems="center" spacing={0.5} sx={{ pt: 0.5 }}>
+                  {!notification.read ? (
+                    <Badge color="primary" variant="dot">
+                      <Check size={16} opacity={0} />
+                    </Badge>
+                  ) : (
+                    <Check size={16} opacity={0.3} />
+                  )}
+                </Stack>
+                <Box>
+                  <Typography variant="subtitle2">{notification.title}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {notification.message}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ))
+          )}
+        </Box>
+      </Menu>
 
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowNotifications(false)}
-                  ></div>
-                  <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg border border-default py-2 z-20 max-h-96 overflow-y-auto">
-                    <div className="px-4 py-3 border-b border-default flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-primary">
-                        Notifications
-                      </h3>
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-accent hover:text-accent-hover font-medium"
-                        >
-                          Mark all as read
-                        </button>
-                      )}
-                    </div>
-
-                    {loading ? (
-                      <div className="px-4 py-8 text-center">
-                        <div className="inline-block w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs text-secondary mt-2">Loading...</p>
-                      </div>
-                    ) : notifications.length === 0 ? (
-                      <div className="px-4 py-8 text-center">
-                        <svg
-                          className="w-12 h-12 mx-auto text-secondary opacity-50"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                          />
-                        </svg>
-                        <p className="text-sm text-secondary mt-2">
-                          No notifications yet
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-default">
-                        {notifications.map((notification) => (
-                          <button
-                            key={notification.id}
-                            onClick={() => {
-                              if (!notification.read) {
-                                markAsRead(notification.id);
-                              }
-                            }}
-                            className={`w-full px-4 py-3 text-left hover:bg-secondary transition-colors ${
-                              !notification.read ? 'bg-accent/5' : ''
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                                !notification.read ? 'bg-accent' : 'bg-transparent'
-                              }`}></div>
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-sm ${
-                                  !notification.read ? 'font-semibold text-primary' : 'font-medium text-primary'
-                                }`}>
-                                  {notification.title}
-                                </p>
-                                <p className="text-xs text-secondary mt-1 line-clamp-2">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-tertiary mt-1">
-                                  {new Date(notification.createdAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {notifications.length > 0 && (
-                      <div className="px-4 py-2 border-t border-default">
-                        <Link
-                          href="/dashboard"
-                          className="text-xs text-accent hover:text-accent-hover font-medium"
-                          onClick={() => setShowNotifications(false)}
-                        >
-                          View all notifications
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* User Menu */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1 rounded-lg hover:bg-secondary"
-              >
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={user.name || "User"}
-                    className="w-8 h-8 rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                    {getInitials(user.name || user.email || "U")}
-                  </div>
-                )}
-                <svg
-                  className="w-4 h-4 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              {/* User Dropdown */}
-              {showUserMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  ></div>
-                  <div className="absolute right-0 mt-2 w-64 bg-card rounded-lg shadow-lg border border-default py-2 z-20">
-                    <div className="px-4 py-3 border-b border-default">
-                      <p className="text-sm font-semibold text-primary">
-                        {user.name}
-                      </p>
-                      <p className="text-xs text-secondary">
-                        {user.email}
-                      </p>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold bg-accent-secondary text-accent rounded">
-                        {user.plan} Plan
-                      </span>
-                    </div>
-
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-secondary"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      Settings
-                    </Link>
-
-                    <Link
-                      href="/dashboard/billing"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-secondary"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                        />
-                      </svg>
-                      Billing
-                    </Link>
-
-                    <button
-                      onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-status-error hover:bg-status-error-light"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                      Sign Out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
+      {/* User Menu */}
+      <Menu
+        anchorEl={userAnchor}
+        open={Boolean(userAnchor)}
+        onClose={() => setUserAnchor(null)}
+        PaperProps={{
+          sx: {
+            width: 280,
+            mt: 1,
+            borderRadius: 3,
+            boxShadow: theme.shadows[8],
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <Box sx={{ px: 2, py: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600}>
+            {user.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user.email}
+          </Typography>
+          {user.plan && (
+            <Chip
+              label={`${user.plan} Plan`}
+              size="small"
+              sx={{ mt: 1 }}
+              color="primary"
+            />
+          )}
+        </Box>
+        <Divider />
+        <MenuItem component={Link} href="/dashboard/settings" onClick={() => setUserAnchor(null)}>
+          <Settings size={16} style={{ marginRight: 12 }} />
+          Settings
+        </MenuItem>
+        <MenuItem component={Link} href="/dashboard/billing" onClick={() => setUserAnchor(null)}>
+          <CreditCard size={16} style={{ marginRight: 12 }} />
+          Billing
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+          sx={{ color: theme.palette.error.main }}
+        >
+          <LogOut size={16} style={{ marginRight: 12 }} />
+          Sign Out
+        </MenuItem>
+      </Menu>
+    </>
   );
 }

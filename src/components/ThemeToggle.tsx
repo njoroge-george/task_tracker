@@ -1,43 +1,72 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { IconButton } from "@mui/material";
+import { useTheme as useNextTheme } from "next-themes";
+import { useTheme } from "@mui/material/styles";
+import { Moon, Sun } from "lucide-react";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const muiTheme = useTheme();
+  const { theme, setTheme, resolvedTheme } = useNextTheme();
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const currentTheme = theme === "system" ? resolvedTheme : theme;
+
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="w-9 h-9">
-        <Sun className="h-5 w-5" />
-      </Button>
+      <IconButton
+        color="primary"
+        size="large"
+        aria-label="Toggle theme"
+        sx={{
+          width: 40,
+          height: 40,
+          border: `1px solid ${muiTheme.palette.divider}`,
+          backgroundColor:
+            muiTheme.palette.mode === "dark"
+              ? "rgba(255,255,255,0.04)"
+              : "rgba(99,102,241,0.08)",
+        }}
+        disabled
+      >
+        <Sun size={20} color={muiTheme.palette.text.primary} />
+      </IconButton>
     );
   }
 
-  const currentTheme = theme === "system" ? resolvedTheme : theme;
+  const iconColor =
+    currentTheme === "dark"
+      ? muiTheme.palette.warning.light
+      : muiTheme.palette.text.primary;
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <IconButton
+      color="primary"
+      size="large"
       onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
-      className="w-9 h-9 relative"
+      sx={{
+        width: 40,
+        height: 40,
+        border: `1px solid ${muiTheme.palette.divider}`,
+        backgroundColor:
+          muiTheme.palette.mode === "dark"
+            ? "rgba(255,255,255,0.04)"
+            : "rgba(99,102,241,0.08)",
+      }}
       title={`Switch to ${currentTheme === "dark" ? "light" : "dark"} mode`}
+      aria-label={`Switch to ${currentTheme === "dark" ? "light" : "dark"} mode`}
     >
       {currentTheme === "dark" ? (
-        <Sun className="h-5 w-5 text-yellow-500 transition-all" />
+        <Sun size={20} color={iconColor} />
       ) : (
-        <Moon className="h-5 w-5 text-slate-700 dark:text-slate-400 transition-all" />
+        <Moon size={20} color={iconColor} />
       )}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+    </IconButton>
   );
 }

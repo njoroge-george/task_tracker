@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from "react";
 import NextLink from "next/link";
 import {
   ArrowRight,
@@ -22,6 +21,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
 import ThemeToggle from "@/components/ThemeToggle";
 import Testimonials from "@/components/landing/Testimonials";
 
@@ -29,8 +29,6 @@ type FeatureItem = {
   title: string;
   description: string;
   icon: typeof Zap;
-  iconBg: string;
-  iconColor: string;
 };
 
 type PricingPlan = {
@@ -75,48 +73,36 @@ const featureItems: FeatureItem[] = [
     description:
       "Drag-and-drop task management with customizable columns and real-time updates.",
     icon: Zap,
-    iconBg: "rgba(var(--accent-secondary), 0.24)",
-    iconColor: "rgb(var(--accent-primary))",
   },
   {
     title: "Team Collaboration",
     description:
       "Work together seamlessly with comments, mentions, and real-time notifications.",
     icon: Users,
-    iconBg: "rgba(var(--status-success), 0.20)",
-    iconColor: "rgb(var(--status-success))",
   },
   {
     title: "Analytics & Reports",
     description:
       "Track progress with detailed analytics, charts, and productivity insights.",
     icon: BarChart3,
-    iconBg: "rgba(var(--accent-secondary), 0.24)",
-    iconColor: "rgb(var(--accent-primary))",
   },
   {
     title: "Task Management",
     description:
       "Create, assign, and track tasks with priorities, deadlines, and subtasks.",
     icon: CheckCircle2,
-    iconBg: "rgba(var(--status-warning), 0.20)",
-    iconColor: "rgb(var(--status-warning))",
   },
   {
     title: "Enterprise Security",
     description:
       "Bank-level encryption, SSO, and advanced permission controls.",
     icon: Shield,
-    iconBg: "rgba(var(--status-error), 0.20)",
-    iconColor: "rgb(var(--status-error))",
   },
   {
     title: "Integrations",
     description:
       "Connect with Slack, GitHub, Google Drive, and 100+ other tools.",
     icon: Zap,
-    iconBg: "rgba(var(--status-info), 0.20)",
-    iconColor: "rgb(var(--status-info))",
   },
 ];
 
@@ -229,22 +215,49 @@ const footerColumns: FooterColumn[] = [
 ];
 
 export default function LandingPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
+  const theme = useTheme();
+  const valuesGradient = `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.main} 100%)`;
+  const valuesContrast = theme.palette.getContrastText(theme.palette.primary.dark);
+  const ctaGradient = `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.light} 100%)`;
+  const ctaContrast = theme.palette.getContrastText(theme.palette.primary.main);
+  const heroBodyColor =
+    theme.palette.mode === "dark"
+      ? alpha(theme.palette.common.white, 0.82)
+      : alpha(theme.palette.text.primary, 0.85);
+  const heroCaptionColor =
+    theme.palette.mode === "dark"
+      ? alpha(theme.palette.common.white, 0.7)
+      : alpha(theme.palette.text.secondary, 0.75);
+  const textPrimary = theme.palette.text.primary;
+  const textSecondary = theme.palette.text.secondary;
+  const cardBackground = theme.palette.background.paper;
+  const dividerColor = alpha(theme.palette.divider, 0.6);
+  const accentMain = theme.palette.primary.main;
+  const successColor = theme.palette.success.main;
+  const warningColor = theme.palette.warning.main;
+  const errorColor = theme.palette.error.main;
+  const infoColor = theme.palette.info.main;
+  const landingBackground =
+    theme.palette.mode === "dark"
+      ? "linear-gradient(180deg, #010617 0%, #041233 45%, #071a48 100%)"
+      : "linear-gradient(180deg, #ffffff 0%, #f7f8ff 35%, #e6edff 70%, #dae2ff 100%)";
+  const heroGlow =
+    theme.palette.mode === "dark"
+      ? "radial-gradient(circle at top, rgba(79,70,229,0.4), transparent 55%)"
+      : "radial-gradient(circle at top, rgba(79,70,229,0.15), rgba(255,255,255,0.9) 60%)";
+  const heroGradientText =
+    "linear-gradient(110deg, #c084fc, #a5b4fc, #60a5fa)";
+  const featuresBackground =
+    theme.palette.mode === "dark"
+      ? alpha(theme.palette.background.default, 0.75)
+      : "rgba(255, 255, 255, 0.9)";
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage:
-          "linear-gradient(to bottom, rgb(var(--background)) 0%, rgb(var(--background-secondary)) 100%)",
+        backgroundImage: landingBackground,
+        color: textPrimary,
       }}
     >
       <Box
@@ -254,8 +267,8 @@ export default function LandingPage() {
           top: 0,
           left: 0,
           right: 0,
-          borderBottom: "1px solid rgb(var(--border))",
-          backgroundColor: "rgba(var(--background), 0.85)",
+          borderBottom: `1px solid ${dividerColor}`,
+          backgroundColor: alpha(theme.palette.background.default, 0.9),
           backdropFilter: "blur(16px)",
           zIndex: 1100,
         }}
@@ -270,10 +283,10 @@ export default function LandingPage() {
           }}
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <Zap size={32} color="rgb(var(--accent-primary))" />
+            <Zap size={32} color={accentMain} />
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: "rgb(var(--foreground))" }}
+              sx={{ fontWeight: 700, color: textPrimary }}
             >
               TaskFlow
             </Typography>
@@ -291,11 +304,11 @@ export default function LandingPage() {
                 href={link.href}
                 underline="none"
                 sx={{
-                  color: "rgb(var(--foreground))",
+                  color: textPrimary,
                   fontWeight: 500,
                   transition: "color 0.2s",
                   "&:hover": {
-                    color: "rgb(var(--accent-primary))",
+                    color: accentMain,
                   },
                 }}
               >
@@ -334,6 +347,7 @@ export default function LandingPage() {
         sx={{
           pt: { xs: 16, md: 20 },
           pb: { xs: 14, md: 18 },
+          backgroundImage: heroGlow,
         }}
       >
         <Container maxWidth="lg">
@@ -343,7 +357,6 @@ export default function LandingPage() {
               sx={{
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
-                color: "rgb(var(--foreground))",
                 fontSize: {
                   xs: "2.75rem",
                   sm: "3.5rem",
@@ -353,11 +366,25 @@ export default function LandingPage() {
                 lineHeight: 1.1,
               }}
             >
-              Manage Your Tasks
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-block",
+                  backgroundImage: heroGradientText,
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                Manage Your Tasks
+              </Box>
               <br />
               <Box
                 component="span"
-                sx={{ color: "rgb(var(--accent-primary))" }}
+                sx={{
+                  color: theme.palette.mode === "dark" ? "#b1c8ff" : accentMain,
+                  textShadow: "0 8px 24px rgba(15, 23, 42, 0.35)",
+                }}
               >
                 Like Never Before
               </Box>
@@ -366,7 +393,7 @@ export default function LandingPage() {
             <Typography
               variant="h6"
               sx={{
-                color: "rgb(var(--foreground-secondary))",
+                color: heroBodyColor,
                 maxWidth: 720,
               }}
             >
@@ -410,7 +437,7 @@ export default function LandingPage() {
 
             <Typography
               variant="body2"
-              sx={{ color: "rgb(var(--foreground-muted))" }}
+              sx={{ color: heroCaptionColor }}
             >
               No credit card required • 14-day free trial
             </Typography>
@@ -423,7 +450,7 @@ export default function LandingPage() {
         id="features"
         sx={{
           py: { xs: 12, md: 16 },
-          backgroundColor: "rgb(var(--background))",
+          backgroundColor: featuresBackground,
         }}
       >
         <Container maxWidth="lg">
@@ -433,14 +460,14 @@ export default function LandingPage() {
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "2.5rem", md: "3rem" },
-                color: "rgb(var(--foreground))",
+                color: textPrimary,
               }}
             >
               Everything You Need to Succeed
             </Typography>
             <Typography
               sx={{
-                color: "rgb(var(--foreground-secondary))",
+                color: textSecondary,
                 maxWidth: 640,
                 mx: "auto",
               }}
@@ -461,19 +488,23 @@ export default function LandingPage() {
               gap: 4,
             }}
           >
-            {featureItems.map((feature) => {
+            {featureItems.map((feature, index) => {
               const Icon = feature.icon;
+              const paletteColor = [accentMain, successColor, warningColor, infoColor, errorColor][
+                index % 5
+              ];
+              const iconBg = alpha(paletteColor, 0.2);
               return (
                 <Card
                   key={feature.title}
                   sx={{
                     height: "100%",
                     borderWidth: 2,
-                    borderColor: "rgba(var(--border), 0.6)",
-                    backgroundColor: "rgb(var(--card-background))",
+                    borderColor: 'none',
+                    backgroundColor: cardBackground,
                     transition: "transform 0.25s, box-shadow 0.25s, border-color 0.25s",
                     "&:hover": {
-                      borderColor: "rgb(var(--accent-primary))",
+                      borderColor: accentMain,
                       transform: "translateY(-6px)",
                       boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                     },
@@ -489,10 +520,10 @@ export default function LandingPage() {
                         alignItems: "center",
                         justifyContent: "center",
                         mb: 3,
-                        backgroundColor: feature.iconBg,
+                        backgroundColor: iconBg,
                       }}
                     >
-                      <Icon size={28} color={feature.iconColor} />
+                      <Icon size={28} color={paletteColor} />
                     </Box>
                     <Typography
                       variant="h6"
@@ -500,9 +531,7 @@ export default function LandingPage() {
                     >
                       {feature.title}
                     </Typography>
-                    <Typography
-                      sx={{ color: "rgb(var(--foreground-secondary))" }}
-                    >
+                    <Typography sx={{ color: textSecondary }}>
                       {feature.description}
                     </Typography>
                   </CardContent>
@@ -527,12 +556,12 @@ export default function LandingPage() {
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "2.5rem", md: "3rem" },
-                color: "rgb(var(--foreground))",
+                color: textPrimary,
               }}
             >
               Simple, Transparent Pricing
             </Typography>
-            <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+            <Typography sx={{ color: textSecondary }}>
               Choose the perfect plan for your team
             </Typography>
           </Stack>
@@ -555,8 +584,8 @@ export default function LandingPage() {
                   height: "100%",
                   borderWidth: plan.highlighted ? 3 : 2,
                   borderColor: plan.highlighted
-                    ? "rgb(var(--accent-primary))"
-                    : "rgba(var(--border), 0.6)",
+                    ? accentMain
+                    : 'none',
                   transform: plan.highlighted ? "scale(1.02)" : "none",
                   boxShadow: plan.highlighted
                     ? "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
@@ -590,14 +619,12 @@ export default function LandingPage() {
                         variant="h5"
                         sx={{
                           fontWeight: 700,
-                          color: "rgb(var(--foreground))",
+                          color: textPrimary,
                         }}
                       >
                         {plan.name}
                       </Typography>
-                      <Typography
-                        sx={{ color: "rgb(var(--foreground-secondary))" }}
-                      >
+                      <Typography sx={{ color: textSecondary }}>
                         {plan.description}
                       </Typography>
                     </Box>
@@ -608,7 +635,7 @@ export default function LandingPage() {
                         sx={{
                           fontSize: "2.5rem",
                           fontWeight: 700,
-                          color: "rgb(var(--foreground))",
+                          color: textPrimary,
                         }}
                       >
                         {plan.price}
@@ -618,7 +645,7 @@ export default function LandingPage() {
                           component="span"
                           sx={{
                             ml: 1,
-                            color: "rgb(var(--foreground-secondary))",
+                            color: textSecondary,
                           }}
                         >
                           {plan.period}
@@ -640,10 +667,10 @@ export default function LandingPage() {
                         <Stack key={feature} direction="row" spacing={2}>
                           <CheckCircle2
                             size={20}
-                            color="rgb(var(--status-success))"
+                            color={successColor}
                           />
                           <Typography
-                            sx={{ color: "rgb(var(--foreground-secondary))" }}
+                            sx={{ color: textSecondary }}
                           >
                             {feature}
                           </Typography>
@@ -663,7 +690,7 @@ export default function LandingPage() {
         id="testimonials"
         sx={{
           py: { xs: 12, md: 16 },
-          backgroundColor: "rgb(var(--background))",
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <Container maxWidth="lg">
@@ -673,12 +700,12 @@ export default function LandingPage() {
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "2.5rem", md: "3rem" },
-                color: "rgb(var(--foreground))",
+                color: textPrimary,
               }}
             >
               Loved by Teams Worldwide
             </Typography>
-            <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+            <Typography sx={{ color: textSecondary }}>
               See what our customers have to say
             </Typography>
           </Stack>
@@ -713,24 +740,24 @@ export default function LandingPage() {
                   sx={{
                     fontWeight: 700,
                     fontSize: { xs: "2.5rem", md: "3rem" },
-                    color: "rgb(var(--foreground))",
+                    color: textPrimary,
                   }}
                 >
                   About TaskFlow
                 </Typography>
-                <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+                <Typography sx={{ color: textSecondary }}>
                   Founded in 2023, TaskFlow was born from a simple idea: project
                   management shouldn&apos;t be complicated. We&apos;ve built a
                   platform that combines powerful features with an intuitive
                   interface.
                 </Typography>
-                <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+                <Typography sx={{ color: textSecondary }}>
                   Our mission is to help teams of all sizes work more
                   efficiently, collaborate seamlessly, and deliver projects on
                   time. With over 10,000 teams worldwide trusting TaskFlow,
                   we&apos;re just getting started.
                 </Typography>
-                <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+                <Typography sx={{ color: textSecondary }}>
                   We believe in transparency, innovation, and putting our
                   customers first. Every feature we build is designed with real
                   user feedback and tested with real teams.
@@ -748,14 +775,12 @@ export default function LandingPage() {
                         sx={{
                           fontSize: "2rem",
                           fontWeight: 700,
-                          color: "rgb(var(--accent-primary))",
+                          color: accentMain,
                         }}
                       >
                         {metric.value}
                       </Typography>
-                      <Typography
-                        sx={{ color: "rgb(var(--foreground-secondary))" }}
-                      >
+                      <Typography sx={{ color: textSecondary }}>
                         {metric.label}
                       </Typography>
                     </Box>
@@ -768,9 +793,8 @@ export default function LandingPage() {
                 sx={{
                   borderRadius: 3,
                   p: 5,
-                  color: "#fff",
-                  backgroundImage:
-                    "linear-gradient(135deg, rgb(var(--color-primary-600)) 0%, rgb(var(--accent-secondary)) 100%)",
+                  color: valuesContrast,
+                  backgroundImage: valuesGradient,
                   boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
                 }}
               >
@@ -802,9 +826,8 @@ export default function LandingPage() {
         component="section"
         sx={{
           py: { xs: 12, md: 16 },
-          backgroundImage:
-            "linear-gradient(135deg, rgb(var(--color-primary-600)) 0%, rgb(var(--accent-secondary)) 100%)",
-          color: "#fff",
+          backgroundImage: ctaGradient,
+          color: ctaContrast,
         }}
       >
         <Container maxWidth="md">
@@ -834,10 +857,10 @@ export default function LandingPage() {
                 endIcon={<ArrowRight size={20} />}
                 sx={{
                   width: { xs: "100%", sm: "auto" },
-                  backgroundColor: "#fff",
-                  color: "rgb(var(--accent-primary))",
+                  backgroundColor: theme.palette.common.white,
+                  color: accentMain,
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.85)",
+                    backgroundColor: alpha(theme.palette.common.white, 0.9),
                   },
                 }}
               >
@@ -848,11 +871,11 @@ export default function LandingPage() {
                 variant="outlined"
                 sx={{
                   width: { xs: "100%", sm: "auto" },
-                  borderColor: "rgba(255,255,255,0.7)",
-                  color: "#fff",
+                  borderColor: alpha(theme.palette.common.white, 0.7),
+                  color: theme.palette.common.white,
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                    borderColor: "#fff",
+                    backgroundColor: alpha(theme.palette.common.white, 0.1),
+                    borderColor: theme.palette.common.white,
                   },
                 }}
               >
@@ -866,8 +889,8 @@ export default function LandingPage() {
       <Box
         component="footer"
         sx={{
-          backgroundColor: "rgb(var(--card-background))",
-          color: "rgb(var(--foreground))",
+          backgroundColor: cardBackground,
+          color: textPrimary,
           py: { xs: 10, md: 12 },
         }}
       >
@@ -886,12 +909,12 @@ export default function LandingPage() {
             <Box>
               <Stack spacing={2}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Zap size={28} color="rgb(var(--accent-primary))" />
+                  <Zap size={28} color={accentMain} />
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     TaskFlow
                   </Typography>
                 </Stack>
-                <Typography sx={{ color: "rgb(var(--foreground-secondary))" }}>
+                <Typography sx={{ color: textSecondary }}>
                   Professional task management for modern teams.
                 </Typography>
               </Stack>
@@ -903,7 +926,7 @@ export default function LandingPage() {
                   sx={{
                     fontWeight: 600,
                     mb: 2,
-                    color: "rgb(var(--foreground))",
+                    color: textPrimary,
                   }}
                 >
                   {column.title}
@@ -915,10 +938,10 @@ export default function LandingPage() {
                       href={link.href}
                       underline="none"
                       sx={{
-                        color: "rgb(var(--foreground-secondary))",
+                        color: textSecondary,
                         fontSize: "0.95rem",
                         "&:hover": {
-                          color: "rgb(var(--accent-primary))",
+                          color: accentMain,
                         },
                       }}
                     >
@@ -934,13 +957,13 @@ export default function LandingPage() {
             sx={{
               mt: 6,
               mb: 3,
-              borderColor: "rgba(var(--border), 0.6)",
+              borderColor: 'none',
             }}
           />
 
           <Typography
             align="center"
-            sx={{ color: "rgb(var(--foreground-secondary))" }}
+            sx={{ color: textSecondary }}
           >
             &copy; 2025 TaskFlow. All rights reserved.
           </Typography>

@@ -21,23 +21,21 @@ interface CreateProjectDialogProps {
   workspaceId?: string;
 }
 
+const BRAND_COLOR = '#4f46e5';
 const COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#f59e0b', // amber
-  '#eab308', // yellow
-  '#84cc16', // lime
-  '#22c55e', // green
-  '#10b981', // emerald
-  '#14b8a6', // teal
-  '#06b6d4', // cyan
-  '#0ea5e9', // sky
-  '#3b82f6', // blue
-  '#6366f1', // indigo
-  '#8b5cf6', // violet
-  '#a855f7', // purple
-  '#d946ef', // fuchsia
-  '#ec4899', // pink
+  BRAND_COLOR,
+  '#6366f1',
+  '#4338ca',
+  '#312e81',
+  '#818cf8',
+  '#38bdf8',
+  '#0ea5e9',
+  '#2563eb',
+  '#0f172a',
+  '#22c55e',
+  '#f97316',
+  '#ef4444',
+  '#ec4899',
 ];
 
 export default function CreateProjectDialog({ open, onClose, workspaceId }: CreateProjectDialogProps) {
@@ -48,7 +46,7 @@ export default function CreateProjectDialog({ open, onClose, workspaceId }: Crea
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: COLORS[4], // Default to green
+    color: BRAND_COLOR,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +73,7 @@ export default function CreateProjectDialog({ open, onClose, workspaceId }: Crea
       setFormData({
         name: '',
         description: '',
-        color: COLORS[4],
+        color: BRAND_COLOR,
       });
       
       onClose();
@@ -93,7 +91,7 @@ export default function CreateProjectDialog({ open, onClose, workspaceId }: Crea
       setFormData({
         name: '',
         description: '',
-        color: COLORS[4],
+        color: BRAND_COLOR,
       });
       setError('');
       onClose();

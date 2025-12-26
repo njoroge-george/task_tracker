@@ -65,106 +65,99 @@ export type ThemeDefinition = {
 
 export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
   light: {
-    // Lime green scale (primary brand color)
     primary: {
-      50: "#f7fee7",   // Very light lime
-      100: "#ecfccb",  // Light lime
-      200: "#d9f99d",  // Lighter lime
-      300: "#bef264",  // Medium light lime
-      400: "#a3e635",  // Medium lime
-      500: "#84cc16",  // Primary lime (main brand)
-      600: "#65a30d",  // Darker lime
-      700: "#4d7c0f",  // Dark lime
-      800: "#3f6212",  // Very dark lime
-      900: "#365314",  // Deepest lime
+      50: "#eef2ff",
+      100: "#e0e7ff",
+      200: "#c7d2fe",
+      300: "#a5b4fc",
+      400: "#818cf8",
+      500: "#6366f1",
+      600: "#4f46e5",
+      700: "#4338ca",
+      800: "#3730a3",
+      900: "#312e81",
     },
-    // Clean black and white backgrounds
     background: {
-      primary: "#ffffff",     // Pure white for main content
-      secondary: "#fafafa",   // Subtle gray for sections
-      tertiary: "#f5f5f5",    // Slightly darker gray
+      primary: "#ffffff",
+      secondary: "#f8f9ff",
+      tertiary: "#eef1ff",
     },
-    // Black-based text colors
     text: {
-      primary: "#000000",     // Pure black for main text
-      secondary: "#262626",   // Dark gray for secondary text
-      tertiary: "#525252",    // Medium gray for tertiary text
-      muted: "#737373",       // Light gray for disabled/subtle text
+      primary: "#0f172a",
+      secondary: "#1f2358",
+      tertiary: "#312e81",
+      muted: "#475569",
     },
-    // Subtle borders
     border: {
-      light: "#e5e5e5",       // Light gray border
-      medium: "#d4d4d4",      // Medium gray border
-      dark: "#a3a3a3",        // Darker gray border
+      light: "#e0e7ff",
+      medium: "#cbd5f5",
+      dark: "#94a3d3",
     },
-    // Card styling
     card: {
       background: "#ffffff",
-      border: "#e5e5e5",
-      shadow: "rgba(0, 0, 0, 0.08)",  // Subtle shadow
-      foreground: "#000000",
+      border: "#e0e7ff",
+      shadow: "rgba(79, 70, 229, 0.08)",
+      foreground: "#0f172a",
     },
-    // Status colors
     status: {
-      success: "#84cc16",     // Lime green for success
-      warning: "#f59e0b",     // Amber for warnings
-      error: "#ef4444",       // Red for errors
-      info: "#84cc16",        // Lime for information
+      success: "#22c55e",
+      warning: "#f97316",
+      error: "#ef4444",
+      info: "#3b82f6",
     },
-    // Accent colors (Lime and Black palette)
     accent: {
-      blue: "#84cc16",        // Primary lime
-      sky: "#a3e635",         // Lighter lime
-      indigo: "#65a30d",      // Darker lime
-      contrastText: "#000000",  // Black text on lime
+      blue: "#4f46e5",
+      sky: "#818cf8",
+      indigo: "#312e81",
+      contrastText: "#ffffff",
     },
   },
   dark: {
     primary: {
-      50: "#f7fee7",
-      100: "#ecfccb",
-      200: "#d9f99d",
-      300: "#bef264",
-      400: "#a3e635",
-      500: "#84cc16",
-      600: "#65a30d",
-      700: "#4d7c0f",
-      800: "#3f6212",
-      900: "#365314",
+      50: "#c7d2fe",
+      100: "#a5b4fc",
+      200: "#818cf8",
+      300: "#6366f1",
+      400: "#4f46e5",
+      500: "#4338ca",
+      600: "#3730a3",
+      700: "#312e81",
+      800: "#26205c",
+      900: "#1b1540",
     },
     background: {
-      primary: "#0f172a",     // Dark navy blue (slate-900)
-      secondary: "#1e293b",   // Slightly lighter navy (slate-800)
-      tertiary: "#334155",    // Medium navy (slate-700)
+      primary: "#040c1a",
+      secondary: "#0b1533",
+      tertiary: "#17203f",
     },
     text: {
-      primary: "#f8fafc",     // Very light text (slate-50)
-      secondary: "#e2e8f0",   // Light gray text (slate-200)
-      tertiary: "#cbd5e1",    // Medium gray text (slate-300)
-      muted: "#94a3b8",       // Muted gray text (slate-400)
+      primary: "#e0e7ff",
+      secondary: "#cbd5ff",
+      tertiary: "#a5b4fc",
+      muted: "#818cf8",
     },
     border: {
-      light: "#334155",       // Slate-700
-      medium: "#475569",      // Slate-600
-      dark: "#64748b",        // Slate-500
+      light: "#1f2a44",
+      medium: "#2c3a5f",
+      dark: "#3b4d7a",
     },
     card: {
-      background: "#1e293b",  // Navy blue (slate-800)
-      border: "#334155",      // Slate-700
-      shadow: "rgba(132, 204, 22, 0.1)",  // Lime glow
-      foreground: "#f8fafc",  // Light text (slate-50)
+      background: "#0e1830",
+      border: "#1f2a44",
+      shadow: "rgba(3, 7, 18, 0.6)",
+      foreground: "#e0e7ff",
     },
     status: {
-      success: "#84cc16",      // Lime green for success
-      warning: "#f59e0b",      // Amber for warnings
-      error: "#ef4444",        // Red for errors
-      info: "#84cc16",         // Lime for information
+      success: "#22c55e",
+      warning: "#f97316",
+      error: "#ef4444",
+      info: "#38bdf8",
     },
     accent: {
-      blue: "#84cc16",         // Primary lime
-      sky: "#a3e635",          // Lighter lime
-      indigo: "#65a30d",       // Darker lime
-      contrastText: "#0f172a", // Navy blue text on lime
+      blue: "#4f46e5",
+      sky: "#818cf8",
+      indigo: "#312e81",
+      contrastText: "#e0e7ff",
     },
   },
 };

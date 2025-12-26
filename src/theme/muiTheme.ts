@@ -105,13 +105,13 @@ export function getMuiTheme(mode: ColorMode = "light") {
         light: tokens.primary[300],
         main: tokens.primary[500],
         dark: tokens.primary[700],
-        contrastText: mode === 'light' ? '#000000' : '#0f172a',
+        contrastText: tokens.accent.contrastText,
       },
       secondary: {
         light: tokens.accent.sky,
         main: tokens.accent.blue,
         dark: tokens.primary[700],
-        contrastText: mode === 'light' ? '#000000' : '#0f172a',
+        contrastText: tokens.accent.contrastText,
       },
       background: {
         default: tokens.background.primary,
@@ -126,11 +126,11 @@ export function getMuiTheme(mode: ColorMode = "light") {
       divider: tokens.border.medium,
       success: {
         main: tokens.status.success,
-        contrastText: mode === 'light' ? '#000000' : '#ffffff',
+        contrastText: '#ffffff',
       },
       warning: {
         main: tokens.status.warning,
-        contrastText: mode === 'light' ? '#000000' : '#ffffff',
+        contrastText: '#1f2937',
       },
       error: {
         main: tokens.status.error,
@@ -138,7 +138,7 @@ export function getMuiTheme(mode: ColorMode = "light") {
       },
       info: {
         main: tokens.status.info,
-        contrastText: mode === 'light' ? '#000000' : '#0f172a',
+        contrastText: tokens.accent.contrastText,
       },
     },
     shape: {
@@ -167,7 +167,7 @@ export function getMuiTheme(mode: ColorMode = "light") {
           },
           contained: {
             backgroundColor: tokens.primary[500],
-            color: mode === 'light' ? '#000000' : '#0f172a',
+            color: tokens.accent.contrastText,
             '&:hover': {
               backgroundColor: tokens.primary[600],
             },
@@ -187,10 +187,10 @@ export function getMuiTheme(mode: ColorMode = "light") {
           root: {
             borderRadius: 12,
             border: `1px solid ${tokens.border.light}`,
-            backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.secondary,
+            backgroundColor: tokens.card.background,
             boxShadow: mode === 'dark'
-              ? '0 4px 6px rgba(0, 0, 0, 0.3)'
-              : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              ? '0 4px 20px rgba(0, 0, 0, 0.45)'
+              : '0 2px 12px rgba(79, 70, 229, 0.08)',
           },
         },
       },
@@ -198,7 +198,7 @@ export function getMuiTheme(mode: ColorMode = "light") {
         styleOverrides: {
           root: {
             backgroundImage: "none",
-            backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.secondary,
+            backgroundColor: mode === 'light' ? tokens.card.background : tokens.background.secondary,
           },
         },
       },
@@ -206,7 +206,7 @@ export function getMuiTheme(mode: ColorMode = "light") {
         styleOverrides: {
           root: {
             '& .MuiOutlinedInput-root': {
-              backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.primary,
+              backgroundColor: mode === 'light' ? tokens.card.background : tokens.background.primary,
               '& fieldset': {
                 borderColor: tokens.border.medium,
               },

@@ -2,632 +2,442 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
+import type { LucideIcon } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  CalendarDays,
+  CheckSquare,
+  ChevronLeft,
+  CreditCard,
+  FolderKanban,
+  KanbanSquare,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageCircle,
+  MessageSquare,
+  PlusCircle,
+  Sparkles,
+  Users,
+  X,
+  Cog,
+} from "lucide-react";
+import {
+  alpha,
+  useTheme,
+} from "@mui/material/styles";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Drawer,
+  Fab,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+
+type NavItem = {
+  name: string;
+  href: string;
+  Icon: LucideIcon;
+  badge?: string;
+  adminOnly?: boolean;
+};
+
+const navigation: NavItem[] = [
+  { name: "Dashboard", href: "/dashboard", Icon: LayoutDashboard },
+  { name: "Activity", href: "/dashboard/activity", Icon: Activity },
+  { name: "My Tasks", href: "/dashboard/tasks", Icon: CheckSquare },
+  { name: "Projects", href: "/dashboard/projects", Icon: FolderKanban },
+  { name: "Discussions", href: "/dashboard/discussions", Icon: MessageSquare },
+  { name: "Playground", href: "/dashboard/playground", Icon: Sparkles },
+  { name: "Board", href: "/dashboard/board", Icon: KanbanSquare },
+  { name: "Calendar", href: "/dashboard/calendar", Icon: CalendarDays },
+  { name: "Messages", href: "/dashboard/messages", Icon: MessageCircle },
+  { name: "Analytics", href: "/dashboard/analytics", Icon: BarChart3 },
+  { name: "Team", href: "/dashboard/team", Icon: Users },
+  { name: "Admin Payments", href: "/dashboard/admin/payments", Icon: CreditCard, adminOnly: true },
+];
+
+const drawerWidth = 280;
+const collapsedWidth = 88;
+const expandedWidth = 272;
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const theme = useTheme();
   const { collapsed, setCollapsed } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: session } = useSession();
+  const isLgDown = useMediaQuery(theme.breakpoints.down("lg"));
 
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM15 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM15 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"
-          />
-        </svg>
+  const filteredNavigation = useMemo(
+    () =>
+      navigation.filter((item) =>
+        item.adminOnly ? session?.user?.role === "ADMIN" : true
       ),
-    },
-    {
-      name: "Activity",
-      href: "/dashboard/activity",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "My Tasks",
-      href: "/dashboard/tasks",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-          />
-        </svg>
-      ),
-      badge: "12",
-    },
-    {
-      name: "Projects",
-      href: "/dashboard/projects",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Discussions",
-      href: "/dashboard/discussions",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Playground",
-      href: "/dashboard/playground",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 2l3 7h7l-5.5 4 2.5 7L12 16l-7 4 2.5-7L2 9h7l3-7z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Board",
-      href: "/dashboard/board",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Calendar",
-      href: "/dashboard/calendar",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Messages",
-      href: "/dashboard/messages",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Analytics",
-      href: "/dashboard/analytics",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Team",
-      href: "/dashboard/team",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Admin Payments",
-      href: "/dashboard/admin/payments",
-      adminOnly: true,
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-    },
-  ];
+    [session]
+  );
 
-  const workspaces = [
-    { name: "My Workspace", active: true },
-    { name: "Team Alpha", active: false },
-  ];
+  const dividerColor = alpha(
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.common.black,
+    theme.palette.mode === "dark" ? 0.12 : 0.08
+  );
 
-  // Filter navigation items based on user role
-  const filteredNavigation = navigation.filter(item => {
-    if (item.adminOnly) {
-      return session?.user?.role === 'ADMIN';
+  const sidebarBackground = useMemo(() => {
+    if (theme.palette.mode === "dark") {
+      return `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${alpha(
+        theme.palette.background.paper,
+        0.95
+      )} 40%, ${theme.palette.background.default} 100%)`;
     }
-    return true;
-  });
+    return `linear-gradient(180deg, ${alpha(
+      theme.palette.primary.dark,
+      0.18
+    )} 0%, ${theme.palette.background.default} 20%, ${theme.palette.background.default} 80%, ${alpha(
+      theme.palette.primary.dark,
+      0.18
+    )} 100%)`;
+  }, [theme]);
+
+  const activeGradient = useMemo(
+    () =>
+      theme.palette.mode === "dark"
+        ? `linear-gradient(135deg, ${alpha(
+            theme.palette.primary.dark,
+            0.75
+          )}, ${alpha(theme.palette.primary.main, 0.35)})`
+        : `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+    [theme]
+  );
+
+  const hoverBackground = useMemo(
+    () =>
+      theme.palette.mode === "dark"
+        ? alpha(theme.palette.primary.main, 0.15)
+        : alpha(theme.palette.primary.main, 0.08),
+    [theme]
+  );
 
   const isActive = (href: string) => pathname === href;
 
+  const renderNavItem = (
+    item: NavItem,
+    options: { collapsed: boolean; onSelect?: () => void }
+  ) => {
+    const { collapsed } = options;
+    const active = isActive(item.href);
+
+    const content = (
+      <Box
+        component={Link}
+        href={item.href}
+        onClick={options.onSelect}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "space-between",
+          gap: collapsed ? 0 : 1.5,
+          px: collapsed ? 1.25 : 2,
+          py: 1.25,
+          borderRadius: 2,
+          textDecoration: "none",
+          position: "relative",
+          color: active
+            ? theme.palette.primary.contrastText
+            : theme.palette.text.secondary,
+          backgroundImage: active ? activeGradient : "none",
+          transition: "all 0.2s ease",
+          "&:hover": {
+            backgroundImage: active ? activeGradient : "none",
+            backgroundColor: active ? undefined : hoverBackground,
+            color: theme.palette.mode === "dark"
+              ? theme.palette.primary.light
+              : theme.palette.primary.dark,
+            boxShadow: active ? theme.shadows[6] : theme.shadows[2],
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={collapsed ? 0 : 1.5}
+          sx={{ color: "inherit" }}
+        >
+          <item.Icon size={20} strokeWidth={2.2} />
+          {!collapsed && (
+            <Typography variant="body2" fontWeight={500}>
+              {item.name}
+            </Typography>
+          )}
+        </Stack>
+        {!collapsed && item.badge && (
+          <Chip
+            label={item.badge}
+            size="small"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.primary.dark,
+              backgroundColor: alpha(theme.palette.primary.light, 0.3),
+            }}
+          />
+        )}
+        {collapsed && item.badge && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 6,
+              right: 8,
+              fontSize: 10,
+              fontWeight: 700,
+              px: 0.75,
+              py: 0.25,
+              borderRadius: 999,
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+            }}
+          >
+            {item.badge}
+          </Box>
+        )}
+      </Box>
+    );
+
+    if (!collapsed) return content;
+
+    return (
+      <Tooltip
+        key={item.name}
+        title={
+          item.badge ? `${item.name} (${item.badge})` : item.name
+        }
+        placement="right"
+        arrow
+      >
+        <Box component="span" sx={{ display: "block" }}>
+          {content}
+        </Box>
+      </Tooltip>
+    );
+  };
+
+  const renderBottomSection = (collapsedView: boolean, onSelect?: () => void) => {
+    if (collapsedView) {
+      return (
+        <Stack spacing={1.5} alignItems="center">
+          <Tooltip title="New Project" placement="right">
+            <IconButton
+              color="primary"
+              onClick={onSelect}
+              sx={{ bgcolor: alpha(theme.palette.primary.main, 0.15) }}
+            >
+              <PlusCircle size={18} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Settings" placement="right">
+            <IconButton
+              component={Link}
+              href="/dashboard/settings"
+              color="primary"
+              sx={{ bgcolor: alpha(theme.palette.primary.main, 0.15) }}
+              onClick={onSelect}
+            >
+              <Cog size={18} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Logout" placement="right">
+            <IconButton
+              color="error"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              sx={{ bgcolor: alpha(theme.palette.error.main, 0.1) }}
+            >
+              <LogOut size={18} />
+            </IconButton>
+          </Tooltip>
+          <ThemeToggle />
+        </Stack>
+      );
+    }
+
+    return (
+      <Stack spacing={1.5}>
+        <Button
+          variant="contained"
+          startIcon={<PlusCircle size={18} />}
+          sx={{ borderRadius: 2 }}
+        >
+          New Project
+        </Button>
+        <Button
+          component={Link}
+          href="/dashboard/settings"
+          variant="outlined"
+          startIcon={<Cog size={18} />}
+          sx={{ borderRadius: 2 }}
+          onClick={onSelect}
+        >
+          Settings
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<LogOut size={18} />}
+          sx={{ borderRadius: 2 }}
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
+          Logout
+        </Button>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ pt: 1 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Theme
+          </Typography>
+          <ThemeToggle />
+        </Stack>
+      </Stack>
+    );
+  };
+
+  const sidebarContent = (collapsedView: boolean, onSelect?: () => void) => (
+    <Stack sx={{ height: "100%" }}>
+      <Box
+        sx={{
+          px: collapsedView ? 1 : 2,
+          py: 2,
+          borderBottom: `1px solid ${dividerColor}`,
+        }}
+      >
+        <WorkspaceSwitcher collapsed={collapsedView} />
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          px: collapsedView ? 1 : 2,
+          py: 3,
+        }}
+      >
+        <Stack spacing={1}>
+          {filteredNavigation.map((item) => (
+            <Box key={item.name}>
+              {renderNavItem(item, {
+                collapsed: collapsedView,
+                onSelect,
+              })}
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+
+      <Divider sx={{ borderColor: dividerColor }} />
+
+      <Box sx={{ px: collapsedView ? 1 : 2, py: 2 }}>
+        {renderBottomSection(collapsedView, onSelect)}
+      </Box>
+    </Stack>
+  );
+
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed bottom-4 right-4 z-50 bg-accent text-white p-3 rounded-full shadow-lg hover:bg-accent-hover transition-colors"
+      {/* Mobile toggle */}
+      <Fab
+        color="primary"
+        onClick={() => setMobileMenuOpen((open) => !open)}
+        sx={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: theme.zIndex.drawer + 2,
+          display: { lg: "none", xs: "flex" },
+        }}
       >
-        {mobileMenuOpen ? (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        )}
-      </button>
+        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </Fab>
 
-      {/* Mobile Sidebar Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar */}
-      <aside
-        className={`lg:hidden fixed inset-y-0 left-0 z-40 w-64 transform ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out sidebar-professional pt-16`}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        PaperProps={{
+          sx: {
+            width: drawerWidth,
+            backgroundImage: sidebarBackground,
+            borderRight: `1px solid ${dividerColor}`,
+            pt: theme.spacing(8),
+          },
+        }}
       >
-        <div className="flex flex-col flex-grow overflow-y-auto h-full">
-          {/* Workspace Selector - Mobile */}
-          <div className="px-4 py-4 border-b border-default">
-            <WorkspaceSwitcher />
-          </div>
+        {sidebarContent(false, () => setMobileMenuOpen(false))}
+      </Drawer>
 
-          {/* Navigation - Mobile */}
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            {filteredNavigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`sidebar-nav-item flex items-center gap-3 px-3 py-2 ${
-                  isActive(item.href)
-                    ? "sidebar-nav-item-active"
-                    : "text-secondary hover:bg-secondary"
-                }`}
-              >
-                {item.icon}
-                <span className="font-medium">{item.name}</span>
-                {item.badge && (
-                  <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
-                    isActive(item.href) 
-                      ? "bg-white/20 text-white dark:bg-black/20" 
-                      : "bg-accent/10 text-accent"
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Footer Section - Mobile */}
-          <div className="px-4 py-4 border-t border-default">
-            <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors">
-              <svg
-                className="w-5 h-5 text-accent"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              <span className="font-medium">New Project</span>
-            </button>
-
-            <Link
-              href="/dashboard/settings"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2 mt-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors"
-            >
-              <svg
-                className="w-5 h-5 text-secondary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span className="font-medium">Settings</span>
-            </Link>
-
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              <span className="font-medium">Logout</span>
-            </button>
-
-            <div className="mt-4 pt-4 border-t border-default">
-              <div className="flex items-center justify-between px-3">
-                <span className="text-sm text-secondary">Theme</span>
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Desktop Sidebar */}
-      <aside className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:pt-16 sidebar-professional transition-all duration-300 ${
-        collapsed ? 'lg:w-20' : 'lg:w-64'
-      }`}>
-        {/* Collapse Toggle Button */}
-        <button
+      {/* Desktop sidebar */}
+      <Box
+        component="aside"
+        sx={{
+          display: { xs: "none", lg: "flex" },
+          position: "fixed",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          flexDirection: "column",
+          width: collapsed ? collapsedWidth : expandedWidth,
+          pt: theme.spacing(8),
+          backgroundImage: sidebarBackground,
+          borderRight: `1px solid ${dividerColor}`,
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 0 35px rgba(2,6,23,0.65)"
+              : theme.shadows[10],
+          transition: "width 0.3s ease",
+          zIndex: theme.zIndex.appBar - 1,
+        }}
+      >
+        <IconButton
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 z-50 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-          title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          size="small"
+          sx={{
+            position: "absolute",
+            top: theme.spacing(12),
+            right: -18,
+            borderRadius: "50%",
+            boxShadow: theme.shadows[4],
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            transform: collapsed ? "rotate(180deg)" : "none",
+            "&:hover": {
+              bgcolor: theme.palette.primary.dark,
+            },
+          }}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <svg
-            className={`w-4 h-4 text-white transition-transform ${collapsed ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+          <ChevronLeft size={18} />
+        </IconButton>
 
-        <div className="flex flex-col flex-grow overflow-y-auto">
-          {/* Workspace Selector */}
-          <div className={`py-4 border-b border-default ${collapsed ? 'px-2' : 'px-4'}`}>
-            <WorkspaceSwitcher collapsed={collapsed} />
-          </div>
+        {sidebarContent(collapsed)}
+      </Box>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1">
-            {filteredNavigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`sidebar-nav-item flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-3 py-2 group relative ${
-                  isActive(item.href)
-                    ? "sidebar-nav-item-active"
-                    : "text-secondary hover:bg-secondary"
-                }`}
-                title={collapsed ? item.name : ''}
-              >
-                <div className={`flex items-center ${collapsed ? '' : 'gap-3'}`}>
-                  {item.icon}
-                  {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
-                </div>
-                {!collapsed && item.badge && (
-                  <span className="px-2 py-0.5 text-xs font-semibold bg-accent-secondary text-accent rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-                {collapsed && item.badge && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 text-xs font-bold bg-accent text-white rounded-full flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
-                {/* Tooltip on hover when collapsed */}
-                {collapsed && (
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
-                    {item.name}
-                    {item.badge && <span className="ml-2 text-accent">({item.badge})</span>}
-                  </div>
-                )}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Bottom Section */}
-          <div className="p-4 border-t border-default">
-            {!collapsed ? (
-              <>
-                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  <span className="font-medium">New Project</span>
-                </button>
-
-                <Link
-                  href="/dashboard/settings"
-                  className="flex items-center gap-3 px-3 py-2 mt-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <span className="font-medium">Settings</span>
-                </Link>
-
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  <span className="font-medium">Logout</span>
-                </button>
-
-                <div className="mt-4 pt-4 border-t border-default">
-                  <div className="flex items-center justify-between px-3">
-                    <span className="text-sm text-secondary">Theme</span>
-                    <ThemeToggle />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <button className="w-full flex items-center justify-center px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors group relative" title="New Project">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
-                    New Project
-                  </div>
-                </button>
-
-                <Link
-                  href="/dashboard/settings"
-                  className="flex items-center justify-center px-3 py-2 mt-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors group relative"
-                  title="Settings"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
-                    Settings
-                  </div>
-                </Link>
-
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full flex items-center justify-center px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors group relative"
-                  title="Logout"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-status-error text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
-                    Logout
-                  </div>
-                </button>
-
-                <div className="mt-4 pt-4 border-t border-default flex justify-center">
-                  <ThemeToggle />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </aside>
+      {/* Spacer for layout when not mobile */}
+      {!isLgDown && (
+        <Box sx={{ width: collapsed ? collapsedWidth : expandedWidth, flexShrink: 0 }} />
+      )}
     </>
   );
 }

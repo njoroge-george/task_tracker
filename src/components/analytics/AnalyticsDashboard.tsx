@@ -23,6 +23,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useTheme } from "@mui/material/styles";
 
 type Task = {
   id: string;
@@ -60,14 +61,13 @@ type Props = {
   activityLogs: ActivityLog[];
 };
 
-const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
-
 export default function AnalyticsDashboard({
   tasks,
   projects,
   completedTasksOverTime,
   activityLogs,
 }: Props) {
+  const theme = useTheme();
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === "DONE").length;
   const inProgressTasks = tasks.filter((t) => t.status === "IN_PROGRESS").length;
@@ -91,31 +91,31 @@ export default function AnalyticsDashboard({
       : 0;
 
   const statusData = [
-    { name: "To Do", value: todoTasks, color: "#3B82F6" },
-    { name: "In Progress", value: inProgressTasks, color: "#F59E0B" },
-    { name: "Done", value: completedTasks, color: "#10B981" },
+    { name: "To Do", value: todoTasks, color: theme.palette.info.main },
+    { name: "In Progress", value: inProgressTasks, color: theme.palette.warning.main },
+    { name: "Done", value: completedTasks, color: theme.palette.success.main },
   ].filter((d) => d.value > 0);
 
   const priorityData = [
     {
       name: "Urgent",
       value: tasks.filter((t) => t.priority === "URGENT").length,
-      color: "#EF4444",
+      color: theme.palette.error.main,
     },
     {
       name: "High",
       value: tasks.filter((t) => t.priority === "HIGH").length,
-      color: "#F59E0B",
+      color: theme.palette.warning.main,
     },
     {
       name: "Medium",
       value: tasks.filter((t) => t.priority === "MEDIUM").length,
-      color: "#3B82F6",
+      color: theme.palette.info.main,
     },
     {
       name: "Low",
       value: tasks.filter((t) => t.priority === "LOW").length,
-      color: "#10B981",
+      color: theme.palette.success.main,
     },
   ].filter((d) => d.value > 0);
 
@@ -200,7 +200,7 @@ export default function AnalyticsDashboard({
                   viewBox="0 0 24 24"
                   width={24}
                   height={24}
-                  color="#10B981"
+                  color={theme.palette.success.main}
                 >
                   <path
                     strokeLinecap="round"
@@ -245,7 +245,7 @@ export default function AnalyticsDashboard({
                   viewBox="0 0 24 24"
                   width={24}
                   height={24}
-                  color="#F59E0B"
+                  color={theme.palette.warning.main}
                 >
                   <path
                     strokeLinecap="round"
@@ -290,7 +290,7 @@ export default function AnalyticsDashboard({
                   viewBox="0 0 24 24"
                   width={24}
                   height={24}
-                  color="#EF4444"
+                  color={theme.palette.error.main}
                 >
                   <path
                     strokeLinecap="round"
@@ -335,7 +335,7 @@ export default function AnalyticsDashboard({
                   viewBox="0 0 24 24"
                   width={24}
                   height={24}
-                  color="#8B5CF6"
+                  color={theme.palette.secondary.main}
                 >
                   <path
                     strokeLinecap="round"

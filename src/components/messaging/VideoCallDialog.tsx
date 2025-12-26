@@ -6,7 +6,6 @@ import {
   DialogContent,
   Box,
   IconButton,
-  Typography,
   Avatar,
 } from '@mui/material';
 import {
@@ -17,6 +16,17 @@ import {
   CallEnd,
 } from '@mui/icons-material';
 import { useCall } from '@/contexts/CallContext';
+
+type CallAudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext;
+  };
+
+const getAudioContextCtor = () => {
+  if (typeof window === 'undefined') return null;
+  const win = window as CallAudioWindow;
+  return win.AudioContext || win.webkitAudioContext || null;
+};
 
 export const VideoCallDialog: React.FC = () => {
   const {
@@ -34,6 +44,10 @@ export const VideoCallDialog: React.FC = () => {
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const waitingOscillatorRef = useRef<OscillatorNode | null>(null);
+  const waitingGainRef = useRef<GainNode | null>(null);
+  const waitingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Set local stream - with retry logic
   useEffect(() => {
@@ -116,6 +130,66 @@ export const VideoCallDialog: React.FC = () => {
 
   const isVideoCall = callType === 'video';
 
+  useEffect(() => {
+    const stopTone = () => {
+      if (waitingIntervalRef.current) {
+        clearInterval(waitingIntervalRef.current);
+        waitingIntervalRef.current = null;
+      }
+      waitingGainRef.current?.disconnect();
+      waitingGainRef.current = null;
+      if (waitingOscillatorRef.current) {
+        waitingOscillatorRef.current.stop();
+        waitingOscillatorRef.current.disconnect();
+        waitingOscillatorRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+    };
+
+    if (isCallActive && !remoteStream) {
+      const AudioCtx = getAudioContextCtor();
+      if (!AudioCtx) return;
+
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioCtx();
+      }
+      const ctx = audioContextRef.current;
+      ctx.resume().catch(() => undefined);
+
+      const oscillator = ctx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 740;
+
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+
+      oscillator.connect(gain).connect(ctx.destination);
+      oscillator.start();
+
+      waitingOscillatorRef.current = oscillator;
+      waitingGainRef.current = gain;
+
+      const schedulePulse = () => {
+        if (!waitingGainRef.current) return;
+        const now = ctx.currentTime;
+        waitingGainRef.current.gain.cancelScheduledValues(now);
+        waitingGainRef.current.gain.setValueAtTime(0.0001, now);
+        waitingGainRef.current.gain.exponentialRampToValueAtTime(0.15, now + 0.15);
+        waitingGainRef.current.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+      };
+
+      schedulePulse();
+      waitingIntervalRef.current = window.setInterval(schedulePulse, 1200);
+
+      return stopTone;
+    }
+
+    stopTone();
+  }, [isCallActive, remoteStream]);
+
   if (!isCallActive) {
     console.log('Dialog NOT rendering - isCallActive is false');
     return null;
@@ -164,9 +238,8 @@ export const VideoCallDialog: React.FC = () => {
             <Box
               sx={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                gap: 2,
+                justifyContent: 'center',
               }}
             >
               <Avatar
@@ -175,12 +248,6 @@ export const VideoCallDialog: React.FC = () => {
               >
                 {callerInfo?.name?.[0]?.toUpperCase()}
               </Avatar>
-              <Typography variant="h5" color="white">
-                {callerInfo?.name}
-              </Typography>
-              <Typography variant="body2" color="grey.400">
-                {remoteStream ? 'Voice call in progress...' : 'Connecting...'}
-              </Typography>
             </Box>
           )}
 
@@ -221,61 +288,15 @@ export const VideoCallDialog: React.FC = () => {
                     width: '100%',
                     height: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 1,
                   }}
                 >
                   <VideocamOff sx={{ color: 'white', fontSize: 40 }} />
-                  <Typography variant="caption" color="white" fontWeight="bold">
-                    {!localStream ? 'Starting camera...' : 'Camera off'}
-                  </Typography>
-                  <Typography variant="caption" color="white" fontSize="0.6rem">
-                    Stream: {localStream ? 'YES' : 'NO'}
-                  </Typography>
                 </Box>
-              )}
-              {localStream && !isVideoOff && (
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    position: 'absolute', 
-                    bottom: 4, 
-                    left: 8, 
-                    color: 'white',
-                    textShadow: '0 1px 2px black',
-                    fontSize: '0.7rem',
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    padding: '2px 6px',
-                    borderRadius: 1,
-                  }}
-                >
-                  You
-                </Typography>
               )}
             </Box>
           )}
-          
-          {/* Debug box - remove after testing */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 180,
-              right: 16,
-              padding: 2,
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              color: 'white',
-              borderRadius: 1,
-              fontSize: '0.75rem',
-              zIndex: 10,
-            }}
-          >
-            <div>isVideoCall: {isVideoCall ? 'YES' : 'NO'}</div>
-            <div>localStream: {localStream ? 'YES' : 'NO'}</div>
-            <div>isVideoOff: {isVideoOff ? 'YES' : 'NO'}</div>
-            <div>Tracks: {localStream?.getTracks().length || 0}</div>
-          </Box>
 
           {/* Call Controls */}
           <Box
@@ -341,38 +362,6 @@ export const VideoCallDialog: React.FC = () => {
             >
               <CallEnd />
             </IconButton>
-          </Box>
-
-          {/* Call Info */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 16,
-              left: 16,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0.5,
-              zIndex: 10,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                color: 'white',
-                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-              }}
-            >
-              {callerInfo?.name}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'grey.300',
-                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-              }}
-            >
-              {isVideoCall ? 'Video call' : 'Voice call'}
-            </Typography>
           </Box>
         </Box>
       </DialogContent>

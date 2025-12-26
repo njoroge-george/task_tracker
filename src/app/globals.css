@@ -103,142 +103,136 @@ body {
   background-color: rgb(8 145 178 / 0.1);
 }
 
-/* Professional Lime/Black Theme Colors */
+/* Brand Theme Colors from MUI palette */
 .bg-professional-blue {
-  background-color: #84cc16;
-  color: #000000;
+  background-color: rgb(var(--color-primary-500));
+  color: rgb(var(--primary-foreground));
 }
 
 .bg-professional-blue-light {
-  background-color: #f7fee7;
-  color: #365314;
+  background-color: rgb(var(--color-primary-50));
+  color: rgb(var(--color-primary-700));
 }
 
 .bg-professional-cyan {
-  background-color: #a3e635;
-  color: #000000;
+  background-color: rgb(var(--color-primary-300));
+  color: rgb(var(--primary-foreground));
 }
 
 .bg-professional-cyan-light {
-  background-color: #ecfccb;
-  color: #4d7c0f;
+  background-color: rgb(var(--color-primary-100));
+  color: rgb(var(--color-primary-700));
 }
 
 .bg-professional-red {
-  background-color: #ef4444;
+  background-color: rgb(var(--status-error));
   color: #ffffff;
 }
 
 .bg-professional-red-light {
-  background-color: #fef2f2;
-  color: #991b1b;
+  background-color: rgb(var(--status-error) / 0.15);
+  color: rgb(var(--status-error));
 }
 
-/* Professional Sidebar Styling */
-.sidebar-professional {
-  background: rgb(var(--background));
-  border-right: 1px solid rgb(var(--border));
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
-}
-
-.sidebar-nav-item {
-  transition: all 0.2s ease;
-  border-radius: 0.5rem;
-}
-
-.sidebar-nav-item:hover {
-  background-color: rgb(var(--secondary));
-  transform: translateX(2px);
-}
-
-.sidebar-nav-item-active {
-  background: rgb(var(--accent));
-  color: rgb(var(--accent-foreground));
-  box-shadow: 0 2px 8px rgba(var(--accent) / 0.3);
-}
-
-/* Professional Navbar Styling */
-.navbar-professional {
-  background: rgb(var(--background));
-  border-bottom: 1px solid rgb(var(--border));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* Card styling - Lime Theme */
+/* Card styling - Status helpers */
 .card-success {
-  background: linear-gradient(135deg, rgb(132 204 22 / 0.1) 0%, rgb(132 204 22 / 0.05) 100%);
-  border: 1px solid rgb(132 204 22 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(132 204 22 / 0.1);
+  background: linear-gradient(135deg, rgb(var(--status-success) / 0.12) 0%, rgb(var(--status-success) / 0.06) 100%);
+  border: 1px solid rgb(var(--status-success) / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(var(--status-success) / 0.12);
 }
 
 .card-warning {
-  background: linear-gradient(135deg, rgb(245 158 11 / 0.1) 0%, rgb(245 158 11 / 0.05) 100%);
-  border: 1px solid rgb(245 158 11 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(245 158 11 / 0.1);
+  background: linear-gradient(135deg, rgb(var(--status-warning) / 0.12) 0%, rgb(var(--status-warning) / 0.06) 100%);
+  border: 1px solid rgb(var(--status-warning) / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(var(--status-warning) / 0.12);
 }
 
 .card-error {
-  background: linear-gradient(135deg, rgb(239 68 68 / 0.1) 0%, rgb(239 68 68 / 0.05) 100%);
-  border: 1px solid rgb(239 68 68 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(239 68 68 / 0.1);
+  background: linear-gradient(135deg, rgb(var(--status-error) / 0.12) 0%, rgb(var(--status-error) / 0.06) 100%);
+  border: 1px solid rgb(var(--status-error) / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(var(--status-error) / 0.12);
 }
 
 .card-info {
-  background: linear-gradient(135deg, rgb(163 230 53 / 0.1) 0%, rgb(163 230 53 / 0.05) 100%);
-  border: 1px solid rgb(163 230 53 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(163 230 53 / 0.1);
+  background: linear-gradient(135deg, rgb(var(--status-info) / 0.12) 0%, rgb(var(--status-info) / 0.06) 100%);
+  border: 1px solid rgb(var(--status-info) / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(var(--status-info) / 0.12);
 }
 
 .card-primary {
-  background: linear-gradient(135deg, rgb(132 204 22 / 0.1) 0%, rgb(132 204 22 / 0.05) 100%);
-  border: 1px solid rgb(132 204 22 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(132 204 22 / 0.1);
+  background: linear-gradient(135deg, rgb(var(--color-primary-500) / 0.15) 0%, rgb(var(--color-primary-500) / 0.08) 100%);
+  border: 1px solid rgb(var(--color-primary-500) / 0.25) !important;
+  box-shadow: 0 4px 6px -1px rgb(var(--color-primary-600) / 0.15);
 }
 
 /* Professional card with subtle border */
 .bg-card {
   background-color: rgb(var(--card-background));
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid rgb(var(--border));
   box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.08);
 }
 
-/* Button Gradients - Lime Theme */
+/* Button Gradients - Brand Theme */
 .btn-professional-blue {
-  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
-  color: #000000;
-  box-shadow: 0 4px 6px -1px rgba(132, 204, 22, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-primary-500)) 0%,
+    rgb(var(--color-primary-700)) 100%
+  );
+  color: rgb(var(--primary-foreground));
+  box-shadow: 0 4px 12px -1px rgb(var(--color-primary-700) / 0.25);
   transition: all 0.2s ease;
 }
 
 .btn-professional-blue:hover {
-  background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
-  box-shadow: 0 6px 8px -1px rgba(132, 204, 22, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-primary-600)) 0%,
+    rgb(var(--color-primary-800)) 100%
+  );
+  box-shadow: 0 8px 16px -1px rgb(var(--color-primary-800) / 0.25);
   transform: translateY(-1px);
 }
 
 .btn-professional-cyan {
-  background: linear-gradient(135deg, #a3e635 0%, #84cc16 100%);
-  color: #000000;
-  box-shadow: 0 4px 6px -1px rgba(163, 230, 53, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-primary-300)) 0%,
+    rgb(var(--color-primary-500)) 100%
+  );
+  color: rgb(var(--primary-foreground));
+  box-shadow: 0 4px 12px -1px rgb(var(--color-primary-500) / 0.25);
   transition: all 0.2s ease;
 }
 
 .btn-professional-cyan:hover {
-  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
-  box-shadow: 0 6px 8px -1px rgba(163, 230, 53, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-primary-400)) 0%,
+    rgb(var(--color-primary-600)) 100%
+  );
+  box-shadow: 0 8px 16px -1px rgb(var(--color-primary-600) / 0.25);
   transform: translateY(-1px);
 }
 
 .btn-professional-red {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--status-error)) 0%,
+    rgb(var(--status-error)) 100%
+  );
   color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px -1px rgb(var(--status-error) / 0.35);
   transition: all 0.2s ease;
 }
 
 .btn-professional-red:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--status-error)) 0%,
+    rgb(var(--status-error)) 100%
+  );
+  box-shadow: 0 8px 16px -1px rgb(var(--status-error) / 0.45);
   transform: translateY(-1px);
 }
 
@@ -286,212 +280,28 @@ button, a, nav {
 }
 
 /* ========================================
-   PAGE-SPECIFIC THEME SYSTEM - LIME THEME
-   Uniform lime and black color scheme
+   PAGE-SPECIFIC THEME SYSTEM - INDIGO/NAVY
+   Uniform palette driven by the MUI theme
    ======================================== */
 
-/* Dashboard Page - Lime Theme */
-.page-theme-dashboard {
-  --page-primary: #84cc16;
-  --page-primary-light: #a3e635;
-  --page-primary-dark: #65a30d;
-  --page-primary-bg: #f7fee7;
-  --page-primary-hover: #ecfccb;
-}
-
-.dark .page-theme-dashboard {
-  --page-primary: #a3e635;
-  --page-primary-light: #bef264;
-  --page-primary-dark: #84cc16;
-  --page-primary-bg: #1e293b;
-  --page-primary-hover: #334155;
-}
-
-/* Activity Page - Lime Theme */
-.page-theme-activity {
-  --page-primary: #84cc16;
-  --page-primary-light: #a3e635;
-  --page-primary-dark: #65a30d;
-  --page-primary-bg: #f7fee7;
-  --page-primary-hover: #ecfccb;
-}
-
-.dark .page-theme-activity {
-  --page-primary: #a3e635;
-  --page-primary-light: #bef264;
-  --page-primary-dark: #84cc16;
-  --page-primary-bg: #1e293b;
-  --page-primary-hover: #334155;
-}
-
-/* Tasks Page - Lime Theme */
-.page-theme-tasks {
-  --page-primary: #84cc16;
-  --page-primary-light: #a3e635;
-  --page-primary-dark: #65a30d;
-  --page-primary-bg: #f7fee7;
-  --page-primary-hover: #ecfccb;
-}
-
-.dark .page-theme-tasks {
-  --page-primary: #a3e635;
-  --page-primary-light: #bef264;
-  --page-primary-dark: #84cc16;
-  --page-primary-bg: #1e293b;
-  --page-primary-hover: #334155;
-}
-
-/* Projects Page - Lime Theme */
-.page-theme-projects {
-  --page-primary: #84cc16;
-  --page-primary-light: #a3e635;
-  --page-primary-dark: #65a30d;
-  --page-primary-bg: #f7fee7;
-  --page-primary-hover: #ecfccb;
-}
-
-.dark .page-theme-projects {
-  --page-primary: #0891b2;
-  --page-primary-light: #06b6d4;
-  --page-primary-dark: #0e7490;
-  --page-primary-bg: #155e75;
-  --page-primary-hover: #164e63;
-}
-
-/* Discussions Page - Red Theme */
-.page-theme-discussions {
-  --page-primary: #dc2626;
-  --page-primary-light: #ef4444;
-  --page-primary-dark: #b91c1c;
-  --page-primary-bg: #fee2e2;
-  --page-primary-hover: #fecaca;
-}
-
-.dark .page-theme-discussions {
-  --page-primary: #ef4444;
-  --page-primary-light: #f87171;
-  --page-primary-dark: #dc2626;
-  --page-primary-bg: #991b1b;
-  --page-primary-hover: #b91c1c;
-}
-
-/* Playground Page - Purple Theme */
-.page-theme-playground {
-  --page-primary: #9333ea;
-  --page-primary-light: #a855f7;
-  --page-primary-dark: #7e22ce;
-  --page-primary-bg: #faf5ff;
-  --page-primary-hover: #f3e8ff;
-}
-
-.dark .page-theme-playground {
-  --page-primary: #a855f7;
-  --page-primary-light: #c084fc;
-  --page-primary-dark: #9333ea;
-  --page-primary-bg: #581c87;
-  --page-primary-hover: #6b21a8;
-}
-
-/* Board Page - Indigo Theme */
-.page-theme-board {
-  --page-primary: #4f46e5;
-  --page-primary-light: #6366f1;
-  --page-primary-dark: #4338ca;
-  --page-primary-bg: #eef2ff;
-  --page-primary-hover: #e0e7ff;
-}
-
-.dark .page-theme-board {
-  --page-primary: #6366f1;
-  --page-primary-light: #818cf8;
-  --page-primary-dark: #4f46e5;
-  --page-primary-bg: #3730a3;
-  --page-primary-hover: #4338ca;
-}
-
-/* Calendar Page - Orange Theme */
-.page-theme-calendar {
-  --page-primary: #ea580c;
-  --page-primary-light: #f97316;
-  --page-primary-dark: #c2410c;
-  --page-primary-bg: #ffedd5;
-  --page-primary-hover: #fed7aa;
-}
-
-.dark .page-theme-calendar {
-  --page-primary: #f97316;
-  --page-primary-light: #fb923c;
-  --page-primary-dark: #ea580c;
-  --page-primary-bg: #9a3412;
-  --page-primary-hover: #c2410c;
-}
-
-/* Messages Page - Green Theme */
-.page-theme-messages {
-  --page-primary: #059669;
-  --page-primary-light: #10b981;
-  --page-primary-dark: #047857;
-  --page-primary-bg: #d1fae5;
-  --page-primary-hover: #a7f3d0;
-}
-
-.dark .page-theme-messages {
-  --page-primary: #10b981;
-  --page-primary-light: #34d399;
-  --page-primary-dark: #059669;
-  --page-primary-bg: #065f46;
-  --page-primary-hover: #047857;
-}
-
-/* Analytics Page - Teal Theme */
-.page-theme-analytics {
-  --page-primary: #0d9488;
-  --page-primary-light: #14b8a6;
-  --page-primary-dark: #0f766e;
-  --page-primary-bg: #ccfbf1;
-  --page-primary-hover: #99f6e4;
-}
-
-.dark .page-theme-analytics {
-  --page-primary: #14b8a6;
-  --page-primary-light: #2dd4bf;
-  --page-primary-dark: #0d9488;
-  --page-primary-bg: #115e59;
-  --page-primary-hover: #134e4a;
-}
-
-/* Team Page - Pink Theme */
-.page-theme-team {
-  --page-primary: #db2777;
-  --page-primary-light: #ec4899;
-  --page-primary-dark: #be185d;
-  --page-primary-bg: #fce7f3;
-  --page-primary-hover: #fbcfe8;
-}
-
-.dark .page-theme-team {
-  --page-primary: #ec4899;
-  --page-primary-light: #f472b6;
-  --page-primary-dark: #db2777;
-  --page-primary-bg: #9f1239;
-  --page-primary-hover: #be185d;
-}
-
-/* Settings Page - Gray Theme */
-.page-theme-settings {
-  --page-primary: #475569;
-  --page-primary-light: #64748b;
-  --page-primary-dark: #334155;
-  --page-primary-bg: #f1f5f9;
-  --page-primary-hover: #e2e8f0;
-}
-
-.dark .page-theme-settings {
-  --page-primary: #64748b;
-  --page-primary-light: #94a3b8;
-  --page-primary-dark: #475569;
-  --page-primary-bg: #1e293b;
-  --page-primary-hover: #334155;
+.page-theme-dashboard,
+.page-theme-activity,
+.page-theme-tasks,
+.page-theme-projects,
+.page-theme-discussions,
+.page-theme-playground,
+.page-theme-board,
+.page-theme-calendar,
+.page-theme-messages,
+.page-theme-analytics,
+.page-theme-team,
+.page-theme-settings,
+.page-theme-default {
+  --page-primary: rgb(var(--color-primary-500));
+  --page-primary-light: rgb(var(--color-primary-400));
+  --page-primary-dark: rgb(var(--color-primary-700));
+  --page-primary-bg: rgb(var(--color-primary-50));
+  --page-primary-hover: rgb(var(--color-primary-100));
 }
 
 /* Apply page theme to common elements */
@@ -562,6 +372,3 @@ button, a, nav {
    ======================================== */
 
 /* Override theme toggle for landing page - removed */
-
-
-
