@@ -92,14 +92,14 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="start" className="w-64 bg-card border-2 shadow-2xl">
+        <DropdownMenuContent side="right" align="start" className="w-64 bg-primary border border-default shadow-2xl">
           <DropdownMenuLabel className="text-primary">Workspaces</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {workspaces.map((workspace) => (
             <DropdownMenuItem
               key={workspace.id}
               onClick={() => handleSwitchWorkspace(workspace)}
-              className="flex items-center justify-between hover:bg-accent"
+              className="flex items-center justify-between hover:bg-secondary cursor-pointer"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="h-6 w-6 rounded bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
@@ -121,7 +121,7 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setCreateDialogOpen(true)} className="text-primary hover:bg-accent">
+          <DropdownMenuItem onClick={() => setCreateDialogOpen(true)} className="text-primary hover:bg-secondary cursor-pointer">
             <Plus className="mr-2 h-4 w-4" />
             Create Workspace
           </DropdownMenuItem>
@@ -160,14 +160,14 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-secondary" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64 bg-card border-2 shadow-2xl">
+        <DropdownMenuContent align="start" className="w-64 bg-primary border border-default shadow-2xl">
           <DropdownMenuLabel className="text-primary">Switch Workspace</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {workspaces.map((workspace) => (
             <DropdownMenuItem
               key={workspace.id}
               onClick={() => handleSwitchWorkspace(workspace)}
-              className="flex items-center justify-between hover:bg-accent"
+              className="flex items-center justify-between hover:bg-secondary cursor-pointer"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="h-6 w-6 rounded bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
@@ -189,7 +189,7 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setCreateDialogOpen(true)} className="text-primary hover:bg-accent">
+          <DropdownMenuItem onClick={() => setCreateDialogOpen(true)} className="text-primary hover:bg-secondary cursor-pointer">
             <Plus className="mr-2 h-4 w-4" />
             Create New Workspace
           </DropdownMenuItem>
@@ -197,7 +197,7 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
       </DropdownMenu>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="bg-card border-2 shadow-2xl">
+        <DialogContent className="bg-primary border border-default shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-primary">Create New Workspace</DialogTitle>
             <DialogDescription className="text-secondary">

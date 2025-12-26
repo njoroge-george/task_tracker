@@ -103,29 +103,29 @@ body {
   background-color: rgb(8 145 178 / 0.1);
 }
 
-/* Professional Blue/Red/Cyan Theme Colors */
+/* Professional Lime/Black Theme Colors */
 .bg-professional-blue {
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: #84cc16;
+  color: #000000;
 }
 
 .bg-professional-blue-light {
-  background-color: #eff6ff;
-  color: #1e40af;
+  background-color: #f7fee7;
+  color: #365314;
 }
 
 .bg-professional-cyan {
-  background-color: #0891b2;
-  color: #ffffff;
+  background-color: #a3e635;
+  color: #000000;
 }
 
 .bg-professional-cyan-light {
-  background-color: #ecfeff;
-  color: #0e7490;
+  background-color: #ecfccb;
+  color: #4d7c0f;
 }
 
 .bg-professional-red {
-  background-color: #dc2626;
+  background-color: #ef4444;
   color: #ffffff;
 }
 
@@ -164,35 +164,35 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Card styling - Professional colors */
+/* Card styling - Lime Theme */
 .card-success {
-  background: linear-gradient(135deg, rgb(5 150 105 / 0.1) 0%, rgb(5 150 105 / 0.05) 100%);
-  border: 1px solid rgb(5 150 105 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(5 150 105 / 0.1);
+  background: linear-gradient(135deg, rgb(132 204 22 / 0.1) 0%, rgb(132 204 22 / 0.05) 100%);
+  border: 1px solid rgb(132 204 22 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(132 204 22 / 0.1);
 }
 
 .card-warning {
-  background: linear-gradient(135deg, rgb(217 119 6 / 0.1) 0%, rgb(217 119 6 / 0.05) 100%);
-  border: 1px solid rgb(217 119 6 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(217 119 6 / 0.1);
+  background: linear-gradient(135deg, rgb(245 158 11 / 0.1) 0%, rgb(245 158 11 / 0.05) 100%);
+  border: 1px solid rgb(245 158 11 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(245 158 11 / 0.1);
 }
 
 .card-error {
-  background: linear-gradient(135deg, rgb(220 38 38 / 0.1) 0%, rgb(220 38 38 / 0.05) 100%);
-  border: 1px solid rgb(220 38 38 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(220 38 38 / 0.1);
+  background: linear-gradient(135deg, rgb(239 68 68 / 0.1) 0%, rgb(239 68 68 / 0.05) 100%);
+  border: 1px solid rgb(239 68 68 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(239 68 68 / 0.1);
 }
 
 .card-info {
-  background: linear-gradient(135deg, rgb(8 145 178 / 0.1) 0%, rgb(8 145 178 / 0.05) 100%);
-  border: 1px solid rgb(8 145 178 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(8 145 178 / 0.1);
+  background: linear-gradient(135deg, rgb(163 230 53 / 0.1) 0%, rgb(163 230 53 / 0.05) 100%);
+  border: 1px solid rgb(163 230 53 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(163 230 53 / 0.1);
 }
 
 .card-primary {
-  background: linear-gradient(135deg, rgb(37 99 235 / 0.1) 0%, rgb(37 99 235 / 0.05) 100%);
-  border: 1px solid rgb(37 99 235 / 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgb(37 99 235 / 0.1);
+  background: linear-gradient(135deg, rgb(132 204 22 / 0.1) 0%, rgb(132 204 22 / 0.05) 100%);
+  border: 1px solid rgb(132 204 22 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(132 204 22 / 0.1);
 }
 
 /* Professional card with subtle border */
@@ -202,43 +202,43 @@ body {
   box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.08);
 }
 
-/* Button Gradients - Professional Theme */
+/* Button Gradients - Lime Theme */
 .btn-professional-blue {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+  color: #000000;
+  box-shadow: 0 4px 6px -1px rgba(132, 204, 22, 0.3);
   transition: all 0.2s ease;
 }
 
 .btn-professional-blue:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
+  box-shadow: 0 6px 8px -1px rgba(132, 204, 22, 0.4);
   transform: translateY(-1px);
 }
 
 .btn-professional-cyan {
-  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
+  background: linear-gradient(135deg, #a3e635 0%, #84cc16 100%);
+  color: #000000;
+  box-shadow: 0 4px 6px -1px rgba(163, 230, 53, 0.3);
   transition: all 0.2s ease;
 }
 
 .btn-professional-cyan:hover {
-  background: linear-gradient(135deg, #0e7490 0%, #155e75 100%);
-  box-shadow: 0 6px 8px -1px rgba(8, 145, 178, 0.4);
+  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+  box-shadow: 0 6px 8px -1px rgba(163, 230, 53, 0.4);
   transform: translateY(-1px);
 }
 
 .btn-professional-red {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
   transition: all 0.2s ease;
 }
 
 .btn-professional-red:hover {
-  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-  box-shadow: 0 6px 8px -1px rgba(220, 38, 38, 0.4);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4);
   transform: translateY(-1px);
 }
 
@@ -286,68 +286,68 @@ button, a, nav {
 }
 
 /* ========================================
-   PAGE-SPECIFIC THEME SYSTEM
-   Each page has its own color scheme
+   PAGE-SPECIFIC THEME SYSTEM - LIME THEME
+   Uniform lime and black color scheme
    ======================================== */
 
-/* Dashboard Page - Blue Theme */
+/* Dashboard Page - Lime Theme */
 .page-theme-dashboard {
-  --page-primary: #2563eb;
-  --page-primary-light: #3b82f6;
-  --page-primary-dark: #1d4ed8;
-  --page-primary-bg: #eff6ff;
-  --page-primary-hover: #dbeafe;
+  --page-primary: #84cc16;
+  --page-primary-light: #a3e635;
+  --page-primary-dark: #65a30d;
+  --page-primary-bg: #f7fee7;
+  --page-primary-hover: #ecfccb;
 }
 
 .dark .page-theme-dashboard {
-  --page-primary: #3b82f6;
-  --page-primary-light: #60a5fa;
-  --page-primary-dark: #2563eb;
-  --page-primary-bg: #1e3a8a;
-  --page-primary-hover: #1e40af;
+  --page-primary: #a3e635;
+  --page-primary-light: #bef264;
+  --page-primary-dark: #84cc16;
+  --page-primary-bg: #1e293b;
+  --page-primary-hover: #334155;
 }
 
-/* Activity Page - Cyan Theme */
+/* Activity Page - Lime Theme */
 .page-theme-activity {
-  --page-primary: #0891b2;
-  --page-primary-light: #06b6d4;
-  --page-primary-dark: #0e7490;
-  --page-primary-bg: #ecfeff;
-  --page-primary-hover: #cffafe;
+  --page-primary: #84cc16;
+  --page-primary-light: #a3e635;
+  --page-primary-dark: #65a30d;
+  --page-primary-bg: #f7fee7;
+  --page-primary-hover: #ecfccb;
 }
 
 .dark .page-theme-activity {
-  --page-primary: #06b6d4;
-  --page-primary-light: #22d3ee;
-  --page-primary-dark: #0891b2;
-  --page-primary-bg: #164e63;
-  --page-primary-hover: #155e75;
+  --page-primary: #a3e635;
+  --page-primary-light: #bef264;
+  --page-primary-dark: #84cc16;
+  --page-primary-bg: #1e293b;
+  --page-primary-hover: #334155;
 }
 
-/* Tasks Page - Blue Theme */
+/* Tasks Page - Lime Theme */
 .page-theme-tasks {
-  --page-primary: #1d4ed8;
-  --page-primary-light: #2563eb;
-  --page-primary-dark: #1e40af;
-  --page-primary-bg: #dbeafe;
-  --page-primary-hover: #bfdbfe;
+  --page-primary: #84cc16;
+  --page-primary-light: #a3e635;
+  --page-primary-dark: #65a30d;
+  --page-primary-bg: #f7fee7;
+  --page-primary-hover: #ecfccb;
 }
 
 .dark .page-theme-tasks {
-  --page-primary: #2563eb;
-  --page-primary-light: #3b82f6;
-  --page-primary-dark: #1d4ed8;
-  --page-primary-bg: #1e40af;
-  --page-primary-hover: #1e3a8a;
+  --page-primary: #a3e635;
+  --page-primary-light: #bef264;
+  --page-primary-dark: #84cc16;
+  --page-primary-bg: #1e293b;
+  --page-primary-hover: #334155;
 }
 
-/* Projects Page - Cyan Theme */
+/* Projects Page - Lime Theme */
 .page-theme-projects {
-  --page-primary: #0e7490;
-  --page-primary-light: #0891b2;
-  --page-primary-dark: #155e75;
-  --page-primary-bg: #cffafe;
-  --page-primary-hover: #a5f3fc;
+  --page-primary: #84cc16;
+  --page-primary-light: #a3e635;
+  --page-primary-dark: #65a30d;
+  --page-primary-bg: #f7fee7;
+  --page-primary-hover: #ecfccb;
 }
 
 .dark .page-theme-projects {
@@ -557,44 +557,11 @@ button, a, nav {
 }
 
 /* ========================================
-   LANDING PAGE - DARK NAVY BLUE THEME
-   Force dark navy theme for marketing pages
+   LANDING PAGE THEME - Removed
+   Now uses default theme system
    ======================================== */
 
-.landing-page-theme {
-  /* Dark Navy Blue Background */
-  --background: 15 23 42;           /* slate-900 #0f172a */
-  --background-secondary: 30 41 59; /* slate-800 #1e293b */
-  --card-background: 30 41 59;      /* slate-800 #1e293b */
-  
-  /* Navy Blue Accents */
-  --primary: 59 130 246;            /* blue-500 #3b82f6 */
-  --primary-foreground: 255 255 255;
-  --accent: 37 99 235;              /* blue-600 #2563eb */
-  --accent-secondary: 96 165 250;   /* blue-400 #60a5fa */
-  --accent-foreground: 255 255 255;
-  
-  /* Text Colors */
-  --foreground: 248 250 252;        /* slate-50 #f8fafc */
-  --text-primary: 248 250 252;      /* slate-50 */
-  --text-secondary: 226 232 240;    /* slate-200 #e2e8f0 */
-  --text-tertiary: 203 213 225;     /* slate-300 #cbd5e1 */
-  
-  /* Borders */
-  --border: 51 65 85;               /* slate-700 #334155 */
-  --border-light: 71 85 105;        /* slate-600 #475569 */
-  
-  /* Status Colors */
-  --success: 34 197 94;             /* green-500 */
-  --warning: 251 191 36;            /* amber-400 */
-  --error: 239 68 68;               /* red-500 */
-  --info: 56 189 248;               /* sky-400 */
-}
-
-/* Override theme toggle for landing page */
-.landing-page-theme .theme-toggle {
-  display: none;
-}
+/* Override theme toggle for landing page - removed */
 
 
 

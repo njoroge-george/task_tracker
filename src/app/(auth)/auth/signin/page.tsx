@@ -206,18 +206,20 @@ export default function SignInPage() {
         </Link>
       </p>
 
-      {/* Demo Credentials */}
-      <div className="mt-6 p-4 bg-accent-secondary border border-blue-200 dark:border-blue-800 rounded-lg">
-        <p className="text-xs font-semibold text-primary mb-2">
-          🎯 Demo Credentials:
-        </p>
-        <p className="text-xs text-blue-700 dark:text-blue-400">
-          Email: demo@tasktracker.com
-        </p>
-        <p className="text-xs text-blue-700 dark:text-blue-400">
-          Password: password123
-        </p>
-      </div>
+      {/* Demo Credentials - Only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-6 p-4 bg-accent-secondary border border-blue-200 dark:border-blue-800 rounded-lg">
+          <p className="text-xs font-semibold text-primary mb-2">
+            🎯 Demo Credentials:
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-400">
+            Email: demo@tasktracker.com
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-400">
+            Password: password123
+          </p>
+        </div>
+      )}
     </div>
   );
 }

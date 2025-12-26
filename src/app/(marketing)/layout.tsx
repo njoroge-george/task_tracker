@@ -1,10 +1,12 @@
+"use client";
+
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="landing-page-theme">
+    <div className="min-h-screen">
       {children}
     </div>
   );

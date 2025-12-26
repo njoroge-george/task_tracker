@@ -95,7 +95,10 @@ export const initSocketServer = (httpServer: HTTPServer) => {
     // Direct Messages
     socket.on('dm:join', (userId: string) => {
       socket.join(`user:${userId}`);
-      console.log(`Socket ${socket.id} joined user room:${userId}`);
+      console.log(`✅ Socket ${socket.id} joined user room: user:${userId}`);
+      
+      // Confirm join by emitting back to the user
+      socket.emit('dm:joined', { userId, socketId: socket.id });
     });
 
     socket.on('dm:send', (message) => {
@@ -173,14 +176,19 @@ export const initSocketServer = (httpServer: HTTPServer) => {
       callType: 'video' | 'audio';
       signal: any;
     }) => {
-      console.log(`Call initiated from ${data.from} to ${data.to}`);
-      socket.to(`user:${data.to}`).emit('call:incoming', {
+      console.log(`📞 Call initiated from ${data.fromName} (${data.from}) to user:${data.to}`);
+      console.log(`   Call type: ${data.callType}`);
+      
+      // Emit to the specific user room
+      const emitted = socket.to(`user:${data.to}`).emit('call:incoming', {
         from: data.from,
         fromName: data.fromName,
         fromAvatar: data.fromAvatar,
         callType: data.callType,
         signal: data.signal,
       });
+      
+      console.log(`   Emitted call:incoming to user:${data.to}`);
     });
 
     socket.on('call:answer', (data: { to: string; from: string; signal: any }) => {

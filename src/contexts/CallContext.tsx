@@ -115,6 +115,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       peer.on('signal', (signal) => {
+        console.log('Sending call initiation to:', receiverId);
         socket?.emit('call:initiate', {
           to: receiverId,
           from: session?.user?.id,
@@ -123,6 +124,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           callType: type,
           signal,
         });
+        console.log('Call initiation emitted successfully');
       });
 
       peer.on('stream', (stream) => {
@@ -290,8 +292,18 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!socket || !session?.user?.id) return;
 
+    // Join user room to receive calls
+    console.log('Joining user room for calls:', session.user.id);
+    socket.emit('dm:join', session.user.id);
+    
+    // Confirm join
+    socket.on('dm:joined', ({ userId, socketId }) => {
+      console.log(`✅ Successfully joined user room: user:${userId} with socket: ${socketId}`);
+    });
+
     // Incoming call
     socket.on('call:incoming', async ({ from, fromName, fromAvatar, callType: type, signal }) => {
+      console.log('🔔 Received incoming call from:', fromName, 'Type:', type);
       setIncomingCall(true);
       setCallType(type);
       setCallerInfo({ id: from, name: fromName, avatar: fromAvatar });
@@ -365,6 +377,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
+      socket.off('dm:joined');
       socket.off('call:incoming');
       socket.off('call:answered');
       socket.off('call:rejected');

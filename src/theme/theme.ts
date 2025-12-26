@@ -65,106 +65,106 @@ export type ThemeDefinition = {
 
 export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
   light: {
-    // Professional Blue scale (primary brand color)
+    // Lime green scale (primary brand color)
     primary: {
-      50: "#eff6ff",   // Very light blue
-      100: "#dbeafe",  // Light blue
-      200: "#bfdbfe",  // Lighter blue
-      300: "#93c5fd",  // Medium light blue
-      400: "#60a5fa",  // Medium blue
-      500: "#2563eb",  // Primary blue (main brand)
-      600: "#1d4ed8",  // Darker blue
-      700: "#1e40af",  // Dark blue
-      800: "#1e3a8a",  // Very dark blue
-      900: "#172554",  // Deepest blue
+      50: "#f7fee7",   // Very light lime
+      100: "#ecfccb",  // Light lime
+      200: "#d9f99d",  // Lighter lime
+      300: "#bef264",  // Medium light lime
+      400: "#a3e635",  // Medium lime
+      500: "#84cc16",  // Primary lime (main brand)
+      600: "#65a30d",  // Darker lime
+      700: "#4d7c0f",  // Dark lime
+      800: "#3f6212",  // Very dark lime
+      900: "#365314",  // Deepest lime
     },
-    // Clean, professional backgrounds
+    // Clean black and white backgrounds
     background: {
       primary: "#ffffff",     // Pure white for main content
-      secondary: "#f8fafc",   // Subtle blue-gray for sections
-      tertiary: "#f1f5f9",    // Slightly darker blue-gray
+      secondary: "#fafafa",   // Subtle gray for sections
+      tertiary: "#f5f5f5",    // Slightly darker gray
     },
-    // Professional text colors
+    // Black-based text colors
     text: {
-      primary: "#0f172a",     // Deep slate for main text
-      secondary: "#334155",   // Medium slate for secondary text
-      tertiary: "#64748b",    // Lighter slate for tertiary text
-      muted: "#94a3b8",       // Muted slate for disabled/subtle text
+      primary: "#000000",     // Pure black for main text
+      secondary: "#262626",   // Dark gray for secondary text
+      tertiary: "#525252",    // Medium gray for tertiary text
+      muted: "#737373",       // Light gray for disabled/subtle text
     },
-    // Refined borders
+    // Subtle borders
     border: {
-      light: "#e2e8f0",       // Light slate border
-      medium: "#cbd5e1",      // Medium slate border
-      dark: "#94a3b8",        // Darker slate border
+      light: "#e5e5e5",       // Light gray border
+      medium: "#d4d4d4",      // Medium gray border
+      dark: "#a3a3a3",        // Darker gray border
     },
     // Card styling
     card: {
       background: "#ffffff",
-      border: "#e2e8f0",
-      shadow: "rgba(15, 23, 42, 0.08)",  // Subtle shadow
-      foreground: "#0f172a",
+      border: "#e5e5e5",
+      shadow: "rgba(0, 0, 0, 0.08)",  // Subtle shadow
+      foreground: "#000000",
     },
-    // Status colors (professional palette)
+    // Status colors
     status: {
-      success: "#059669",     // Professional green
-      warning: "#d97706",     // Amber/orange for warnings
-      error: "#dc2626",       // Professional red
-      info: "#0891b2",        // Cyan for information
+      success: "#84cc16",     // Lime green for success
+      warning: "#f59e0b",     // Amber for warnings
+      error: "#ef4444",       // Red for errors
+      info: "#84cc16",        // Lime for information
     },
-    // Accent colors (Red/Blue/Cyan professional palette)
+    // Accent colors (Lime and Black palette)
     accent: {
-      blue: "#2563eb",        // Primary blue
-      sky: "#0891b2",         // Cyan/teal
-      indigo: "#dc2626",      // Red accent (replaces purple)
-      contrastText: "#ffffff",
+      blue: "#84cc16",        // Primary lime
+      sky: "#a3e635",         // Lighter lime
+      indigo: "#65a30d",      // Darker lime
+      contrastText: "#000000",  // Black text on lime
     },
   },
   dark: {
     primary: {
-      50: "#eff6ff",
-      100: "#dbeafe",
-      200: "#bfdbfe",
-      300: "#93c5fd",
-      400: "#60a5fa",
-      500: "#3b82f6",
-      600: "#2563eb",
-      700: "#1d4ed8",
-      800: "#1e40af",
-      900: "#1e3a8a",
+      50: "#f7fee7",
+      100: "#ecfccb",
+      200: "#d9f99d",
+      300: "#bef264",
+      400: "#a3e635",
+      500: "#84cc16",
+      600: "#65a30d",
+      700: "#4d7c0f",
+      800: "#3f6212",
+      900: "#365314",
     },
     background: {
-      primary: "#111827",
-      secondary: "#1f2937",
-      tertiary: "#374151",
+      primary: "#0f172a",     // Dark navy blue (slate-900)
+      secondary: "#1e293b",   // Slightly lighter navy (slate-800)
+      tertiary: "#334155",    // Medium navy (slate-700)
     },
     text: {
-      primary: "#f3f4f6",
-      secondary: "#d1d5db",
-      tertiary: "#9ca3af",
-      muted: "#6b7280",
+      primary: "#f8fafc",     // Very light text (slate-50)
+      secondary: "#e2e8f0",   // Light gray text (slate-200)
+      tertiary: "#cbd5e1",    // Medium gray text (slate-300)
+      muted: "#94a3b8",       // Muted gray text (slate-400)
     },
     border: {
-      light: "#374151",
-      medium: "#4b5563",
-      dark: "#6b7280",
+      light: "#334155",       // Slate-700
+      medium: "#475569",      // Slate-600
+      dark: "#64748b",        // Slate-500
     },
     card: {
-      background: "#1f2937",
-      border: "#374151",
-      shadow: "rgba(0, 0, 0, 0.3)",
-      foreground: "#f3f4f6",
+      background: "#1e293b",  // Navy blue (slate-800)
+      border: "#334155",      // Slate-700
+      shadow: "rgba(132, 204, 22, 0.1)",  // Lime glow
+      foreground: "#f8fafc",  // Light text (slate-50)
     },
     status: {
-      success: "#34d399",
-      warning: "#fbbf24",
-      error: "#f87171",
-      info: "#38bdf8",
+      success: "#84cc16",      // Lime green for success
+      warning: "#f59e0b",      // Amber for warnings
+      error: "#ef4444",        // Red for errors
+      info: "#84cc16",         // Lime for information
     },
     accent: {
-      blue: "#60a5fa",
-      sky: "#38bdf8",
-      indigo: "#818cf8",
-      contrastText: "#0b1120",
+      blue: "#84cc16",         // Primary lime
+      sky: "#a3e635",          // Lighter lime
+      indigo: "#65a30d",       // Darker lime
+      contrastText: "#0f172a", // Navy blue text on lime
     },
   },
 };

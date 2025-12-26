@@ -45,7 +45,7 @@ export default function FloatingScreenShare() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button

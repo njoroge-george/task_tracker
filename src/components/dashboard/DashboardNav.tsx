@@ -109,10 +109,10 @@ export default function DashboardNav({ user }: DashboardNavProps) {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
             >
               <svg
-                className="w-6 h-6 text-slate-700"
+                className="w-6 h-6 text-primary"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -129,7 +129,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-sm">
                 <svg
-                  className="w-5 h-5 text-accent-foreground"
+                  className="w-5 h-5 text-white dark:text-gray-900"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -150,7 +150,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             {/* Home Button */}
             <Link
               href="/"
-              className="hidden md:flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              className="hidden md:flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-primary hover:bg-secondary rounded-lg transition-colors"
             >
               <svg
                 className="w-4 h-4"
@@ -175,10 +175,10 @@ export default function DashboardNav({ user }: DashboardNavProps) {
               <input
                 type="text"
                 placeholder="Search tasks, projects..."
-                className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400"
+                className="w-full px-4 py-2 pl-10 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-primary text-primary placeholder-muted"
               />
               <svg
-                className="absolute left-3 top-2.5 w-5 h-5 text-slate-400"
+                className="absolute left-3 top-2.5 w-5 h-5 text-muted"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -199,7 +199,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             <ThemeToggle />
 
             {/* Quick Add */}
-            <button className="p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+            <button className="p-2 text-primary hover:bg-secondary rounded-lg transition-colors">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -219,7 +219,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="relative p-2 text-primary hover:bg-secondary rounded-lg transition-colors"
               >
                 <svg
                   className="w-6 h-6"

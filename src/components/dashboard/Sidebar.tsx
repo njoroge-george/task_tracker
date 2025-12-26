@@ -296,7 +296,7 @@ export default function Sidebar() {
       >
         <div className="flex flex-col flex-grow overflow-y-auto h-full">
           {/* Workspace Selector - Mobile */}
-          <div className="px-4 py-4 border-b border-slate-200">
+          <div className="px-4 py-4 border-b border-default">
             <WorkspaceSwitcher />
           </div>
 
@@ -318,8 +318,8 @@ export default function Sidebar() {
                 {item.badge && (
                   <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
                     isActive(item.href) 
-                      ? "bg-white/20 text-white" 
-                      : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                      ? "bg-white/20 text-white dark:bg-black/20" 
+                      : "bg-accent/10 text-accent"
                   }`}>
                     {item.badge}
                   </span>
@@ -329,10 +329,10 @@ export default function Sidebar() {
           </nav>
 
           {/* Footer Section - Mobile */}
-          <div className="px-4 py-4 border-t border-slate-200">
+          <div className="px-4 py-4 border-t border-default">
             <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors">
               <svg
-                className="w-5 h-5 text-blue-500"
+                className="w-5 h-5 text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -353,7 +353,7 @@ export default function Sidebar() {
               className="flex items-center gap-3 px-3 py-2 mt-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors"
             >
               <svg
-                className="w-5 h-5 text-gray-500"
+                className="w-5 h-5 text-secondary"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -376,7 +376,7 @@ export default function Sidebar() {
 
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -464,7 +464,7 @@ export default function Sidebar() {
                 )}
                 {/* Tooltip on hover when collapsed */}
                 {collapsed && (
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
                     {item.name}
                     {item.badge && <span className="ml-2 text-accent">({item.badge})</span>}
                   </div>
@@ -522,7 +522,7 @@ export default function Sidebar() {
 
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors"
                 >
                   <svg
                     className="w-5 h-5"
@@ -563,7 +563,7 @@ export default function Sidebar() {
                       d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                     />
                   </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
                     New Project
                   </div>
                 </button>
@@ -592,14 +592,14 @@ export default function Sidebar() {
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-primary text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
                     Settings
                   </div>
                 </Link>
 
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full flex items-center justify-center px-3 py-2 mt-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors group relative"
+                  className="w-full flex items-center justify-center px-3 py-2 mt-2 text-sm text-status-error hover:bg-status-error-light rounded-lg transition-colors group relative"
                   title="Logout"
                 >
                   <svg
@@ -615,7 +615,7 @@ export default function Sidebar() {
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                     />
                   </svg>
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-card text-status-error text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg border border-default">
                     Logout
                   </div>
                 </button>
