@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 
     // Send assignment notification if task is assigned to someone else
     if (task.assigneeId && task.assigneeId !== session.user.id) {
-      const { notifyTaskAssignment } = await import('@/lib/notification-scheduler');
+      const { notifyTaskAssignment } = await import('@/lib/task-notifications');
       notifyTaskAssignment(task.id, session.user.id, task.assigneeId).catch(console.error);
     }
 
