@@ -100,45 +100,146 @@ body {
 }
 
 .bg-status-info-light {
-  background-color: rgb(59 130 246 / 0.1);
+  background-color: rgb(8 145 178 / 0.1);
 }
 
-/* Card styling - colored, no borders */
+/* Professional Blue/Red/Cyan Theme Colors */
+.bg-professional-blue {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.bg-professional-blue-light {
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+.bg-professional-cyan {
+  background-color: #0891b2;
+  color: #ffffff;
+}
+
+.bg-professional-cyan-light {
+  background-color: #ecfeff;
+  color: #0e7490;
+}
+
+.bg-professional-red {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.bg-professional-red-light {
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+
+/* Professional Sidebar Styling */
+.sidebar-professional {
+  background: rgb(var(--background));
+  border-right: 1px solid rgb(var(--border));
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-nav-item {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.sidebar-nav-item:hover {
+  background-color: rgb(var(--secondary));
+  transform: translateX(2px);
+}
+
+.sidebar-nav-item-active {
+  background: rgb(var(--accent));
+  color: rgb(var(--accent-foreground));
+  box-shadow: 0 2px 8px rgba(var(--accent) / 0.3);
+}
+
+/* Professional Navbar Styling */
+.navbar-professional {
+  background: rgb(var(--background));
+  border-bottom: 1px solid rgb(var(--border));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Card styling - Professional colors */
 .card-success {
-  background: linear-gradient(135deg, rgb(34 197 94 / 0.1) 0%, rgb(34 197 94 / 0.05) 100%);
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(34 197 94 / 0.1);
+  background: linear-gradient(135deg, rgb(5 150 105 / 0.1) 0%, rgb(5 150 105 / 0.05) 100%);
+  border: 1px solid rgb(5 150 105 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(5 150 105 / 0.1);
 }
 
 .card-warning {
-  background: linear-gradient(135deg, rgb(251 146 60 / 0.1) 0%, rgb(251 146 60 / 0.05) 100%);
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(251 146 60 / 0.1);
+  background: linear-gradient(135deg, rgb(217 119 6 / 0.1) 0%, rgb(217 119 6 / 0.05) 100%);
+  border: 1px solid rgb(217 119 6 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(217 119 6 / 0.1);
 }
 
 .card-error {
-  background: linear-gradient(135deg, rgb(239 68 68 / 0.1) 0%, rgb(239 68 68 / 0.05) 100%);
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(239 68 68 / 0.1);
+  background: linear-gradient(135deg, rgb(220 38 38 / 0.1) 0%, rgb(220 38 38 / 0.05) 100%);
+  border: 1px solid rgb(220 38 38 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(220 38 38 / 0.1);
 }
 
 .card-info {
-  background: linear-gradient(135deg, rgb(59 130 246 / 0.1) 0%, rgb(59 130 246 / 0.05) 100%);
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.1);
+  background: linear-gradient(135deg, rgb(8 145 178 / 0.1) 0%, rgb(8 145 178 / 0.05) 100%);
+  border: 1px solid rgb(8 145 178 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(8 145 178 / 0.1);
 }
 
 .card-primary {
-  background: linear-gradient(135deg, rgb(var(--accent-primary) / 0.1) 0%, rgb(var(--accent-primary) / 0.05) 100%);
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(var(--accent-primary) / 0.1);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.1) 0%, rgb(37 99 235 / 0.05) 100%);
+  border: 1px solid rgb(37 99 235 / 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgb(37 99 235 / 0.1);
 }
 
-/* Remove borders from all cards by default */
+/* Professional card with subtle border */
 .bg-card {
   background-color: rgb(var(--card-background));
-  border: none !important;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.08);
+}
+
+/* Button Gradients - Professional Theme */
+.btn-professional-blue {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-professional-blue:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-professional-cyan {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-professional-cyan:hover {
+  background: linear-gradient(135deg, #0e7490 0%, #155e75 100%);
+  box-shadow: 0 6px 8px -1px rgba(8, 145, 178, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-professional-red {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-professional-red:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  box-shadow: 0 6px 8px -1px rgba(220, 38, 38, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Ensure SVG icons are visible */
@@ -183,3 +284,317 @@ nav a {
 button, a, nav {
   color: rgb(var(--foreground));
 }
+
+/* ========================================
+   PAGE-SPECIFIC THEME SYSTEM
+   Each page has its own color scheme
+   ======================================== */
+
+/* Dashboard Page - Blue Theme */
+.page-theme-dashboard {
+  --page-primary: #2563eb;
+  --page-primary-light: #3b82f6;
+  --page-primary-dark: #1d4ed8;
+  --page-primary-bg: #eff6ff;
+  --page-primary-hover: #dbeafe;
+}
+
+.dark .page-theme-dashboard {
+  --page-primary: #3b82f6;
+  --page-primary-light: #60a5fa;
+  --page-primary-dark: #2563eb;
+  --page-primary-bg: #1e3a8a;
+  --page-primary-hover: #1e40af;
+}
+
+/* Activity Page - Cyan Theme */
+.page-theme-activity {
+  --page-primary: #0891b2;
+  --page-primary-light: #06b6d4;
+  --page-primary-dark: #0e7490;
+  --page-primary-bg: #ecfeff;
+  --page-primary-hover: #cffafe;
+}
+
+.dark .page-theme-activity {
+  --page-primary: #06b6d4;
+  --page-primary-light: #22d3ee;
+  --page-primary-dark: #0891b2;
+  --page-primary-bg: #164e63;
+  --page-primary-hover: #155e75;
+}
+
+/* Tasks Page - Blue Theme */
+.page-theme-tasks {
+  --page-primary: #1d4ed8;
+  --page-primary-light: #2563eb;
+  --page-primary-dark: #1e40af;
+  --page-primary-bg: #dbeafe;
+  --page-primary-hover: #bfdbfe;
+}
+
+.dark .page-theme-tasks {
+  --page-primary: #2563eb;
+  --page-primary-light: #3b82f6;
+  --page-primary-dark: #1d4ed8;
+  --page-primary-bg: #1e40af;
+  --page-primary-hover: #1e3a8a;
+}
+
+/* Projects Page - Cyan Theme */
+.page-theme-projects {
+  --page-primary: #0e7490;
+  --page-primary-light: #0891b2;
+  --page-primary-dark: #155e75;
+  --page-primary-bg: #cffafe;
+  --page-primary-hover: #a5f3fc;
+}
+
+.dark .page-theme-projects {
+  --page-primary: #0891b2;
+  --page-primary-light: #06b6d4;
+  --page-primary-dark: #0e7490;
+  --page-primary-bg: #155e75;
+  --page-primary-hover: #164e63;
+}
+
+/* Discussions Page - Red Theme */
+.page-theme-discussions {
+  --page-primary: #dc2626;
+  --page-primary-light: #ef4444;
+  --page-primary-dark: #b91c1c;
+  --page-primary-bg: #fee2e2;
+  --page-primary-hover: #fecaca;
+}
+
+.dark .page-theme-discussions {
+  --page-primary: #ef4444;
+  --page-primary-light: #f87171;
+  --page-primary-dark: #dc2626;
+  --page-primary-bg: #991b1b;
+  --page-primary-hover: #b91c1c;
+}
+
+/* Playground Page - Purple Theme */
+.page-theme-playground {
+  --page-primary: #9333ea;
+  --page-primary-light: #a855f7;
+  --page-primary-dark: #7e22ce;
+  --page-primary-bg: #faf5ff;
+  --page-primary-hover: #f3e8ff;
+}
+
+.dark .page-theme-playground {
+  --page-primary: #a855f7;
+  --page-primary-light: #c084fc;
+  --page-primary-dark: #9333ea;
+  --page-primary-bg: #581c87;
+  --page-primary-hover: #6b21a8;
+}
+
+/* Board Page - Indigo Theme */
+.page-theme-board {
+  --page-primary: #4f46e5;
+  --page-primary-light: #6366f1;
+  --page-primary-dark: #4338ca;
+  --page-primary-bg: #eef2ff;
+  --page-primary-hover: #e0e7ff;
+}
+
+.dark .page-theme-board {
+  --page-primary: #6366f1;
+  --page-primary-light: #818cf8;
+  --page-primary-dark: #4f46e5;
+  --page-primary-bg: #3730a3;
+  --page-primary-hover: #4338ca;
+}
+
+/* Calendar Page - Orange Theme */
+.page-theme-calendar {
+  --page-primary: #ea580c;
+  --page-primary-light: #f97316;
+  --page-primary-dark: #c2410c;
+  --page-primary-bg: #ffedd5;
+  --page-primary-hover: #fed7aa;
+}
+
+.dark .page-theme-calendar {
+  --page-primary: #f97316;
+  --page-primary-light: #fb923c;
+  --page-primary-dark: #ea580c;
+  --page-primary-bg: #9a3412;
+  --page-primary-hover: #c2410c;
+}
+
+/* Messages Page - Green Theme */
+.page-theme-messages {
+  --page-primary: #059669;
+  --page-primary-light: #10b981;
+  --page-primary-dark: #047857;
+  --page-primary-bg: #d1fae5;
+  --page-primary-hover: #a7f3d0;
+}
+
+.dark .page-theme-messages {
+  --page-primary: #10b981;
+  --page-primary-light: #34d399;
+  --page-primary-dark: #059669;
+  --page-primary-bg: #065f46;
+  --page-primary-hover: #047857;
+}
+
+/* Analytics Page - Teal Theme */
+.page-theme-analytics {
+  --page-primary: #0d9488;
+  --page-primary-light: #14b8a6;
+  --page-primary-dark: #0f766e;
+  --page-primary-bg: #ccfbf1;
+  --page-primary-hover: #99f6e4;
+}
+
+.dark .page-theme-analytics {
+  --page-primary: #14b8a6;
+  --page-primary-light: #2dd4bf;
+  --page-primary-dark: #0d9488;
+  --page-primary-bg: #115e59;
+  --page-primary-hover: #134e4a;
+}
+
+/* Team Page - Pink Theme */
+.page-theme-team {
+  --page-primary: #db2777;
+  --page-primary-light: #ec4899;
+  --page-primary-dark: #be185d;
+  --page-primary-bg: #fce7f3;
+  --page-primary-hover: #fbcfe8;
+}
+
+.dark .page-theme-team {
+  --page-primary: #ec4899;
+  --page-primary-light: #f472b6;
+  --page-primary-dark: #db2777;
+  --page-primary-bg: #9f1239;
+  --page-primary-hover: #be185d;
+}
+
+/* Settings Page - Gray Theme */
+.page-theme-settings {
+  --page-primary: #475569;
+  --page-primary-light: #64748b;
+  --page-primary-dark: #334155;
+  --page-primary-bg: #f1f5f9;
+  --page-primary-hover: #e2e8f0;
+}
+
+.dark .page-theme-settings {
+  --page-primary: #64748b;
+  --page-primary-light: #94a3b8;
+  --page-primary-dark: #475569;
+  --page-primary-bg: #1e293b;
+  --page-primary-hover: #334155;
+}
+
+/* Apply page theme to common elements */
+[data-page-theme] button.btn-primary,
+[data-page-theme] .btn-page-theme {
+  background-color: var(--page-primary);
+  border-color: var(--page-primary);
+  color: white;
+}
+
+[data-page-theme] button.btn-primary:hover,
+[data-page-theme] .btn-page-theme:hover {
+  background-color: var(--page-primary-dark);
+  border-color: var(--page-primary-dark);
+}
+
+[data-page-theme] .card-page-theme {
+  border-left: 4px solid var(--page-primary);
+  background-color: var(--page-primary-bg);
+}
+
+[data-page-theme] .card-page-theme:hover {
+  background-color: var(--page-primary-hover);
+}
+
+[data-page-theme] .nav-active {
+  color: var(--page-primary);
+  border-bottom: 2px solid var(--page-primary);
+}
+
+[data-page-theme] .badge-page-theme {
+  background-color: var(--page-primary);
+  color: white;
+}
+
+[data-page-theme] .text-page-primary {
+  color: var(--page-primary);
+}
+
+[data-page-theme] .bg-page-primary {
+  background-color: var(--page-primary);
+}
+
+[data-page-theme] .bg-page-primary-light {
+  background-color: var(--page-primary-bg);
+}
+
+[data-page-theme] .border-page-primary {
+  border-color: var(--page-primary);
+}
+
+[data-page-theme] .hover\:bg-page-primary:hover {
+  background-color: var(--page-primary-hover);
+}
+
+/* Page theme for links */
+[data-page-theme] a.link-page-theme {
+  color: var(--page-primary);
+}
+
+[data-page-theme] a.link-page-theme:hover {
+  color: var(--page-primary-dark);
+}
+
+/* ========================================
+   LANDING PAGE - DARK NAVY BLUE THEME
+   Force dark navy theme for marketing pages
+   ======================================== */
+
+.landing-page-theme {
+  /* Dark Navy Blue Background */
+  --background: 15 23 42;           /* slate-900 #0f172a */
+  --background-secondary: 30 41 59; /* slate-800 #1e293b */
+  --card-background: 30 41 59;      /* slate-800 #1e293b */
+  
+  /* Navy Blue Accents */
+  --primary: 59 130 246;            /* blue-500 #3b82f6 */
+  --primary-foreground: 255 255 255;
+  --accent: 37 99 235;              /* blue-600 #2563eb */
+  --accent-secondary: 96 165 250;   /* blue-400 #60a5fa */
+  --accent-foreground: 255 255 255;
+  
+  /* Text Colors */
+  --foreground: 248 250 252;        /* slate-50 #f8fafc */
+  --text-primary: 248 250 252;      /* slate-50 */
+  --text-secondary: 226 232 240;    /* slate-200 #e2e8f0 */
+  --text-tertiary: 203 213 225;     /* slate-300 #cbd5e1 */
+  
+  /* Borders */
+  --border: 51 65 85;               /* slate-700 #334155 */
+  --border-light: 71 85 105;        /* slate-600 #475569 */
+  
+  /* Status Colors */
+  --success: 34 197 94;             /* green-500 */
+  --warning: 251 191 36;            /* amber-400 */
+  --error: 239 68 68;               /* red-500 */
+  --info: 56 189 248;               /* sky-400 */
+}
+
+/* Override theme toggle for landing page */
+.landing-page-theme .theme-toggle {
+  display: none;
+}
+
+
+

@@ -1,55 +1,21 @@
 /**
- * Notification Scheduler - Production Grade
+ * Notification Scheduler
  * Handles scheduled notifications like due-date reminders and assignment alerts
- * 
- * @version 2.0.0
- * @author TaskFlow Team
  */
 
 import { prisma } from "@/lib/prisma";
 import { notifyUser } from "@/lib/notifications";
 import { sendTaskAssignmentEmail, sendTaskReminderEmail, sendTaskDueSoonEmail } from "@/lib/email";
-import { TaskStatus, Priority } from "@prisma/client";
-
-// Type definitions for better type safety
-type ReminderSettings = {
-  enabled: boolean;
-  intervals: number[];
-};
-
-type TaskWithRelations = {
-  id: string;
-  title: string;
-  description: string | null;
-  dueDate: Date | null;
-  priority: Priority;
-  status: TaskStatus;
-  assignee: {
-    id: string;
-    email: string | null;
-    name: string | null;
-  } | null;
-  project: {
-    name: string;
-    workspace: {
-      name: string;
-    };
-  } | null;
-};
 
 /**
  * Check for tasks that need reminders and send notifications
  * Should be run periodically (e.g., every hour via cron)
  */
-export async function checkDueDateReminders(): Promise<void> {
+export async function checkDueDateReminders() {
   try {
     const now = new Date();
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔔 [${now.toISOString()}] Checking due date reminders...`);
-    }
-
-    // Get all users with reminder settings enabled
+    // Get all users with reminder settings
     const users = await prisma.user.findMany({
       where: {
         reminderSettings: {
@@ -65,10 +31,8 @@ export async function checkDueDateReminders(): Promise<void> {
       },
     });
 
-    let totalReminders = 0;
-
     for (const user of users) {
-      const reminderSettings = user.reminderSettings as unknown as ReminderSettings;
+      const reminderSettings = user.reminderSettings as any;
       
       if (!reminderSettings?.enabled) continue;
       
@@ -93,13 +57,6 @@ export async function checkDueDateReminders(): Promise<void> {
             },
           },
           include: {
-            assignee: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
-              },
-            },
             project: {
               select: {
                 name: true,
@@ -124,12 +81,12 @@ export async function checkDueDateReminders(): Promise<void> {
                 equals: task.id,
               },
               createdAt: {
-                gte: new Date(now.getTime() - hoursBeforeDue * 60 * 60 * 1000 - 60 * 60 * 1000),
+                gte: new Date(now.getTime() - hoursBeforeDue * 60 * 60 * 1000 - 60 * 60 * 1000), // Within last hour window
               },
             },
           });
 
-          if (existingReminder) continue; // Already sent
+          if (existingReminder) continue; // Already sent reminder for this task
 
           // Send reminder notification
           const timeUntilDue = hoursBeforeDue >= 24 
@@ -147,14 +104,14 @@ export async function checkDueDateReminders(): Promise<void> {
               hoursBeforeDue,
               dueDate: task.dueDate,
             },
-            forceEmail: true,
+            forceEmail: true, // Always send email for reminders
           });
 
           // Send detailed reminder email
-          if (user.email && task.assignee?.email) {
+          if (user.email) {
             await sendTaskReminderEmail({
-              to: task.assignee.email,
-              userName: task.assignee.name || 'there',
+              to: user.email,
+              userName: user.name || 'there',
               task: {
                 id: task.id,
                 title: task.title,
@@ -167,18 +124,13 @@ export async function checkDueDateReminders(): Promise<void> {
               hoursUntilDue: hoursBeforeDue,
             });
           }
-
-          totalReminders++;
         }
       }
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Sent ${totalReminders} due date reminders`);
-    }
+    console.log(`✅ Due date reminders check completed at ${now.toISOString()}`);
   } catch (error) {
     console.error('❌ Error checking due date reminders:', error);
-    throw error; // Re-throw for proper error handling in cron
   }
 }
 
@@ -186,16 +138,12 @@ export async function checkDueDateReminders(): Promise<void> {
  * Send notifications for tasks due within the next 24-48 hours
  * This is a broader sweep than the specific reminders
  */
-export async function sendDueSoonNotifications(): Promise<void> {
+export async function sendDueSoonNotifications() {
   try {
     const now = new Date();
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔔 [${now.toISOString()}] Checking tasks due soon...`);
-    }
-
-    // Find tasks due soon
+    // Find tasks due soon that haven't been marked as notified
     const tasksDueSoon = await prisma.task.findMany({
       where: {
         dueDate: {
@@ -230,8 +178,6 @@ export async function sendDueSoonNotifications(): Promise<void> {
         },
       },
     });
-
-    let totalNotifications = 0;
 
     for (const task of tasksDueSoon) {
       if (!task.assignee) continue;
@@ -287,32 +233,23 @@ export async function sendDueSoonNotifications(): Promise<void> {
           hoursUntilDue,
         });
       }
-
-      totalNotifications++;
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Sent ${totalNotifications} due soon notifications`);
-    }
+    console.log(`✅ Due soon notifications sent at ${now.toISOString()}`);
   } catch (error) {
     console.error('❌ Error sending due soon notifications:', error);
-    throw error;
   }
 }
 
 /**
  * Send daily digest of upcoming tasks
  */
-export async function sendDailyDigest(): Promise<void> {
+export async function sendDailyDigest() {
   try {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(23, 59, 59, 999);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔔 [${now.toISOString()}] Sending daily digest...`);
-    }
 
     // Get all active users
     const users = await prisma.user.findMany({
@@ -328,8 +265,6 @@ export async function sendDailyDigest(): Promise<void> {
         notificationPreferences: true,
       },
     });
-
-    let totalDigests = 0;
 
     for (const user of users) {
       const prefs = user.notificationPreferences as any;
@@ -363,7 +298,7 @@ export async function sendDailyDigest(): Promise<void> {
 
       if (upcomingTasks.length === 0) continue;
 
-      // Send digest notification (using TASK_DUE_SOON instead of SYSTEM)
+      // Send digest notification
       await notifyUser({
         userId: user.id,
         title: 'Daily Task Digest',
@@ -375,34 +310,24 @@ export async function sendDailyDigest(): Promise<void> {
           digest: true,
         },
       });
-
-      totalDigests++;
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Sent ${totalDigests} daily digests`);
-    }
+    console.log(`✅ Daily digest sent at ${now.toISOString()}`);
   } catch (error) {
     console.error('❌ Error sending daily digest:', error);
-    throw error;
   }
 }
 
 /**
  * Notify user when a task is assigned to them
  */
-export async function notifyTaskAssignment(
-  taskId: string,
-  assignerId: string,
-  assigneeId: string
-): Promise<void> {
+export async function notifyTaskAssignment(taskId: string, assignerId: string, assigneeId: string) {
   try {
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: {
         assignee: {
           select: {
-            id: true,
             email: true,
             name: true,
           },
@@ -420,13 +345,13 @@ export async function notifyTaskAssignment(
       },
     });
 
-    if (!task || !task.assignee) return;
-
-    // Get assigner information
+    // Get assigner information separately
     const assigner = await prisma.user.findUnique({
       where: { id: assignerId },
       select: { name: true },
     });
+
+    if (!task || !task.assignee) return;
 
     const assignerName = assigner?.name || 'Someone';
 
@@ -440,7 +365,7 @@ export async function notifyTaskAssignment(
         taskId: task.id,
         assignerId,
       },
-      forceEmail: true,
+      forceEmail: true, // Always send email for assignments
     });
 
     // Send detailed assignment email
@@ -461,26 +386,19 @@ export async function notifyTaskAssignment(
       });
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Task assignment notification sent for task ${taskId}`);
-    }
+    console.log(`✅ Task assignment notification sent for task ${taskId}`);
   } catch (error) {
     console.error('❌ Error sending task assignment notification:', error);
-    throw error;
   }
 }
 
 /**
  * Check for overdue tasks and send notifications
  */
-export async function checkOverdueTasks(): Promise<void> {
+export async function checkOverdueTasks() {
   try {
     const now = new Date();
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔔 [${now.toISOString()}] Checking overdue tasks...`);
-    }
-
     const overdueTasks = await prisma.task.findMany({
       where: {
         dueDate: {
@@ -508,8 +426,6 @@ export async function checkOverdueTasks(): Promise<void> {
         },
       },
     });
-
-    let totalOverdueNotifications = 0;
 
     for (const task of overdueTasks) {
       if (!task.assignee) continue;
@@ -547,18 +463,12 @@ export async function checkOverdueTasks(): Promise<void> {
         metadata: {
           taskId: task.id,
           daysOverdue,
-          overdue: true,
         },
       });
-
-      totalOverdueNotifications++;
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Sent ${totalOverdueNotifications} overdue task notifications`);
-    }
+    console.log(`✅ Overdue task check completed at ${now.toISOString()}`);
   } catch (error) {
     console.error('❌ Error checking overdue tasks:', error);
-    throw error;
   }
 }

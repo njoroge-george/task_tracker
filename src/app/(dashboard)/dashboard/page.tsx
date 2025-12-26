@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format, startOfDay, addDays } from "date-fns";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { PageThemeProvider } from "@/contexts/PageThemeContext";
 
 async function getDashboardData(userId: string) {
   const now = new Date();
@@ -193,19 +194,21 @@ export default async function DashboardPage() {
       : "Good evening";
 
   return (
-    <DashboardContent
-      userName={session.user.name || "User"}
-      currentDate={currentDate}
-      greeting={greeting}
-      stats={stats}
-      todayTasks={todayTasks}
-      overdueTasks={overdueTasks}
-      weekTasks={weekTasks}
-      completedToday={completedToday}
-      projects={projects}
-      teamActivity={teamActivity}
-      priorityStats={priorityStats}
-      notifications={notifications}
-    />
+    <PageThemeProvider theme="dashboard">
+      <DashboardContent
+        userName={session.user.name || "User"}
+        currentDate={currentDate}
+        greeting={greeting}
+        stats={stats}
+        todayTasks={todayTasks}
+        overdueTasks={overdueTasks}
+        weekTasks={weekTasks}
+        completedToday={completedToday}
+        projects={projects}
+        teamActivity={teamActivity}
+        priorityStats={priorityStats}
+        notifications={notifications}
+      />
+    </PageThemeProvider>
   );
 }

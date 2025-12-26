@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { applyRateLimit } from '@/lib/rate-limit-middleware';
 
 export async function POST(req: NextRequest) {
   try {
+    // Apply strict payment rate limiting (3 requests per minute)
+    const rateLimitResult = await applyRateLimit(req, "payment");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const session = await auth();
 
     if (!session?.user?.email) {

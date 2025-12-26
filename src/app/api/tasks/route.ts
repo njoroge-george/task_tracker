@@ -1,7 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { applyRateLimit } from "@/lib/rate-limit-middleware";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -15,8 +16,14 @@ const createTaskSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
+    // Apply general API rate limiting
+    const rateLimitResult = await applyRateLimit(request, "api");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -79,8 +86,14 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Apply general API rate limiting
+    const rateLimitResult = await applyRateLimit(request, "api");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

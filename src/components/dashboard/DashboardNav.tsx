@@ -102,17 +102,17 @@ export default function DashboardNav({ user }: DashboardNavProps) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary">
+    <nav className="navbar-professional fixed top-0 left-0 right-0 z-50">
       <div className="px-4 lg:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Mobile Menu Button */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 rounded-lg hover:bg-secondary"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 text-slate-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -127,9 +127,9 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             </button>
 
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-sm">
                 <svg
-                  className="w-5 h-5 text-white"
+                  className="w-5 h-5 text-accent-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -142,7 +142,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
                   />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-accent">
+              <span className="text-xl font-bold text-primary">
                 TaskTracker
               </span>
             </Link>
@@ -150,7 +150,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             {/* Home Button */}
             <Link
               href="/"
-              className="hidden md:flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-primary hover:bg-secondary rounded-lg transition-colors"
+              className="hidden md:flex items-center gap-2 px-4 py-2 ml-4 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <svg
                 className="w-4 h-4"
@@ -175,10 +175,10 @@ export default function DashboardNav({ user }: DashboardNavProps) {
               <input
                 type="text"
                 placeholder="Search tasks, projects..."
-                className="w-full px-4 py-2 pl-10 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary"
+                className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400"
               />
               <svg
-                className="absolute left-3 top-2.5 w-5 h-5 text-secondary"
+                className="absolute left-3 top-2.5 w-5 h-5 text-slate-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -199,7 +199,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             <ThemeToggle />
 
             {/* Quick Add */}
-            <button className="p-2 text-primary hover:bg-secondary rounded-lg">
+            <button className="p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -219,7 +219,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-primary hover:bg-secondary rounded-lg"
+                className="relative p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 <svg
                   className="w-6 h-6"
@@ -235,7 +235,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
                   />
                 </svg>
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-sm">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}

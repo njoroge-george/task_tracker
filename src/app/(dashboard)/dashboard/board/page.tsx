@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import KanbanBoard from "@/components/board/KanbanBoard";
+import { PageThemeProvider } from "@/contexts/PageThemeContext";
 
 export default async function BoardPage() {
   const session = await auth();
@@ -74,17 +75,19 @@ export default async function BoardPage() {
     .map((t) => ({ ...t, project: t.project! }));
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-primary mb-2">
-          Task Board
-        </h1>
-        <p className="text-secondary">
-          Drag and drop tasks to update their status
-        </p>
-      </div>
+    <PageThemeProvider theme="board">
+      <div className="h-full flex flex-col">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            Task Board
+          </h1>
+          <p className="text-secondary">
+            Drag and drop tasks to update their status
+          </p>
+        </div>
 
-      <KanbanBoard tasks={boardTasks as any} projects={projects} />
-    </div>
+        <KanbanBoard tasks={boardTasks as any} projects={projects} />
+      </div>
+    </PageThemeProvider>
   );
 }

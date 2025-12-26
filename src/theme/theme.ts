@@ -65,50 +65,57 @@ export type ThemeDefinition = {
 
 export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
   light: {
+    // Professional Blue scale (primary brand color)
     primary: {
-      50: "#eff6ff",
-      100: "#dbeafe",
-      200: "#bfdbfe",
-      300: "#93c5fd",
-      400: "#60a5fa",
-      500: "#3b82f6",
-      600: "#2563eb",
-      700: "#1d4ed8",
-      800: "#1e40af",
-      900: "#1e3a8a",
+      50: "#eff6ff",   // Very light blue
+      100: "#dbeafe",  // Light blue
+      200: "#bfdbfe",  // Lighter blue
+      300: "#93c5fd",  // Medium light blue
+      400: "#60a5fa",  // Medium blue
+      500: "#2563eb",  // Primary blue (main brand)
+      600: "#1d4ed8",  // Darker blue
+      700: "#1e40af",  // Dark blue
+      800: "#1e3a8a",  // Very dark blue
+      900: "#172554",  // Deepest blue
     },
+    // Clean, professional backgrounds
     background: {
-      primary: "#ffffff",
-      secondary: "#f9fafb",
-      tertiary: "#f3f4f6",
+      primary: "#ffffff",     // Pure white for main content
+      secondary: "#f8fafc",   // Subtle blue-gray for sections
+      tertiary: "#f1f5f9",    // Slightly darker blue-gray
     },
+    // Professional text colors
     text: {
-      primary: "#111827",
-      secondary: "#374151",
-      tertiary: "#4b5563",
-      muted: "#6b7280",
+      primary: "#0f172a",     // Deep slate for main text
+      secondary: "#334155",   // Medium slate for secondary text
+      tertiary: "#64748b",    // Lighter slate for tertiary text
+      muted: "#94a3b8",       // Muted slate for disabled/subtle text
     },
+    // Refined borders
     border: {
-      light: "#e5e7eb",
-      medium: "#d1d5db",
-      dark: "#9ca3af",
+      light: "#e2e8f0",       // Light slate border
+      medium: "#cbd5e1",      // Medium slate border
+      dark: "#94a3b8",        // Darker slate border
     },
+    // Card styling
     card: {
       background: "#ffffff",
-      border: "#e5e7eb",
-      shadow: "rgba(0, 0, 0, 0.1)",
-      foreground: "#111827",
+      border: "#e2e8f0",
+      shadow: "rgba(15, 23, 42, 0.08)",  // Subtle shadow
+      foreground: "#0f172a",
     },
+    // Status colors (professional palette)
     status: {
-      success: "#10b981",
-      warning: "#f59e0b",
-      error: "#ef4444",
-      info: "#0ea5e9",
+      success: "#059669",     // Professional green
+      warning: "#d97706",     // Amber/orange for warnings
+      error: "#dc2626",       // Professional red
+      info: "#0891b2",        // Cyan for information
     },
+    // Accent colors (Red/Blue/Cyan professional palette)
     accent: {
-      blue: "#3b82f6",
-      sky: "#0ea5e9",
-      indigo: "#6366f1",
+      blue: "#2563eb",        // Primary blue
+      sky: "#0891b2",         // Cyan/teal
+      indigo: "#dc2626",      // Red accent (replaces purple)
       contrastText: "#ffffff",
     },
   },

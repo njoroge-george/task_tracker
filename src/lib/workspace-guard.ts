@@ -227,8 +227,8 @@ export async function logWorkspaceAccess(params: {
     data: {
       userId: params.userId,
       action: params.action,
-      entityType: params.resource || 'workspace',
-      entityId: params.resourceId || params.workspaceId,
+      entity: params.resource || 'workspace',
+      workspaceId: params.workspaceId,
       metadata: params.metadata,
     },
   });

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/email';
+import { applyRateLimit } from '@/lib/rate-limit-middleware';
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -15,6 +16,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Apply strict rate limiting for invites (10 requests per 10 seconds)
+    const rateLimitResult = await applyRateLimit(req, "strict");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const session = await auth();
     
     if (!session?.user?.id) {

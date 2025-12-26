@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendEmail } from "@/lib/email";
+import { applyRateLimit } from "@/lib/rate-limit-middleware";
 
 export async function POST(req: NextRequest) {
   try {
+    // Apply strict rate limiting (5 requests per minute to prevent abuse)
+    const rateLimitResult = await applyRateLimit(req, "auth");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const { email } = await req.json();
 
     if (!email) {

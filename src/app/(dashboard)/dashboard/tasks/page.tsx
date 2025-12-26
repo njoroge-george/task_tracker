@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import TaskList from "@/components/tasks/TaskList";
 import TasksPageHeader from "@/components/tasks/TasksPageHeader";
+import { PageThemeProvider } from "@/contexts/PageThemeContext";
 
 async function getTasks(userId: string) {
   const tasks = await prisma.task.findMany({
@@ -47,12 +49,18 @@ async function getProjects(userId: string) {
 
 export default async function TasksPage() {
   const session = await auth();
-  const userId = session!.user.id;
+  
+  if (!session || !session.user) {
+    redirect("/auth/signin");
+  }
+  
+  const userId = session.user.id;
   const tasks = await getTasks(userId);
   const projects = await getProjects(userId);
 
   return (
-    <div className="space-y-6">
+    <PageThemeProvider theme="tasks">
+      <div className="space-y-6">
       {/* Header */}
       <TasksPageHeader projects={projects} />
 
@@ -131,5 +139,6 @@ export default async function TasksPage() {
       {/* Task List */}
       <TaskList tasks={tasks} />
     </div>
+    </PageThemeProvider>
   );
 }

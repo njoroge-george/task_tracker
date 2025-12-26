@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import NewProjectButton from "@/components/projects/NewProjectButton";
+import { PageThemeProvider } from "@/contexts/PageThemeContext";
 
 async function getProjects(userId: string) {
   const workspaceMember = await prisma.workspaceMember.findFirst({
@@ -70,7 +71,8 @@ export default async function ProjectsPage() {
   const projects = await getProjects(userId);
 
   return (
-    <div className="space-y-6">
+    <PageThemeProvider theme="projects">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -224,5 +226,6 @@ export default async function ProjectsPage() {
         </div>
       )}
     </div>
+    </PageThemeProvider>
   );
 }

@@ -18,7 +18,6 @@ export default function Sidebar() {
     {
       name: "Dashboard",
       href: "/dashboard",
-      color: "text-blue-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -38,7 +37,6 @@ export default function Sidebar() {
     {
       name: "Activity",
       href: "/dashboard/activity",
-      color: "text-green-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -58,7 +56,6 @@ export default function Sidebar() {
     {
       name: "My Tasks",
       href: "/dashboard/tasks",
-      color: "text-purple-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -79,7 +76,6 @@ export default function Sidebar() {
     {
       name: "Projects",
       href: "/dashboard/projects",
-      color: "text-yellow-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -99,7 +95,6 @@ export default function Sidebar() {
     {
       name: "Discussions",
       href: "/dashboard/discussions",
-      color: "text-pink-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -119,7 +114,6 @@ export default function Sidebar() {
     {
       name: "Playground",
       href: "/dashboard/playground",
-      color: "text-indigo-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -139,7 +133,6 @@ export default function Sidebar() {
     {
       name: "Board",
       href: "/dashboard/board",
-      color: "text-teal-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -159,7 +152,6 @@ export default function Sidebar() {
     {
       name: "Calendar",
       href: "/dashboard/calendar",
-      color: "text-red-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -179,7 +171,6 @@ export default function Sidebar() {
     {
       name: "Messages",
       href: "/dashboard/messages",
-      color: "text-cyan-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -199,7 +190,6 @@ export default function Sidebar() {
     {
       name: "Analytics",
       href: "/dashboard/analytics",
-      color: "text-orange-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -219,7 +209,6 @@ export default function Sidebar() {
     {
       name: "Team",
       href: "/dashboard/team",
-      color: "text-emerald-500",
       icon: (
         <svg
           className="w-5 h-5"
@@ -239,7 +228,6 @@ export default function Sidebar() {
     {
       name: "Admin Payments",
       href: "/dashboard/admin/payments",
-      color: "text-red-500",
       adminOnly: true,
       icon: (
         <svg
@@ -304,11 +292,11 @@ export default function Sidebar() {
       <aside
         className={`lg:hidden fixed inset-y-0 left-0 z-40 w-64 transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out bg-primary pt-16`}
+        } transition-transform duration-300 ease-in-out sidebar-professional pt-16`}
       >
         <div className="flex flex-col flex-grow overflow-y-auto h-full">
           {/* Workspace Selector - Mobile */}
-          <div className="px-4 py-4 border-b border-default">
+          <div className="px-4 py-4 border-b border-slate-200">
             <WorkspaceSwitcher />
           </div>
 
@@ -319,16 +307,20 @@ export default function Sidebar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                className={`sidebar-nav-item flex items-center gap-3 px-3 py-2 ${
                   isActive(item.href)
-                    ? "bg-accent-secondary text-accent"
-                    : "text-primary hover:bg-secondary"
+                    ? "sidebar-nav-item-active"
+                    : "text-secondary hover:bg-secondary"
                 }`}
               >
-                <span className={item.color}>{item.icon}</span>
+                {item.icon}
                 <span className="font-medium">{item.name}</span>
                 {item.badge && (
-                  <span className="ml-auto bg-accent-secondary text-accent text-xs px-2 py-1 rounded-full">
+                  <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
+                    isActive(item.href) 
+                      ? "bg-white/20 text-white" 
+                      : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                  }`}>
                     {item.badge}
                   </span>
                 )}
@@ -337,7 +329,7 @@ export default function Sidebar() {
           </nav>
 
           {/* Footer Section - Mobile */}
-          <div className="px-4 py-4 border-t border-default">
+          <div className="px-4 py-4 border-t border-slate-200">
             <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors">
               <svg
                 className="w-5 h-5 text-blue-500"
@@ -413,7 +405,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:pt-16 bg-primary transition-all duration-300 ${
+      <aside className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:pt-16 sidebar-professional transition-all duration-300 ${
         collapsed ? 'lg:w-20' : 'lg:w-64'
       }`}>
         {/* Collapse Toggle Button */}
@@ -449,15 +441,15 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-3 py-2 rounded-lg transition-colors group relative ${
+                className={`sidebar-nav-item flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-3 py-2 group relative ${
                   isActive(item.href)
-                    ? "bg-accent-secondary text-accent"
-                    : "text-primary hover:bg-secondary"
+                    ? "sidebar-nav-item-active"
+                    : "text-secondary hover:bg-secondary"
                 }`}
                 title={collapsed ? item.name : ''}
               >
                 <div className={`flex items-center ${collapsed ? '' : 'gap-3'}`}>
-                  <span className={item.color}>{item.icon}</span>
+                  {item.icon}
                   {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
                 </div>
                 {!collapsed && item.badge && (
@@ -487,7 +479,7 @@ export default function Sidebar() {
               <>
                 <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors">
                   <svg
-                    className="w-5 h-5 text-blue-500"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -507,7 +499,7 @@ export default function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2 mt-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-500"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -559,7 +551,7 @@ export default function Sidebar() {
               <>
                 <button className="w-full flex items-center justify-center px-3 py-2 text-sm text-primary hover:bg-secondary rounded-lg transition-colors group relative" title="New Project">
                   <svg
-                    className="w-5 h-5 text-blue-500"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -582,7 +574,7 @@ export default function Sidebar() {
                   title="Settings"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-500"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

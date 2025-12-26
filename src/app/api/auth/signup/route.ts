@@ -1,10 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signUpSchema } from "@/lib/validations";
+import { applyRateLimit } from "@/lib/rate-limit-middleware";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting (5 requests per minute)
+    const rateLimitResult = await applyRateLimit(request, "auth");
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const body = await request.json();
     const validatedData = signUpSchema.parse(body);
 
