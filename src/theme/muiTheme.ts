@@ -105,17 +105,17 @@ export function getMuiTheme(mode: ColorMode = "light") {
         light: tokens.primary[300],
         main: tokens.primary[500],
         dark: tokens.primary[700],
-        contrastText: tokens.accent.contrastText,
+        contrastText: mode === 'light' ? '#000000' : '#0f172a',
       },
       secondary: {
         light: tokens.accent.sky,
         main: tokens.accent.blue,
         dark: tokens.primary[700],
-        contrastText: tokens.accent.contrastText,
+        contrastText: mode === 'light' ? '#000000' : '#0f172a',
       },
       background: {
         default: tokens.background.primary,
-        paper: tokens.card.background,
+        paper: tokens.background.secondary,
         secondary: tokens.background.secondary,
         tertiary: tokens.background.tertiary,
       },
@@ -126,19 +126,19 @@ export function getMuiTheme(mode: ColorMode = "light") {
       divider: tokens.border.medium,
       success: {
         main: tokens.status.success,
-        contrastText: tokens.accent.contrastText,
+        contrastText: mode === 'light' ? '#000000' : '#ffffff',
       },
       warning: {
         main: tokens.status.warning,
-        contrastText: tokens.accent.contrastText,
+        contrastText: mode === 'light' ? '#000000' : '#ffffff',
       },
       error: {
         main: tokens.status.error,
-        contrastText: tokens.accent.contrastText,
+        contrastText: '#ffffff',
       },
       info: {
         main: tokens.status.info,
-        contrastText: tokens.accent.contrastText,
+        contrastText: mode === 'light' ? '#000000' : '#0f172a',
       },
     },
     shape: {
@@ -156,27 +156,41 @@ export function getMuiTheme(mode: ColorMode = "light") {
       MuiButton: {
         defaultProps: {
           variant: "contained",
-          disableElevation: true,
+          disableElevation: false,
         },
         styleOverrides: {
           root: {
-            borderRadius: 999,
+            borderRadius: 8,
+            textTransform: 'none',
+            fontWeight: 600,
+            padding: '8px 16px',
           },
           contained: {
-            color: tokens.accent.contrastText,
+            backgroundColor: tokens.primary[500],
+            color: mode === 'light' ? '#000000' : '#0f172a',
+            '&:hover': {
+              backgroundColor: tokens.primary[600],
+            },
+          },
+          outlined: {
+            borderColor: tokens.border.medium,
+            color: tokens.text.primary,
+            '&:hover': {
+              borderColor: tokens.primary[500],
+              backgroundColor: mode === 'light' ? tokens.primary[50] : tokens.background.tertiary,
+            },
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 16,
-            border: `1px solid ${tokens.card.border}`,
-            backgroundColor: tokens.card.background,
-            boxShadow:
-              mode === "dark"
-                ? "0 12px 24px rgba(15, 23, 42, 0.45)"
-                : "0 12px 24px rgba(15, 23, 42, 0.12)",
+            borderRadius: 12,
+            border: `1px solid ${tokens.border.light}`,
+            backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.secondary,
+            boxShadow: mode === 'dark'
+              ? '0 4px 6px rgba(0, 0, 0, 0.3)'
+              : '0 2px 4px rgba(0, 0, 0, 0.1)',
           },
         },
       },
@@ -184,6 +198,31 @@ export function getMuiTheme(mode: ColorMode = "light") {
         styleOverrides: {
           root: {
             backgroundImage: "none",
+            backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.secondary,
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: mode === 'light' ? '#ffffff' : tokens.background.primary,
+              '& fieldset': {
+                borderColor: tokens.border.medium,
+              },
+              '&:hover fieldset': {
+                borderColor: tokens.primary[500],
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: tokens.primary[500],
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: tokens.text.secondary,
+            },
+            '& .MuiInputBase-input': {
+              color: tokens.text.primary,
+            },
           },
         },
       },
