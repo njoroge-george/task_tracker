@@ -421,26 +421,26 @@ export function DashboardContent({
               <div
                 style={{
                   background: isDark
-                    ? "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(30,58,138,0.5))"
-                    : "linear-gradient(135deg, #eef2ff, #dbeafe)",
-                  borderColor: "rgba(59,130,246,0.35)",
-                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(59,130,246,0.2)"}`,
+                    ? "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(67,56,202,0.5))"
+                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                  borderColor: isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.3)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.2)"}`,
                 }}
-                className="p-6 rounded-2xl border"
+                className="p-6 rounded-2xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                     Today&apos;s Tasks
                   </h3>
                   <span
                     className="text-xs font-bold px-2 py-1 rounded-full"
                     style={{
-                      color: "#1d4ed8",
-                      backgroundColor: "rgba(59,130,246,0.15)",
+                      color: isDark ? "#c7d2fe" : "#4338ca",
+                      backgroundColor: "rgba(99,102,241,0.15)",
                     }}
                   >
                     {todayTasks.length}
@@ -478,10 +478,10 @@ export function DashboardContent({
               <div
                 style={{
                   background: isDark
-                    ? "linear-gradient(135deg, rgba(248,113,113,0.25), rgba(127,29,29,0.55))"
-                    : "linear-gradient(135deg, #fee2e2, #fecaca)",
-                  borderColor: "rgba(248,113,113,0.4)",
-                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.4)" : "rgba(248,113,113,0.25)"}`,
+                    ? "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(67,56,202,0.55))"
+                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                  borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.4)" : "rgba(99,102,241,0.25)"}`,
                 }}
                 className="p-6 rounded-2xl border"
               >
@@ -490,14 +490,14 @@ export function DashboardContent({
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                     Overdue
                   </h3>
                   <span
                     className="text-xs font-bold px-2 py-1 rounded-full"
                     style={{
-                      color: "#b91c1c",
-                      backgroundColor: "rgba(248,113,113,0.25)",
+                      color: isDark ? "#c7d2fe" : "#4338ca",
+                      backgroundColor: "rgba(99,102,241,0.2)",
                     }}
                   >
                     {overdueTasks.length}
@@ -535,10 +535,10 @@ export function DashboardContent({
               <div
                 style={{
                   background: isDark
-                    ? "linear-gradient(135deg, rgba(251,191,36,0.25), rgba(120,53,15,0.5))"
-                    : "linear-gradient(135deg, #fef3c7, #fde68a)",
-                  borderColor: "rgba(251,191,36,0.4)",
-                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(251,191,36,0.25)"}`,
+                    ? "linear-gradient(135deg, rgba(99,102,241,0.28), rgba(67,56,202,0.52))"
+                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                  borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.22)"}`,
                 }}
                 className="p-6 rounded-2xl border"
               >
@@ -547,14 +547,14 @@ export function DashboardContent({
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                     Due This Week
                   </h3>
                   <span
                     className="text-xs font-bold px-2 py-1 rounded-full"
                     style={{
-                      color: "#92400e",
-                      backgroundColor: "rgba(251,191,36,0.3)",
+                      color: isDark ? "#c7d2fe" : "#4338ca",
+                      backgroundColor: "rgba(99,102,241,0.18)",
                     }}
                   >
                     {weekTasks.length}
@@ -592,10 +592,10 @@ export function DashboardContent({
               <div
                 style={{
                   background: isDark
-                    ? "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(20,83,45,0.5))"
-                    : "linear-gradient(135deg, #d1fae5, #a7f3d0)",
-                  borderColor: "rgba(34,197,94,0.4)",
-                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(16,185,129,0.25)"}`,
+                    ? "linear-gradient(135deg, rgba(99,102,241,0.26), rgba(67,56,202,0.48))"
+                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                  borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.2)"}`,
                 }}
                 className="p-6 rounded-2xl border"
               >
@@ -604,14 +604,14 @@ export function DashboardContent({
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                     Completed Today
                   </h3>
                   <span
                     className="text-xs font-bold px-2 py-1 rounded-full"
                     style={{
-                      color: "#047857",
-                      backgroundColor: "rgba(34,197,94,0.25)",
+                      color: isDark ? "#c7d2fe" : "#4338ca",
+                      backgroundColor: "rgba(99,102,241,0.18)",
                     }}
                   >
                     {completedToday.length}
