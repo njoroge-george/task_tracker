@@ -41,7 +41,8 @@ async function getDashboardData(userId: string) {
           select: { id: true },
         },
       },
-      take: 6,
+      orderBy: { createdAt: "desc" },
+      take: 12,
     }),
     prisma.notification.findMany({
       where: { userId, read: false },

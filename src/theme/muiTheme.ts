@@ -10,6 +10,28 @@ declare module "@mui/material/styles" {
 
 export type ColorMode = ThemeMode;
 
+// Geist font family configuration
+const fontFamily = [
+  'var(--font-geist-sans)',
+  '-apple-system',
+  'BlinkMacSystemFont',
+  '"Segoe UI"',
+  'Roboto',
+  '"Helvetica Neue"',
+  'Arial',
+  'sans-serif',
+].join(',');
+
+const monoFontFamily = [
+  'var(--font-geist-mono)',
+  'Menlo',
+  'Monaco',
+  'Consolas',
+  '"Liberation Mono"',
+  '"Courier New"',
+  'monospace',
+].join(',');
+
 const toRgbChannels = (color: string): string => {
   if (!color) return color;
 
@@ -145,12 +167,40 @@ export function getMuiTheme(mode: ColorMode = "light") {
       borderRadius: 8,
     },
     typography: {
-      fontFamily:
-        'var(--font-geist-sans), system-ui, -apple-system, "Helvetica", "Arial", sans-serif',
-      h1: { fontWeight: 700 },
-      h2: { fontWeight: 700 },
-      h3: { fontWeight: 700 },
-      button: { textTransform: "none", fontWeight: 600 },
+      fontFamily,
+      h1: { 
+        fontWeight: 700,
+        letterSpacing: '-0.025em',
+      },
+      h2: { 
+        fontWeight: 700,
+        letterSpacing: '-0.025em',
+      },
+      h3: { 
+        fontWeight: 700,
+        letterSpacing: '-0.02em',
+      },
+      h4: {
+        fontWeight: 600,
+        letterSpacing: '-0.01em',
+      },
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+      button: { 
+        textTransform: "none", 
+        fontWeight: 600,
+        letterSpacing: '0.01em',
+      },
+      body1: {
+        letterSpacing: '0.01em',
+      },
+      body2: {
+        letterSpacing: '0.01em',
+      },
     },
     components: {
       MuiButton: {

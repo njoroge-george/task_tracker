@@ -19,7 +19,7 @@ export default function TasksPageHeader({ projects = [] }: TasksPageHeaderProps)
         </div>
         <button
           onClick={() => setShowCreateDialog(true)}
-          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-300 to-indigo-500 text-black font-semibold shadow-md transition-all hover:from-indigo-400 hover:to-indigo-600 hover:shadow-lg flex items-center gap-2"
         >
           <svg
             className="w-5 h-5"

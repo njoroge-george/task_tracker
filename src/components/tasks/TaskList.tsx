@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type Task = {
   id: string;
@@ -23,6 +25,70 @@ interface TaskListProps {
 }
 
 export default function TaskList({ tasks }: TaskListProps) {
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const handleEditTask = (taskId: string) => {
+    router.push(`/dashboard/tasks/${taskId}`);
+  };
+
+  const handleToggleTaskStatus = async (taskId: string, isDone: boolean) => {
+    setActionError(null);
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: isDone ? "DONE" : "TODO",
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || "Failed to update task");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update task", error);
+      setActionError(
+        error instanceof Error ? error.message : "Failed to update task"
+      );
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (deletingId) return;
+
+    const confirmed = window.confirm("Are you sure you want to delete this task?");
+    if (!confirmed) return;
+
+    setActionError(null);
+    setDeletingId(taskId);
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || "Failed to delete task");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to delete task", error);
+      setActionError(
+        error instanceof Error ? error.message : "Failed to delete task"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors = {
       TODO: "bg-card text-primary",
@@ -115,6 +181,11 @@ export default function TaskList({ tasks }: TaskListProps) {
 
   return (
     <div className="bg-primary rounded-xl border border-default divide-y divide-gray-200 dark:divide-gray-700">
+      {actionError && (
+        <div className="px-4 py-2 text-sm text-status-error bg-status-error-light rounded-t-xl">
+          {actionError}
+        </div>
+      )}
       {tasks.map((task) => {
         const dueDate = formatDate(task.dueDate);
 
@@ -129,7 +200,7 @@ export default function TaskList({ tasks }: TaskListProps) {
                 type="checkbox"
                 checked={task.status === "DONE"}
                 className="mt-1 w-5 h-5 text-accent border-default rounded focus:ring-accent cursor-pointer"
-                onChange={() => {}}
+                onChange={() => handleToggleTaskStatus(task.id, !(task.status === "DONE"))}
               />
 
               {/* Task Content */}
@@ -229,7 +300,12 @@ export default function TaskList({ tasks }: TaskListProps) {
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-1">
-                    <button className="p-2 text-secondary hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-secondary transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => handleEditTask(task.id)}
+                      className="p-2 text-secondary hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-secondary transition-colors"
+                      aria-label="Edit task"
+                    >
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -244,7 +320,13 @@ export default function TaskList({ tasks }: TaskListProps) {
                         />
                       </svg>
                     </button>
-                    <button className="p-2 text-secondary hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-secondary transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTask(task.id)}
+                      disabled={deletingId === task.id}
+                      className="p-2 text-secondary hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Delete task"
+                    >
                       <svg
                         className="w-4 h-4"
                         fill="none"

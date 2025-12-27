@@ -118,7 +118,7 @@ export default function BillingTab({ user }: Props) {
   return (
     <div className="space-y-6">
       {/* Current Plan */}
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-soft shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-primary">
@@ -152,10 +152,8 @@ export default function BillingTab({ user }: Props) {
           return (
             <div
               key={plan.name}
-              className={`relative rounded-lg border-2 p-6 ${
-                plan.popular
-                  ? "border-accent shadow-lg"
-                  : "border-default"
+              className={`relative rounded-2xl p-6 border border-soft shadow-sm ${
+                plan.popular ? "ring-1 ring-[rgba(79,70,229,0.25)]" : ""
               } ${isCurrentPlan ? "ring-2 ring-green-500" : ""}`}
             >
               {plan.popular && (
@@ -226,11 +224,11 @@ export default function BillingTab({ user }: Props) {
       </div>
 
       {/* Billing History */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h3 className="text-lg font-medium text-primary mb-4">
           Payment History
         </h3>
-        <div className="bg-primary border border-default rounded-lg overflow-hidden">
+        <div className="bg-primary border border-soft rounded-2xl overflow-hidden shadow-sm">
           <table className="w-full">
             <thead className="bg-gray-50 bg-card">
               <tr>
@@ -291,13 +289,13 @@ export default function BillingTab({ user }: Props) {
       </div>
 
       {/* Payment Method */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-primary">
             Payment Method
           </h3>
         </div>
-        <div className="flex items-center gap-4 p-4 bg-gray-50 bg-card/50 rounded-lg">
+        <div className="flex items-center gap-4 p-4 bg-gray-50 bg-card/50 rounded-xl border border-soft shadow-sm">
           <div className="w-12 h-8 bg-gradient-to-r from-green-600 to-green-800 rounded flex items-center justify-center text-white text-xs font-bold">
             M-PESA
           </div>

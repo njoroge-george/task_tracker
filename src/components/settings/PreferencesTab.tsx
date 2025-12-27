@@ -135,7 +135,7 @@ export default function PreferencesTab({ user }: Props) {
               onChange={(e) =>
                 setFormData({ ...formData, timezone: e.target.value })
               }
-              className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="UTC">UTC</option>
               <option value="America/New_York">Eastern Time (ET)</option>
@@ -163,7 +163,7 @@ export default function PreferencesTab({ user }: Props) {
               onChange={(e) =>
                 setFormData({ ...formData, dateFormat: e.target.value })
               }
-              className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2025)</option>
               <option value="DD/MM/YYYY">DD/MM/YYYY (31/12/2025)</option>
@@ -184,7 +184,7 @@ export default function PreferencesTab({ user }: Props) {
               onChange={(e) =>
                 setFormData({ ...formData, weekStart: parseInt(e.target.value) })
               }
-              className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="0">Sunday</option>
               <option value="1">Monday</option>
@@ -204,7 +204,7 @@ export default function PreferencesTab({ user }: Props) {
               onChange={(e) =>
                 setFormData({ ...formData, theme: e.target.value })
               }
-              className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="SYSTEM">System (Auto)</option>
               <option value="LIGHT">Light</option>
@@ -218,7 +218,7 @@ export default function PreferencesTab({ user }: Props) {
       </div>
 
       {/* Notification Preferences */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h3 className="text-lg font-medium text-primary mb-4">
           Notifications
         </h3>
@@ -247,7 +247,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -275,7 +275,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -303,7 +303,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -331,7 +331,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -359,7 +359,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -387,7 +387,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -415,14 +415,14 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
         </div>
       </div>
 
       {/* Task Reminders */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h3 className="text-lg font-medium text-primary mb-4">
           Task Reminders
         </h3>
@@ -451,7 +451,7 @@ export default function PreferencesTab({ user }: Props) {
                 }
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer bg-card peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+              <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-700 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border border-transparent after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-500 peer-checked:to-indigo-600 peer-checked:after:translate-x-full"></div>
             </label>
           </div>
 
@@ -487,7 +487,7 @@ export default function PreferencesTab({ user }: Props) {
                           },
                         });
                       }}
-                      className="w-4 h-4 text-accent bg-card border-default rounded focus:ring-accent"
+                      className="w-4 h-4 text-accent bg-card border-soft rounded focus:ring-accent"
                     />
                     <span className="text-sm text-primary">{interval.label}</span>
                   </label>

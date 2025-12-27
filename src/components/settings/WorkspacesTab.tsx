@@ -46,7 +46,7 @@ export default function WorkspacesTab({ workspaces, userId }: Props) {
           return (
             <div
               key={workspace.id}
-              className="flex items-center justify-between p-4 bg-gray-50 bg-card/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accent dark:hover:border-accent transition-colors"
+              className="flex items-center justify-between p-4 rounded-lg border border-soft bg-white/80 dark:bg-slate-900/60 shadow-sm hover:shadow-md transition-all"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
@@ -96,29 +96,29 @@ export default function WorkspacesTab({ workspaces, userId }: Props) {
       </div>
 
       {/* Workspace Stats */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h4 className="text-sm font-medium text-primary mb-4">
           Workspace Statistics
         </h4>
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-accent-secondary rounded-lg">
-            <p className="text-2xl font-bold text-accent">
+          <div className="p-4 rounded-lg border border-soft bg-white/70 dark:bg-slate-900/60 shadow-sm">
+            <p className="text-2xl font-bold text-primary">
               {workspaces.length}
             </p>
             <p className="text-xs text-secondary mt-1">
               Total Workspaces
             </p>
           </div>
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <p className="text-2xl font-bold text-accent dark:text-purple-400">
+          <div className="p-4 rounded-lg border border-soft bg-purple-50/80 dark:bg-purple-900/30 shadow-sm">
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-300">
               {workspaces.filter((w) => w.ownerId === userId).length}
             </p>
             <p className="text-xs text-secondary mt-1">
               Owned by You
             </p>
           </div>
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <p className="text-2xl font-bold text-status-success dark:text-green-400">
+          <div className="p-4 rounded-lg border border-soft bg-green-50/80 dark:bg-green-900/30 shadow-sm">
+            <p className="text-2xl font-bold text-status-success dark:text-green-300">
               {workspaces.filter((w) => w.ownerId !== userId).length}
             </p>
             <p className="text-xs text-secondary mt-1">
@@ -129,11 +129,11 @@ export default function WorkspacesTab({ workspaces, userId }: Props) {
       </div>
 
       {/* Invitations */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h4 className="text-sm font-medium text-primary mb-4">
           Pending Invitations
         </h4>
-        <div className="text-center py-8 bg-gray-50 bg-card/50 rounded-lg border-2 border-dashed border-default">
+        <div className="text-center py-8 rounded-lg border border-dashed border-soft bg-white/70 dark:bg-slate-900/40">
           <svg
             className="w-12 h-12 text-secondary mx-auto mb-2"
             fill="none"
@@ -165,7 +165,7 @@ export default function WorkspacesTab({ workspaces, userId }: Props) {
               value={newWorkspaceName}
               onChange={(e) => setNewWorkspaceName(e.target.value)}
               placeholder="Workspace name"
-              className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent mb-4"
+              className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent mb-4"
             />
             <div className="flex gap-3">
               <button
@@ -183,7 +183,7 @@ export default function WorkspacesTab({ workspaces, userId }: Props) {
                   setShowCreateModal(false);
                   setNewWorkspaceName("");
                 }}
-                className="flex-1 px-4 py-2 border border-default text-primary rounded-lg hover:bg-secondary transition-colors"
+                className="flex-1 px-4 py-2 border border-soft text-primary rounded-lg hover:bg-secondary transition-colors"
               >
                 Cancel
               </button>

@@ -65,7 +65,7 @@ export default function ProfileTab({ user }: Props) {
   return (
     <div className="space-y-6">
       {/* Subscription Status Card */}
-      <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg p-6">
+      <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 border border-soft rounded-2xl p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -151,7 +151,7 @@ export default function ProfileTab({ user }: Props) {
             ) : (
               <a
                 href="/dashboard/pricing"
-                className="px-4 py-2 bg-card border-2 border-default text-primary rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-card border border-soft text-primary rounded-lg hover:bg-accent transition-colors text-sm font-medium"
               >
                 Manage Plan
               </a>
@@ -166,7 +166,12 @@ export default function ProfileTab({ user }: Props) {
           Profile Picture
         </label>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold shadow-inner border border-soft"
+            style={{
+              background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), rgba(59,130,246,0.4))",
+              color: "rgb(var(--foreground))",
+            }}
+          >
             {user.name
               ? user.name
                   .split(" ")
@@ -176,7 +181,7 @@ export default function ProfileTab({ user }: Props) {
               : user.email[0].toUpperCase()}
           </div>
           <div>
-            <button className="px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+            <button className="px-4 py-2 rounded-lg border border-soft text-primary bg-white hover:bg-secondary dark:bg-slate-800 dark:text-white transition-colors text-sm shadow-sm">
               Change Picture
             </button>
             <p className="text-xs text-secondary mt-1">
@@ -200,7 +205,7 @@ export default function ProfileTab({ user }: Props) {
             id="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+            className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             placeholder="John Doe"
           />
         </div>
@@ -219,7 +224,7 @@ export default function ProfileTab({ user }: Props) {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            className="w-full px-4 py-2 border border-default rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
+            className="w-full px-4 py-2 border border-soft rounded-lg bg-white bg-card text-primary focus:ring-2 focus:ring-accent focus:border-transparent"
             placeholder="john@example.com"
           />
         </div>
@@ -240,7 +245,7 @@ export default function ProfileTab({ user }: Props) {
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-700 text-white font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
@@ -248,7 +253,7 @@ export default function ProfileTab({ user }: Props) {
       </form>
 
       {/* Danger Zone */}
-      <div className="pt-6 border-t border-default">
+      <div className="pt-6 border-t border-soft">
         <h3 className="text-sm font-medium text-status-error mb-4">
           Danger Zone
         </h3>

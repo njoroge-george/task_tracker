@@ -40,12 +40,13 @@ export default function SignInPage() {
     }
   };
 
-  const handleOAuthSignIn = (provider: "google" | "github") => {
-    signIn(provider, { callbackUrl });
-  };
+  // OAuth providers temporarily disabled until integrations are fixed.
+  // const handleOAuthSignIn = (provider: "google" | "github") => {
+  //   signIn(provider, { callbackUrl });
+  // };
 
   return (
-    <div className="bg-primary rounded-2xl shadow-2xl p-8 space-y-6">
+    <div className="rounded-3xl border border-default bg-[rgb(var(--card-background))] p-10 space-y-8 shadow-2xl backdrop-blur dark:bg-slate-900/80">
       {/* Header */}
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-secondary mb-4">
@@ -78,7 +79,8 @@ export default function SignInPage() {
         </div>
       )}
 
-      {/* OAuth Buttons */}
+      {/* OAuth Buttons disabled until providers are back online */}
+      {/*
       <div className="space-y-3">
         <button
           onClick={() => handleOAuthSignIn("google")}
@@ -117,6 +119,7 @@ export default function SignInPage() {
           <span className="font-medium">Continue with GitHub</span>
         </button>
       </div>
+      */}
 
       {/* Divider */}
       <div className="relative">
@@ -145,7 +148,7 @@ export default function SignInPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
             placeholder="you@example.com"
           />
         </div>
@@ -163,7 +166,7 @@ export default function SignInPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
             placeholder="••••••••"
           />
         </div>
@@ -180,7 +183,7 @@ export default function SignInPage() {
           </label>
           <Link
             href="/auth/forgot-password"
-            className="text-sm text-accent hover:underline"
+            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
           >
             Forgot password?
           </Link>
@@ -189,7 +192,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-accent hover:bg-accent-hover text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-500))] to-[rgb(var(--color-primary-700))] px-4 py-3 font-semibold text-white shadow-lg transition-all hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
@@ -200,26 +203,11 @@ export default function SignInPage() {
         Don't have an account?{" "}
         <Link
           href="/auth/signup"
-          className="text-accent font-semibold hover:underline"
+          className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
         >
           Sign up for free
         </Link>
       </p>
-
-      {/* Demo Credentials - Only show in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-6 p-4 bg-accent-secondary border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-xs font-semibold text-primary mb-2">
-            🎯 Demo Credentials:
-          </p>
-          <p className="text-xs text-blue-700 dark:text-blue-400">
-            Email: demo@tasktracker.com
-          </p>
-          <p className="text-xs text-blue-700 dark:text-blue-400">
-            Password: password123
-          </p>
-        </div>
-      )}
     </div>
   );
 }

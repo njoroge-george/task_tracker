@@ -45,9 +45,9 @@ export default function SettingsTabs({ user, workspaces, userId }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
-    <div className="bg-primary rounded-lg border border-default">
+    <div className="bg-primary rounded-2xl border border-soft shadow-sm">
       {/* Tabs */}
-      <div className="border-b border-default">
+      <div className="border-b border-soft">
         <nav className="flex space-x-8 px-6" aria-label="Tabs">
           {tabs.map((tab) => (
             <button

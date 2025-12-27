@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/theme/useTheme";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -20,6 +21,7 @@ type Project = {
   id: string;
   name: string;
   color: string | null;
+  status?: string | null;
   tasks: { id: string }[];
   _count: { tasks: number };
 };
@@ -88,6 +90,44 @@ export function DashboardContent({
   notifications,
 }: DashboardContentProps) {
   const { colors, isDark } = useTheme();
+  const [selectedProjectCategory, setSelectedProjectCategory] = useState("ALL");
+
+  const projectCategoryLabels: Record<string, string> = {
+    ACTIVE: "Active",
+    ON_HOLD: "On Hold",
+    COMPLETED: "Completed",
+    ARCHIVED: "Archived",
+  };
+
+  const projectCategoryStats = useMemo(() => {
+    return projects.reduce<Record<string, number>>((acc, project) => {
+      const status = (project.status || "ACTIVE").toUpperCase();
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+  }, [projects]);
+
+  const availableProjectCategories = useMemo(() => {
+    return Object.keys(projectCategoryStats);
+  }, [projectCategoryStats]);
+
+  useEffect(() => {
+    if (selectedProjectCategory === "ALL") return;
+    if (!availableProjectCategories.includes(selectedProjectCategory)) {
+      setSelectedProjectCategory(
+        availableProjectCategories[0] ?? "ALL"
+      );
+    }
+  }, [availableProjectCategories, selectedProjectCategory]);
+
+  const filteredProjects =
+    selectedProjectCategory === "ALL"
+      ? projects
+      : projects.filter(
+          (project) =>
+            (project.status || "ACTIVE").toUpperCase() ===
+            selectedProjectCategory
+        );
 
   const totalPriority =
     priorityStats.low +
@@ -374,92 +414,91 @@ export function DashboardContent({
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Task Overview - 4 cards in grid */}
-          {/* Today's Tasks */}
-          <div
-            style={{
-              backgroundColor: colors.card.background,
-              borderColor: colors.border.light,
-              boxShadow: `0 1px 3px ${colors.card.shadow}`,
-            }}
-            className="p-6 rounded-xl border"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3
-                style={{ color: colors.text.primary }}
-                className="text-sm font-semibold flex items-center gap-2"
-              >
-                <span
-                  style={{ backgroundColor: colors.accent.blue }}
-                  className="w-2 h-2 rounded-full"
-                ></span>
-                Today&apos;s Tasks
-              </h3>
-              <span
-                style={{
-                  color: colors.accent.blue,
-                  backgroundColor: isDark ? "#1e3a8a" : "#dbeafe",
-                }}
-                className="text-xs font-bold px-2 py-1 rounded-full"
-              >
-                {todayTasks.length}
-              </span>
-            </div>
-            <div className="space-y-2">
-              {todayTasks.length === 0 ? (
-                <p style={{ color: colors.text.muted }} className="text-xs">
-                  No tasks for today! 🎉
-                </p>
-              ) : (
-                todayTasks.slice(0, 3).map((task) => (
-                  <div
-                    key={task.id}
-                    style={{ color: colors.text.secondary }}
-                    className="text-xs truncate"
-                  >
-                    • {task.title}
-                  </div>
-                ))
-              )}
-              {todayTasks.length > 3 && (
-                <Link
-                  href="/dashboard/tasks?filter=today"
-                  style={{ color: colors.accent.blue }}
-                  className="text-xs hover:underline"
-                >
-                  +{todayTasks.length - 3} more
-                </Link>
-              )}
-            </div>
-          </div>
-
-              {/* Overdue Tasks */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {/* Today's Tasks */}
               <div
                 style={{
-                  backgroundColor: colors.card.background,
-                  borderColor: colors.border.light,
-                  boxShadow: `0 1px 3px ${colors.card.shadow}`,
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(30,58,138,0.5))"
+                    : "linear-gradient(135deg, #eef2ff, #dbeafe)",
+                  borderColor: "rgba(59,130,246,0.35)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(59,130,246,0.2)"}`,
                 }}
-                className="p-6 rounded-xl border"
+                className="p-6 rounded-2xl border"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span
-                      style={{ backgroundColor: colors.status.error }}
-                      className="w-2 h-2 rounded-full"
-                    ></span>
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                    Today&apos;s Tasks
+                  </h3>
+                  <span
+                    className="text-xs font-bold px-2 py-1 rounded-full"
+                    style={{
+                      color: "#1d4ed8",
+                      backgroundColor: "rgba(59,130,246,0.15)",
+                    }}
+                  >
+                    {todayTasks.length}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {todayTasks.length === 0 ? (
+                    <p style={{ color: colors.text.muted }} className="text-xs">
+                      No tasks for today! 🎉
+                    </p>
+                  ) : (
+                    todayTasks.slice(0, 3).map((task) => (
+                      <div
+                        key={task.id}
+                        style={{ color: colors.text.secondary }}
+                        className="text-xs truncate"
+                      >
+                        • {task.title}
+                      </div>
+                    ))
+                  )}
+                  {todayTasks.length > 3 && (
+                    <Link
+                      href="/dashboard/tasks?filter=today"
+                      style={{ color: colors.text.primary }}
+                      className="text-xs font-semibold"
+                    >
+                      +{todayTasks.length - 3} more
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Overdue Tasks */}
+              <div
+                style={{
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(248,113,113,0.25), rgba(127,29,29,0.55))"
+                    : "linear-gradient(135deg, #fee2e2, #fecaca)",
+                  borderColor: "rgba(248,113,113,0.4)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.4)" : "rgba(248,113,113,0.25)"}`,
+                }}
+                className="p-6 rounded-2xl border"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3
+                    style={{ color: colors.text.primary }}
+                    className="text-sm font-semibold flex items-center gap-2"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
                     Overdue
                   </h3>
                   <span
-                    style={{
-                      color: colors.status.error,
-                      backgroundColor: isDark ? "#7f1d1d" : "#fee2e2",
-                    }}
                     className="text-xs font-bold px-2 py-1 rounded-full"
+                    style={{
+                      color: "#b91c1c",
+                      backgroundColor: "rgba(248,113,113,0.25)",
+                    }}
                   >
                     {overdueTasks.length}
                   </span>
@@ -483,8 +522,8 @@ export function DashboardContent({
                   {overdueTasks.length > 3 && (
                     <Link
                       href="/dashboard/tasks?filter=overdue"
-                      style={{ color: colors.status.error }}
-                      className="text-xs hover:underline"
+                      style={{ color: colors.text.primary }}
+                      className="text-xs font-semibold"
                     >
                       +{overdueTasks.length - 3} more
                     </Link>
@@ -495,29 +534,28 @@ export function DashboardContent({
               {/* Due This Week */}
               <div
                 style={{
-                  backgroundColor: colors.card.background,
-                  borderColor: colors.border.light,
-                  boxShadow: `0 1px 3px ${colors.card.shadow}`,
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(251,191,36,0.25), rgba(120,53,15,0.5))"
+                    : "linear-gradient(135deg, #fef3c7, #fde68a)",
+                  borderColor: "rgba(251,191,36,0.4)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(251,191,36,0.25)"}`,
                 }}
-                className="p-6 rounded-xl border"
+                className="p-6 rounded-2xl border"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span
-                      style={{ backgroundColor: colors.status.warning }}
-                      className="w-2 h-2 rounded-full"
-                    ></span>
+                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                     Due This Week
                   </h3>
                   <span
-                    style={{
-                      color: colors.status.warning,
-                      backgroundColor: isDark ? "#78350f" : "#fef3c7",
-                    }}
                     className="text-xs font-bold px-2 py-1 rounded-full"
+                    style={{
+                      color: "#92400e",
+                      backgroundColor: "rgba(251,191,36,0.3)",
+                    }}
                   >
                     {weekTasks.length}
                   </span>
@@ -541,8 +579,8 @@ export function DashboardContent({
                   {weekTasks.length > 3 && (
                     <Link
                       href="/dashboard/tasks?filter=week"
-                      style={{ color: colors.status.warning }}
-                      className="text-xs hover:underline"
+                      style={{ color: colors.text.primary }}
+                      className="text-xs font-semibold"
                     >
                       +{weekTasks.length - 3} more
                     </Link>
@@ -553,29 +591,28 @@ export function DashboardContent({
               {/* Completed Today */}
               <div
                 style={{
-                  backgroundColor: colors.card.background,
-                  borderColor: colors.border.light,
-                  boxShadow: `0 1px 3px ${colors.card.shadow}`,
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(20,83,45,0.5))"
+                    : "linear-gradient(135deg, #d1fae5, #a7f3d0)",
+                  borderColor: "rgba(34,197,94,0.4)",
+                  boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(16,185,129,0.25)"}`,
                 }}
-                className="p-6 rounded-xl border"
+                className="p-6 rounded-2xl border"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
                     style={{ color: colors.text.primary }}
                     className="text-sm font-semibold flex items-center gap-2"
                   >
-                    <span
-                      style={{ backgroundColor: colors.status.success }}
-                      className="w-2 h-2 rounded-full"
-                    ></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     Completed Today
                   </h3>
                   <span
-                    style={{
-                      color: colors.status.success,
-                      backgroundColor: isDark ? "#064e3b" : "#d1fae5",
-                    }}
                     className="text-xs font-bold px-2 py-1 rounded-full"
+                    style={{
+                      color: "#047857",
+                      backgroundColor: "rgba(34,197,94,0.25)",
+                    }}
                   >
                     {completedToday.length}
                   </span>
@@ -599,8 +636,8 @@ export function DashboardContent({
                   {completedToday.length > 3 && (
                     <Link
                       href="/dashboard/tasks?filter=completed"
-                      style={{ color: colors.status.success }}
-                      className="text-xs hover:underline"
+                      style={{ color: colors.text.primary }}
+                      className="text-xs font-semibold"
                     >
                       +{completedToday.length - 3} more
                     </Link>
@@ -608,15 +645,15 @@ export function DashboardContent({
                 </div>
               </div>
             </div>
-
-          {/* Projects Overview - Spans 2 columns on xl screens */}
+          </div>
+          {/* Projects Overview */}
           <div
             style={{
               backgroundColor: colors.card.background,
               borderColor: colors.border.light,
               boxShadow: `0 1px 3px ${colors.card.shadow}`,
             }}
-            className="p-6 rounded-xl border xl:col-span-2"
+            className="p-6 rounded-xl border xl:col-span-3"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 style={{ color: colors.text.primary }} className="text-lg font-bold">
@@ -630,13 +667,67 @@ export function DashboardContent({
                 View All →
               </Link>
             </div>
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setSelectedProjectCategory("ALL")}
+                className="px-3 py-1.5 text-xs font-semibold rounded-full border transition"
+                style={{
+                  borderColor:
+                    selectedProjectCategory === "ALL"
+                      ? colors.accent.blue
+                      : colors.border.light,
+                  color:
+                    selectedProjectCategory === "ALL"
+                      ? "#fff"
+                      : colors.text.secondary,
+                  backgroundColor:
+                    selectedProjectCategory === "ALL"
+                      ? colors.accent.blue
+                      : colors.card.background,
+                }}
+              >
+                All ({projects.length})
+              </button>
+              {availableProjectCategories.map((category) => (
+                <button
+                  type="button"
+                  key={category}
+                  onClick={() => setSelectedProjectCategory(category)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-full border transition"
+                  style={{
+                    borderColor:
+                      selectedProjectCategory === category
+                        ? colors.accent.blue
+                        : colors.border.light,
+                    color:
+                      selectedProjectCategory === category
+                        ? "#fff"
+                        : colors.text.secondary,
+                    backgroundColor:
+                      selectedProjectCategory === category
+                        ? colors.accent.blue
+                        : colors.card.background,
+                  }}
+                >
+                  {projectCategoryLabels[category] ||
+                    category
+                      .toLowerCase()
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (char) => char.toUpperCase())}{" "}
+                  ({projectCategoryStats[category] ?? 0})
+                </button>
+              ))}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {projects.length === 0 ? (
+                {filteredProjects.length === 0 ? (
                   <p style={{ color: colors.text.muted }} className="text-sm">
-                    No projects yet. Create one to get started!
+                    {selectedProjectCategory === "ALL"
+                      ? "No projects yet. Create one to get started!"
+                      : "No projects in this category yet."}
                   </p>
                 ) : (
-                  projects.map((project) => {
+                  filteredProjects.map((project) => {
                     const completedTasks = project.tasks.length;
                     const totalTasks = project._count.tasks;
                     const progress =
@@ -665,6 +756,23 @@ export function DashboardContent({
                           >
                             {project.name}
                           </h3>
+                          <span
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{
+                              color: colors.accent.contrastText,
+                              backgroundColor: colors.accent.blue,
+                            }}
+                          >
+                            {projectCategoryLabels[
+                              (project.status || "ACTIVE").toUpperCase()
+                            ] ??
+                              (project.status || "Active")
+                                .toLowerCase()
+                                .replace(/_/g, " ")
+                                .replace(/\b\w/g, (char) =>
+                                  char.toUpperCase()
+                                )}
+                          </span>
                         </div>
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs">
@@ -1149,8 +1257,9 @@ export function DashboardContent({
               )}
             </div>
           </div>
-          </div>
         </div>
       </div>
+    </div>
+  </div>
   );
 }

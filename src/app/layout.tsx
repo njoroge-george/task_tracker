@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://yourdomain.com", // Replace with your actual domain
+    url: "https://taskflow.geenjoroge.org", // Replace with your actual domain
     siteName: "TaskFlow™",
     title: "Task Tracker - Manage Your Tasks Efficiently",
     description: "A modern task management application for boosting your productivity",

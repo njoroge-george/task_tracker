@@ -79,9 +79,9 @@ export default function ProjectDiscussionsPage() {
         <p className="text-sm text-secondary mt-1">Threaded discussions for this project.</p>
       </div>
 
-      <Card>
+      <Card className="border border-default bg-primary">
         <CardHeader>
-          <CardTitle>New Discussion</CardTitle>
+          <CardTitle className="text-primary">New Discussion</CardTitle>
           <CardDescription>Ask questions, share context, or propose changes.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -89,12 +89,14 @@ export default function ProjectDiscussionsPage() {
             placeholder="Title"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
+            className="bg-white/90 text-primary border border-default focus-visible:ring-indigo-500 focus-visible:ring-offset-0 dark:bg-slate-900/70"
           />
           <Textarea
             placeholder="Write your discussion..."
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
             rows={5}
+            className="bg-white/90 text-primary border border-default focus-visible:ring-indigo-500 focus-visible:ring-offset-0 dark:bg-slate-900/70"
           />
           <div className="flex justify-end">
             <Button onClick={postDiscussion} disabled={posting || !newTitle.trim() || !newContent.trim()}>
@@ -104,9 +106,9 @@ export default function ProjectDiscussionsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border border-default bg-primary">
         <CardHeader>
-          <CardTitle>Threads</CardTitle>
+          <CardTitle className="text-primary">Threads</CardTitle>
           <CardDescription>
             {loading ? "Loading discussions..." : discussions.length === 0 ? "No discussions yet" : `${discussions.length} thread(s)`}
           </CardDescription>
@@ -174,7 +176,7 @@ function DiscussionItem({ discussion }: { discussion: Discussion }) {
 
   return (
     <div className="p-4 rounded-lg border border-default bg-primary">
-      <h3 className="text-sm font-semibold">{discussion.title}</h3>
+      <h3 className="text-sm font-semibold text-primary">{discussion.title}</h3>
       <p className="text-sm text-secondary mt-1 whitespace-pre-wrap">{discussion.content}</p>
       <p className="text-xs text-muted-foreground mt-2">By {discussion.author.name || discussion.author.email} • {new Date(discussion.createdAt).toLocaleString()}</p>
       <div className="mt-3">
@@ -209,6 +211,7 @@ function DiscussionItem({ discussion }: { discussion: Discussion }) {
                   postComment();
                 }
               }}
+              className="bg-white/90 text-primary border border-default focus-visible:ring-indigo-500 focus-visible:ring-offset-0 dark:bg-slate-900/70"
             />
             <Button onClick={postComment} disabled={postingComment || !newComment.trim()}>
               {postingComment ? 'Posting…' : 'Comment'}

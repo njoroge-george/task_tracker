@@ -10,7 +10,7 @@ export default function NewProjectButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
+        className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-300 to-indigo-500 text-black font-semibold shadow-md transition-all hover:from-indigo-400 hover:to-indigo-600 hover:shadow-lg"
       >
         + New Project
       </button>
