@@ -142,9 +142,9 @@ export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
       dark: "#3b4d7a",
     },
     card: {
-      background: "#0e1830",
-      border: "#1f2a44",
-      shadow: "rgba(3, 7, 18, 0.6)",
+      background: "#19314dff",
+      border: "#1f3e44ff",
+      shadow: "rgba(3, 7, 18, 0.46)",
       foreground: "#e0e7ff",
     },
     status: {

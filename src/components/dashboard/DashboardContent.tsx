@@ -422,7 +422,7 @@ export function DashboardContent({
                 style={{
                   background: isDark
                     ? "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(67,56,202,0.5))"
-                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                    : "linear-gradient(135deg, #cdfaf4ff, #04ece0ff)",
                   borderColor: isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.3)",
                   boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.2)"}`,
                 }}
@@ -479,11 +479,11 @@ export function DashboardContent({
                 style={{
                   background: isDark
                     ? "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(67,56,202,0.55))"
-                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                    : "linear-gradient(135deg, #cdfaf4ff, #04ece0ff)",
                   borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
                   boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.4)" : "rgba(99,102,241,0.25)"}`,
                 }}
-                className="p-6 rounded-2xl border"
+                className="p-6 rounded-2xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
@@ -536,11 +536,11 @@ export function DashboardContent({
                 style={{
                   background: isDark
                     ? "linear-gradient(135deg, rgba(99,102,241,0.28), rgba(67,56,202,0.52))"
-                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                    :  "linear-gradient(135deg, #cdfaf4ff, #04ece0ff)",
                   borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
                   boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.22)"}`,
                 }}
-                className="p-6 rounded-2xl border"
+                className="p-6 rounded-2xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
@@ -593,11 +593,11 @@ export function DashboardContent({
                 style={{
                   background: isDark
                     ? "linear-gradient(135deg, rgba(99,102,241,0.26), rgba(67,56,202,0.48))"
-                    : "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+                    : "linear-gradient(135deg, #cdfaf4ff, #04ece0ff)",
                   borderColor: isDark ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.3)",
                   boxShadow: `0 10px 35px ${isDark ? "rgba(15,23,42,0.35)" : "rgba(99,102,241,0.2)"}`,
                 }}
-                className="p-6 rounded-2xl border"
+                className="p-6 rounded-2xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3
