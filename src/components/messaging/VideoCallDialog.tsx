@@ -44,6 +44,7 @@ export const VideoCallDialog: React.FC = () => {
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null); // For voice calls
   const audioContextRef = useRef<AudioContext | null>(null);
   const waitingOscillatorRef = useRef<OscillatorNode | null>(null);
   const waitingGainRef = useRef<GainNode | null>(null);
@@ -80,32 +81,51 @@ export const VideoCallDialog: React.FC = () => {
 
   // Set remote stream - with retry logic
   useEffect(() => {
-    console.log('Remote stream effect:', { hasStream: !!remoteStream, videoRef: !!remoteVideoRef.current });
+    console.log('Remote stream effect:', { hasStream: !!remoteStream, videoRef: !!remoteVideoRef.current, audioRef: !!remoteAudioRef.current, callType });
     
     if (!remoteStream) return;
     
-    // Retry attaching stream if ref isn't ready yet
-    const attachStream = () => {
-      if (remoteVideoRef.current) {
-        console.log('Setting remote stream to video element');
-        remoteVideoRef.current.srcObject = remoteStream;
-        // Ensure video plays
-        remoteVideoRef.current.play().catch(err => {
-          console.error('Error playing remote video:', err);
-        });
-        return true;
+    // For video calls, use video element
+    if (callType === 'video') {
+      const attachStream = () => {
+        if (remoteVideoRef.current) {
+          console.log('Setting remote stream to video element');
+          remoteVideoRef.current.srcObject = remoteStream;
+          remoteVideoRef.current.play().catch(err => {
+            console.error('Error playing remote video:', err);
+          });
+          return true;
+        }
+        return false;
+      };
+      
+      if (!attachStream()) {
+        console.log('Remote video ref not ready, retrying...');
+        const timer = setTimeout(attachStream, 100);
+        return () => clearTimeout(timer);
       }
-      return false;
-    };
-    
-    // Try immediately
-    if (!attachStream()) {
-      // If ref not ready, retry after a short delay
-      console.log('Remote video ref not ready, retrying...');
-      const timer = setTimeout(attachStream, 100);
-      return () => clearTimeout(timer);
+    } 
+    // For voice calls, use audio element
+    else if (callType === 'audio') {
+      const attachStream = () => {
+        if (remoteAudioRef.current) {
+          console.log('Setting remote stream to audio element for voice call');
+          remoteAudioRef.current.srcObject = remoteStream;
+          remoteAudioRef.current.play().catch(err => {
+            console.error('Error playing remote audio:', err);
+          });
+          return true;
+        }
+        return false;
+      };
+      
+      if (!attachStream()) {
+        console.log('Remote audio ref not ready, retrying...');
+        const timer = setTimeout(attachStream, 100);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [remoteStream]);
+  }, [remoteStream, callType]);
 
   // Debug logging
   useEffect(() => {
@@ -365,6 +385,16 @@ export const VideoCallDialog: React.FC = () => {
           </Box>
         </Box>
       </DialogContent>
+      
+      {/* Hidden audio element for voice calls */}
+      {callType === 'audio' && (
+        <audio
+          ref={remoteAudioRef}
+          autoPlay
+          playsInline
+          style={{ display: 'none' }}
+        />
+      )}
     </Dialog>
   );
 };

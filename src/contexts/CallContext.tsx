@@ -98,10 +98,15 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCallType(type);
       setCallerInfo({ id: receiverId, name: receiverName, avatar: receiverAvatar });
 
-      // Get user media
+      // Get user media with proper audio constraints
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: type === 'video',
-        audio: true,
+        video: type === 'video' ? { width: 1280, height: 720 } : false,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+        },
       });
       setLocalStream(stream);
       setIsCallActive(true); // Mark call as active immediately
@@ -139,6 +144,13 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       peer.on('stream', (stream) => {
         setRemoteStream(stream);
         // Call already marked as active
+        
+        // Clear timeout since call was answered
+        if (callTimeoutRef.current) {
+          clearTimeout(callTimeoutRef.current);
+          callTimeoutRef.current = null;
+          console.log('✅ Call answered - timeout cleared');
+        }
       });
 
       peer.on('error', (err) => {
@@ -150,7 +162,8 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set timeout for unanswered call (30 seconds)
       callTimeoutRef.current = setTimeout(async () => {
-        if (initiatorRef.current && receiverIdRef.current && !remoteStream) {
+        // Only trigger "no answer" if call is still not active and no remote stream
+        if (initiatorRef.current && receiverIdRef.current && !isCallActive && !peerRef.current?.destroyed) {
           console.log('Call timeout - no answer');
           
           // Log as "No answer" for caller
@@ -171,6 +184,8 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           cleanup();
           alert('No answer');
+        } else {
+          console.log('Timeout reached but call is active or already answered - ignoring');
         }
       }, 30000); // 30 seconds
     } catch (error) {
@@ -323,8 +338,13 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const handleAnswer = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
-            video: type === 'video',
-            audio: true,
+            video: type === 'video' ? { width: 1280, height: 720 } : false,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 48000,
+            },
           });
           setLocalStream(stream);
           setIsCallActive(true); // Mark call as active immediately
@@ -380,6 +400,13 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     socket.on('call:answered', ({ signal }) => {
       if (peerRef.current && initiatorRef.current) {
         peerRef.current.signal(signal);
+        
+        // Clear timeout since call was answered
+        if (callTimeoutRef.current) {
+          clearTimeout(callTimeoutRef.current);
+          callTimeoutRef.current = null;
+          console.log('✅ Call answered by receiver - timeout cleared');
+        }
       }
     });
 
