@@ -192,7 +192,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="group w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-500))] to-[rgb(var(--color-primary-700))] px-4 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
+          className="group w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-100))] to-[rgb(var(--color-primary-300))] px-4 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
         >
           <span className="inline-flex items-center justify-center gap-2">
             {loading ? "Signing in..." : "Sign In"}
