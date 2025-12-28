@@ -108,11 +108,20 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           sampleRate: 48000,
         },
       });
+      
+      // Log stream tracks
+      console.log('Initiator local stream tracks:', stream.getTracks().map(t => ({
+        kind: t.kind,
+        enabled: t.enabled,
+        readyState: t.readyState,
+        id: t.id
+      })));
+      
       setLocalStream(stream);
       setIsCallActive(true); // Mark call as active immediately
       callStartTimeRef.current = new Date(); // Track call start time
 
-      // Create peer connection as initiator
+      // Create peer connection as initiator (reduced STUN servers to avoid warning)
       const peer = new SimplePeer({
         initiator: true,
         trickle: false,
@@ -121,9 +130,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'stun:stun4.l.google.com:19302' },
           ]
         },
       });
@@ -141,9 +147,9 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Call initiation emitted successfully');
       });
 
-      peer.on('stream', (stream) => {
-        setRemoteStream(stream);
-        // Call already marked as active
+      peer.on('stream', (remoteStreamReceived) => {
+        console.log('✅ Received remote stream from peer');
+        setRemoteStream(remoteStreamReceived);
         
         // Clear timeout since call was answered
         if (callTimeoutRef.current) {
@@ -162,9 +168,9 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set timeout for unanswered call (30 seconds)
       callTimeoutRef.current = setTimeout(async () => {
-        // Only trigger "no answer" if call is still not active and no remote stream
-        if (initiatorRef.current && receiverIdRef.current && !isCallActive && !peerRef.current?.destroyed) {
-          console.log('Call timeout - no answer');
+        // Only trigger "no answer" if we haven't received remote stream
+        if (initiatorRef.current && receiverIdRef.current && !remoteStream && peerRef.current && !peerRef.current.destroyed) {
+          console.log('Call timeout - no answer received');
           
           // Log as "No answer" for caller
           try {
@@ -185,7 +191,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           cleanup();
           alert('No answer');
         } else {
-          console.log('Timeout reached but call is active or already answered - ignoring');
+          console.log('Timeout reached but remote stream exists - call is active');
         }
       }, 30000); // 30 seconds
     } catch (error) {
@@ -346,6 +352,15 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
               sampleRate: 48000,
             },
           });
+          
+          // Log stream tracks
+          console.log('Receiver local stream tracks:', stream.getTracks().map(t => ({
+            kind: t.kind,
+            enabled: t.enabled,
+            readyState: t.readyState,
+            id: t.id
+          })));
+          
           setLocalStream(stream);
           setIsCallActive(true); // Mark call as active immediately
           setIncomingCall(false);
@@ -359,14 +374,12 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
               iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
               ]
             },
           });
 
           peer.on('signal', (answerSignal) => {
+            console.log('Sending answer signal to caller');
             socket.emit('call:answer', {
               to: from,
               from: session.user?.id,
@@ -375,8 +388,8 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
 
           peer.on('stream', (remoteStream) => {
+            console.log('✅ Receiver got remote stream from caller');
             setRemoteStream(remoteStream);
-            // Already active, just update remote stream
           });
 
           peer.on('error', (err) => {

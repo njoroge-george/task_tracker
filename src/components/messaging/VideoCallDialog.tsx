@@ -81,9 +81,23 @@ export const VideoCallDialog: React.FC = () => {
 
   // Set remote stream - with retry logic
   useEffect(() => {
-    console.log('Remote stream effect:', { hasStream: !!remoteStream, videoRef: !!remoteVideoRef.current, audioRef: !!remoteAudioRef.current, callType });
+    console.log('Remote stream effect:', { 
+      hasStream: !!remoteStream, 
+      videoRef: !!remoteVideoRef.current, 
+      audioRef: !!remoteAudioRef.current, 
+      callType 
+    });
     
     if (!remoteStream) return;
+    
+    // Log remote stream tracks
+    console.log('Remote stream tracks:', remoteStream.getTracks().map(t => ({
+      kind: t.kind,
+      enabled: t.enabled,
+      readyState: t.readyState,
+      id: t.id,
+      muted: t.muted
+    })));
     
     // For video calls, use video element
     if (callType === 'video') {
@@ -91,6 +105,8 @@ export const VideoCallDialog: React.FC = () => {
         if (remoteVideoRef.current) {
           console.log('Setting remote stream to video element');
           remoteVideoRef.current.srcObject = remoteStream;
+          remoteVideoRef.current.muted = false; // Ensure not muted
+          remoteVideoRef.current.volume = 1.0; // Full volume
           remoteVideoRef.current.play().catch(err => {
             console.error('Error playing remote video:', err);
           });
@@ -111,6 +127,8 @@ export const VideoCallDialog: React.FC = () => {
         if (remoteAudioRef.current) {
           console.log('Setting remote stream to audio element for voice call');
           remoteAudioRef.current.srcObject = remoteStream;
+          remoteAudioRef.current.muted = false; // Ensure not muted
+          remoteAudioRef.current.volume = 1.0; // Full volume
           remoteAudioRef.current.play().catch(err => {
             console.error('Error playing remote audio:', err);
           });

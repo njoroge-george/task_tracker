@@ -7,6 +7,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import SimplePeer from 'simple-peer';
 
 export interface ScreenShareParticipant {
   id: string;
@@ -33,7 +34,7 @@ export interface ScreenShareState {
   recordedChunks: Blob[];
 }
 
-export function useScreenShare(roomId: string, userId: string) {
+export function useScreenShare(roomId: string, userId: string, userName: string, socket: any) {
   const { toast } = useToast();
   const [state, setState] = useState<ScreenShareState>({
     isSharing: false,
@@ -45,96 +46,154 @@ export function useScreenShare(roomId: string, userId: string) {
     recordedChunks: [],
   });
 
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const peerRef = useRef<SimplePeer.Instance | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const wsRef = useRef<any>(null);
+  const peersRef = useRef<Map<string, SimplePeer.Instance>>(new Map());
 
-  // Initialize connection (simplified without signaling server for now)
-  const initializeWebSocket = useCallback(() => {
-    // For now, we'll use a simple local state approach
-    // In production, you'd add Socket.io or similar
-    console.log('Screen sharing initialized for room:', roomId);
-    
-    // Simulate connection
-    setTimeout(() => {
+  // Setup Socket.IO listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    console.log('Setting up screen share socket listeners for room:', roomId);
+
+    // Join the screen share room
+    socket.emit('screen-share:join-room', {
+      roomId,
+      userId,
+      userName,
+    });
+
+    // Someone started sharing
+    socket.on('screen-share:started', (data: any) => {
+      console.log('Screen share started by:', data.userName);
       toast({
-        title: 'Ready to Share',
-        description: 'Screen sharing is ready',
+        title: 'Screen Share Started',
+        description: `${data.userName} is now sharing their screen`,
       });
-    }, 500);
-  }, [roomId, userId]);
-
-  // Handle signaling messages
-  const handleSignalingMessage = async (data: any) => {
-    switch (data.type) {
-      case 'offer':
-        await handleOffer(data);
-        break;
-      case 'answer':
-        await handleAnswer(data);
-        break;
-      case 'ice-candidate':
-        await handleIceCandidate(data);
-        break;
-      case 'participant-joined':
-        handleParticipantJoined(data);
-        break;
-      case 'participant-left':
-        handleParticipantLeft(data);
-        break;
-      case 'sharing-started':
-        handleSharingStarted(data);
-        break;
-      case 'sharing-stopped':
-        handleSharingStopped(data);
-        break;
-    }
-  };
-
-  // Create peer connection
-  const createPeerConnection = useCallback(() => {
-    const config: RTCConfiguration = {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-      ],
-    };
-
-    const pc = new RTCPeerConnection(config);
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        console.log('ICE candidate:', event.candidate);
-        // In production, send via Socket.io or signaling server
-      }
-    };
-
-    pc.ontrack = (event) => {
-      console.log('Received remote track');
+      
       setState(prev => ({
         ...prev,
-        remoteStream: event.streams[0],
-        isViewing: true,
+        participants: [...prev.participants, {
+          id: data.userId,
+          name: data.userName,
+          isSharing: true,
+          timestamp: new Date(),
+        }],
       }));
-    };
+    });
 
-    pc.onconnectionstatechange = () => {
-      console.log('Connection state:', pc.connectionState);
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        toast({
-          title: 'Connection Lost',
-          description: 'Screen sharing connection was interrupted',
-          variant: 'destructive',
+    // Received screen share offer
+    socket.on('screen-share:offer', async (data: any) => {
+      console.log('Received screen share offer from:', data.userName);
+      
+      // Create peer as receiver
+      const peer = new SimplePeer({
+        initiator: false,
+        trickle: false,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+          ],
+        },
+      });
+
+      peer.on('signal', (signal) => {
+        console.log('Sending screen share answer');
+        socket.emit('screen-share:answer', {
+          roomId,
+          from: userId,
+          signal,
         });
-      }
-    };
+      });
 
-    peerConnectionRef.current = pc;
-    return pc;
-  }, [roomId]);
+      peer.on('stream', (remoteStream) => {
+        console.log('✅ Received screen share stream');
+        setState(prev => ({
+          ...prev,
+          remoteStream,
+          isViewing: true,
+        }));
+      });
+
+      peer.on('error', (err) => {
+        console.error('Screen share peer error:', err);
+      });
+
+      peer.signal(data.signal);
+      peersRef.current.set(data.from, peer);
+    });
+
+    // Received screen share answer
+    socket.on('screen-share:answer', (data: any) => {
+      console.log('Received screen share answer');
+      if (peerRef.current) {
+        peerRef.current.signal(data.signal);
+      }
+    });
+
+    // Screen share stopped
+    socket.on('screen-share:stopped', (data: any) => {
+      console.log('Screen share stopped');
+      toast({
+        title: 'Screen Share Ended',
+        description: 'The screen share has ended',
+      });
+      
+      setState(prev => ({
+        ...prev,
+        remoteStream: null,
+        isViewing: false,
+        participants: prev.participants.filter(p => p.id !== data.userId),
+      }));
+      
+      // Clean up peer
+      const peer = peersRef.current.get(data.userId);
+      if (peer) {
+        peer.destroy();
+        peersRef.current.delete(data.userId);
+      }
+    });
+
+    // Viewer joined
+    socket.on('screen-share:viewer-joined', (data: any) => {
+      console.log('Viewer joined:', data.userName);
+      toast({
+        title: 'Viewer Joined',
+        description: `${data.userName} joined your screen share`,
+      });
+      
+      setState(prev => ({
+        ...prev,
+        participants: [...prev.participants, {
+          id: data.userId,
+          name: data.userName,
+          isSharing: false,
+          timestamp: new Date(),
+        }],
+      }));
+    });
+
+    return () => {
+      socket.off('screen-share:started');
+      socket.off('screen-share:offer');
+      socket.off('screen-share:answer');
+      socket.off('screen-share:stopped');
+      socket.off('screen-share:viewer-joined');
+    };
+  }, [socket, roomId, userId, userName, toast]);
 
   // Start sharing screen
   const startSharing = async (options: ScreenShareOptions = {}) => {
+    if (!socket) {
+      toast({
+        title: 'Connection Error',
+        description: 'Not connected to server',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       // Request screen capture
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -147,6 +206,8 @@ export function useScreenShare(roomId: string, userId: string) {
         audio: options.includeAudio || false,
       });
 
+      console.log('Got screen share stream:', stream.getTracks().map(t => ({ kind: t.kind, id: t.id })));
+
       // Handle when user stops sharing via browser UI
       stream.getVideoTracks()[0].onended = () => {
         stopSharing();
@@ -154,23 +215,46 @@ export function useScreenShare(roomId: string, userId: string) {
 
       setState(prev => ({ ...prev, localStream: stream, isSharing: true }));
 
-      // Initialize WebSocket
-      initializeWebSocket();
-
-      // Create peer connection and add tracks
-      const pc = createPeerConnection();
-      stream.getTracks().forEach(track => {
-        pc.addTrack(track, stream);
+      // Notify room that we're sharing
+      socket.emit('screen-share:start', {
+        roomId,
+        userId,
+        userName,
       });
 
-      // Create and send offer (simplified for local use)
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      console.log('Created offer:', offer);
+      // Create peer as initiator for each viewer
+      const peer = new SimplePeer({
+        initiator: true,
+        trickle: false,
+        stream,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+          ],
+        },
+      });
 
-      // In production, send offer via Socket.io
-      // For now, just initialize connection
-      initializeWebSocket();
+      peer.on('signal', (signal) => {
+        console.log('Sending screen share offer');
+        socket.emit('screen-share:offer', {
+          roomId,
+          from: userId,
+          userName,
+          signal,
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.error('Screen share peer error:', err);
+        toast({
+          title: 'Connection Error',
+          description: 'Failed to establish screen share connection',
+          variant: 'destructive',
+        });
+      });
+
+      peerRef.current = peer;
 
       // Start recording if requested
       if (options.recordSession) {
@@ -206,13 +290,25 @@ export function useScreenShare(roomId: string, userId: string) {
       state.localStream.getTracks().forEach(track => track.stop());
     }
 
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
+    if (peerRef.current) {
+      peerRef.current.destroy();
+      peerRef.current = null;
     }
+
+    // Destroy all viewer peers
+    peersRef.current.forEach(peer => peer.destroy());
+    peersRef.current.clear();
 
     if (state.isRecording) {
       stopRecording();
+    }
+
+    // Notify room
+    if (socket) {
+      socket.emit('screen-share:stop', {
+        roomId,
+        userId,
+      });
     }
 
     console.log('Screen sharing stopped');
@@ -297,93 +393,19 @@ export function useScreenShare(roomId: string, userId: string) {
     });
   };
 
-  // Handle signaling events
-  const handleOffer = async (data: any) => {
-    const pc = createPeerConnection();
-    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    console.log('Created answer:', answer);
-    
-    // In production, send answer via Socket.io
-  };
-
-  const handleAnswer = async (data: any) => {
-    if (peerConnectionRef.current) {
-      await peerConnectionRef.current.setRemoteDescription(
-        new RTCSessionDescription(data.answer)
-      );
-    }
-  };
-
-  const handleIceCandidate = async (data: any) => {
-    if (peerConnectionRef.current && data.candidate) {
-      await peerConnectionRef.current.addIceCandidate(
-        new RTCIceCandidate(data.candidate)
-      );
-    }
-  };
-
-  const handleParticipantJoined = (data: any) => {
-    setState(prev => ({
-      ...prev,
-      participants: [
-        ...prev.participants,
-        {
-          id: data.userId,
-          name: data.userName,
-          isSharing: false,
-          timestamp: new Date(),
-        },
-      ],
-    }));
-  };
-
-  const handleParticipantLeft = (data: any) => {
-    setState(prev => ({
-      ...prev,
-      participants: prev.participants.filter(p => p.id !== data.userId),
-    }));
-  };
-
-  const handleSharingStarted = (data: any) => {
-    setState(prev => ({
-      ...prev,
-      participants: prev.participants.map(p =>
-        p.id === data.userId ? { ...p, isSharing: true } : p
-      ),
-    }));
-
-    toast({
-      title: 'Screen Sharing',
-      description: `${data.userName} started sharing their screen`,
-    });
-  };
-
-  const handleSharingStopped = (data: any) => {
-    setState(prev => ({
-      ...prev,
-      participants: prev.participants.map(p =>
-        p.id === data.userId ? { ...p, isSharing: false } : p
-      ),
-      ...(data.userId !== userId && { isViewing: false, remoteStream: null }),
-    }));
-  };
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (state.localStream) {
         state.localStream.getTracks().forEach(track => track.stop());
       }
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
+      if (peerRef.current) {
+        peerRef.current.destroy();
       }
-      if (wsRef.current) {
-        wsRef.current.disconnect?.();
-      }
+      peersRef.current.forEach(peer => peer.destroy());
+      peersRef.current.clear();
     };
-  }, []);
+  }, [state.localStream]);
 
   return {
     ...state,

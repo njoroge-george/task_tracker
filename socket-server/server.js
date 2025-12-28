@@ -227,6 +227,55 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Screen Sharing Signaling
+  socket.on('screen-share:start', (data) => {
+    console.log(`🖥️ Screen share started in room: ${data.roomId} by ${data.userName}`);
+    socket.join(`screen:${data.roomId}`);
+    
+    // Notify others in the room
+    socket.to(`screen:${data.roomId}`).emit('screen-share:started', {
+      userId: data.userId,
+      userName: data.userName,
+      roomId: data.roomId,
+    });
+  });
+
+  socket.on('screen-share:offer', (data) => {
+    console.log(`📤 Screen share offer from ${data.from} to ${data.to}`);
+    socket.to(`screen:${data.roomId}`).emit('screen-share:offer', {
+      from: data.from,
+      signal: data.signal,
+      userName: data.userName,
+    });
+  });
+
+  socket.on('screen-share:answer', (data) => {
+    console.log(`📥 Screen share answer from ${data.from}`);
+    socket.to(`screen:${data.roomId}`).emit('screen-share:answer', {
+      from: data.from,
+      signal: data.signal,
+    });
+  });
+
+  socket.on('screen-share:stop', (data) => {
+    console.log(`🛑 Screen share stopped in room: ${data.roomId}`);
+    socket.to(`screen:${data.roomId}`).emit('screen-share:stopped', {
+      userId: data.userId,
+    });
+    socket.leave(`screen:${data.roomId}`);
+  });
+
+  socket.on('screen-share:join-room', (data) => {
+    console.log(`👥 User ${data.userName} joined screen share room: ${data.roomId}`);
+    socket.join(`screen:${data.roomId}`);
+    
+    // Notify the sharer that someone joined
+    socket.to(`screen:${data.roomId}`).emit('screen-share:viewer-joined', {
+      userId: data.userId,
+      userName: data.userName,
+    });
+  });
+
   // Disconnect
   socket.on('disconnect', () => {
     console.log('❌ Client disconnected:', socket.id);

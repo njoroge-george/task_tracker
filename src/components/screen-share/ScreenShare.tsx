@@ -30,6 +30,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useScreenShare, ScreenShareOptions } from '@/hooks/use-screen-share';
+import { useRealtime } from '@/contexts/RealtimeContext';
 import { hasFeature } from '@/lib/plan-features';
 import Link from 'next/link';
 import {
@@ -65,6 +66,7 @@ export default function ScreenShare({
   className = '',
 }: ScreenShareProps) {
   const { data: session } = useSession();
+  const { socket } = useRealtime();
   const userPlan = session?.user?.plan;
   const {
     isSharing,
@@ -79,7 +81,7 @@ export default function ScreenShare({
     startRecording,
     stopRecording,
     downloadRecording,
-  } = useScreenShare(roomId, userId);
+  } = useScreenShare(roomId, userId, userName, socket);
 
   const [options, setOptions] = useState<ScreenShareOptions>({
     includeAudio: false,
