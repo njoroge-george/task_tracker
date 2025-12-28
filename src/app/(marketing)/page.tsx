@@ -323,7 +323,14 @@ export default function LandingPage() {
               component={NextLink}
               href="/auth/signin"
               variant="text"
-              sx={{ display: { xs: "none", sm: "inline-flex" } }}
+              sx={{ 
+                display: { xs: "none", sm: "inline-flex" },
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  color: accentMain,
+                },
+              }}
             >
               Sign In
             </Button>
@@ -334,6 +341,12 @@ export default function LandingPage() {
               variant="contained"
               sx={{
                 px: 3,
+                transition: "all 0.3s ease",
+                boxShadow: "0 4px 14px 0 rgba(0, 0, 0, 0.1)",
+                "&:hover": {
+                  transform: "translateY(-3px)",
+                  boxShadow: "0 8px 20px 0 rgba(0, 0, 0, 0.2)",
+                },
               }}
             >
               Get Started
@@ -417,6 +430,19 @@ export default function LandingPage() {
                   px: { xs: 4, sm: 5 },
                   py: { xs: 2, sm: 2.5 },
                   fontSize: "1.1rem",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
+                  background: `linear-gradient(135deg, ${accentMain} 0%, ${theme.palette.primary.dark} 100%)`,
+                  "&:hover": {
+                    transform: "translateY(-4px) scale(1.02)",
+                    boxShadow: "0 20px 35px -5px rgba(0, 0, 0, 0.25)",
+                    "& .MuiButton-endIcon": {
+                      transform: "translateX(4px)",
+                    },
+                  },
+                  "& .MuiButton-endIcon": {
+                    transition: "transform 0.3s ease",
+                  },
                 }}
               >
                 Start Free Trial
@@ -429,6 +455,14 @@ export default function LandingPage() {
                   px: { xs: 4, sm: 5 },
                   py: { xs: 2, sm: 2.5 },
                   fontSize: "1.1rem",
+                  transition: "all 0.3s ease",
+                  borderWidth: 2,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    borderWidth: 2,
+                    backgroundColor: alpha(accentMain, 0.1),
+                    boxShadow: "0 10px 20px -5px rgba(0, 0, 0, 0.15)",
+                  },
                 }}
               >
                 Watch Demo
@@ -502,16 +536,21 @@ export default function LandingPage() {
                     borderWidth: 2,
                     borderColor: 'none',
                     backgroundColor: cardBackground,
-                    transition: "transform 0.25s, box-shadow 0.25s, border-color 0.25s",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    cursor: "pointer",
                     "&:hover": {
                       borderColor: accentMain,
-                      transform: "translateY(-6px)",
-                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                      transform: "translateY(-12px) scale(1.02)",
+                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                      "& .feature-icon": {
+                        transform: "scale(1.1) rotate(5deg)",
+                      },
                     },
                   }}
                 >
                   <CardContent sx={{ p: 4 }}>
                     <Box
+                      className="feature-icon"
                       sx={{
                         width: 48,
                         height: 48,
@@ -521,6 +560,7 @@ export default function LandingPage() {
                         justifyContent: "center",
                         mb: 3,
                         backgroundColor: iconBg,
+                        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                     >
                       <Icon size={28} color={paletteColor} />
@@ -590,12 +630,14 @@ export default function LandingPage() {
                   boxShadow: plan.highlighted
                     ? "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                     : "none",
-                  transition: "transform 0.25s, box-shadow 0.25s",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  cursor: "pointer",
                   "&:hover": {
                     transform: plan.highlighted
-                      ? "scale(1.04)"
-                      : "translateY(-6px)",
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                      ? "scale(1.06) translateY(-8px)"
+                      : "translateY(-10px) scale(1.02)",
+                    boxShadow: "0 30px 60px -12px rgba(0, 0, 0, 0.25)",
+                    borderColor: accentMain,
                   },
                 }}
               >
@@ -657,7 +699,21 @@ export default function LandingPage() {
                       component={NextLink}
                       href={plan.ctaHref}
                       variant={plan.ctaVariant}
-                      sx={{ width: "100%" }}
+                      sx={{ 
+                        width: "100%",
+                        py: 1.5,
+                        transition: "all 0.3s ease",
+                        ...(plan.ctaVariant === "contained" && {
+                          boxShadow: "0 4px 14px 0 rgba(0, 0, 0, 0.1)",
+                          background: `linear-gradient(135deg, ${accentMain} 0%, ${theme.palette.primary.dark} 100%)`,
+                        }),
+                        "&:hover": {
+                          transform: "translateY(-3px)",
+                          boxShadow: plan.ctaVariant === "contained" 
+                            ? "0 10px 25px 0 rgba(0, 0, 0, 0.2)"
+                            : "0 5px 15px 0 rgba(0, 0, 0, 0.1)",
+                        },
+                      }}
                     >
                       {plan.ctaLabel}
                     </Button>
@@ -857,10 +913,22 @@ export default function LandingPage() {
                 endIcon={<ArrowRight size={20} />}
                 sx={{
                   width: { xs: "100%", sm: "auto" },
+                  px: 5,
+                  py: 2,
                   backgroundColor: theme.palette.common.white,
                   color: accentMain,
+                  boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.3)",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
-                    backgroundColor: alpha(theme.palette.common.white, 0.9),
+                    backgroundColor: alpha(theme.palette.common.white, 0.95),
+                    transform: "translateY(-5px) scale(1.02)",
+                    boxShadow: "0 20px 40px -5px rgba(0, 0, 0, 0.4)",
+                    "& .MuiButton-endIcon": {
+                      transform: "translateX(5px)",
+                    },
+                  },
+                  "& .MuiButton-endIcon": {
+                    transition: "transform 0.3s ease",
                   },
                 }}
               >
@@ -871,11 +939,18 @@ export default function LandingPage() {
                 variant="outlined"
                 sx={{
                   width: { xs: "100%", sm: "auto" },
+                  px: 5,
+                  py: 2,
+                  borderWidth: 2,
                   borderColor: alpha(theme.palette.common.white, 0.7),
                   color: theme.palette.common.white,
+                  transition: "all 0.3s ease",
                   "&:hover": {
-                    backgroundColor: alpha(theme.palette.common.white, 0.1),
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
                     borderColor: theme.palette.common.white,
+                    borderWidth: 2,
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
                   },
                 }}
               >

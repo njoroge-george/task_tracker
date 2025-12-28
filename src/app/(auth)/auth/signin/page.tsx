@@ -46,10 +46,10 @@ export default function SignInPage() {
   // };
 
   return (
-    <div className="rounded-3xl border border-default bg-[rgb(var(--card-background))] p-10 space-y-8 shadow-2xl backdrop-blur dark:bg-slate-900/80">
+    <div className="rounded-3xl border border-default bg-[rgb(var(--card-background))] p-10 space-y-8 shadow-2xl backdrop-blur dark:bg-slate-900/80 transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)]">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-secondary mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-secondary mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12">
           <svg
             className="w-8 h-8 text-accent"
             fill="none"
@@ -64,10 +64,10 @@ export default function SignInPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-primary">
+        <h1 className="text-3xl font-bold text-primary animate-fade-in">
           Welcome Back
         </h1>
-        <p className="mt-2 text-secondary">
+        <p className="mt-2 text-secondary animate-fade-in-delay">
           Sign in to your account to continue
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function SignInPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
+            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] focus:scale-[1.02] hover:shadow-md dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
             placeholder="you@example.com"
           />
         </div>
@@ -166,7 +166,7 @@ export default function SignInPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
+            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] focus:scale-[1.02] hover:shadow-md dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
             placeholder="••••••••"
           />
         </div>
@@ -183,7 +183,7 @@ export default function SignInPage() {
           </label>
           <Link
             href="/auth/forgot-password"
-            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+            className="text-sm text-blue-600 hover:underline hover:text-blue-700 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Forgot password?
           </Link>
@@ -192,9 +192,16 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-500))] to-[rgb(var(--color-primary-700))] px-4 py-3 font-semibold text-white shadow-lg transition-all hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+          className="group w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-500))] to-[rgb(var(--color-primary-700))] px-4 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
         >
-          {loading ? "Signing in..." : "Sign In"}
+          <span className="inline-flex items-center justify-center gap-2">
+            {loading ? "Signing in..." : "Sign In"}
+            {!loading && (
+              <svg className="w-5 h-5 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            )}
+          </span>
         </button>
       </form>
 
@@ -203,7 +210,7 @@ export default function SignInPage() {
         Don't have an account?{" "}
         <Link
           href="/auth/signup"
-          className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+          className="font-semibold text-blue-600 hover:underline hover:text-blue-700 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
         >
           Sign up for free
         </Link>

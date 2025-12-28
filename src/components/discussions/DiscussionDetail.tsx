@@ -410,8 +410,8 @@ export default function DiscussionDetail({
 
         {/* Discussion Content */}
         <div className="bg-primary border border-default rounded-xl p-6 mb-6">
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p className="text-primary whitespace-pre-wrap">{discussion.content}</p>
+          <div className="text-primary whitespace-pre-wrap break-words">
+            {discussion.content}
           </div>
         </div>
 

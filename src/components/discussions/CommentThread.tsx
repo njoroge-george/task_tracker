@@ -117,7 +117,7 @@ export function CommentThread({
 
             {/* Comment text */}
             <div 
-              className="prose prose-sm max-w-none dark:prose-invert text-sm text-gray-700 dark:text-gray-300"
+              className="text-sm text-gray-700 dark:text-gray-300 [&>*]:mb-2 [&>*:last-child]:mb-0"
               dangerouslySetInnerHTML={{ __html: comment.content }}
             />
           </div>

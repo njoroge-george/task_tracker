@@ -82,10 +82,10 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-primary rounded-2xl shadow-2xl p-8 space-y-6">
+    <div className="bg-primary rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)]">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12">
           <svg
             className="w-8 h-8 text-accent dark:text-purple-400"
             fill="none"
@@ -100,10 +100,10 @@ export default function SignUpPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-primary">
+        <h1 className="text-3xl font-bold text-primary animate-fade-in">
           Create Account
         </h1>
-        <p className="mt-2 text-secondary">
+        <p className="mt-2 text-secondary animate-fade-in-delay">
           Start your productivity journey today
         </p>
       </div>
@@ -183,7 +183,7 @@ export default function SignUpPage() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full px-4 py-3 border border-default rounded-lg bg-card text-primary transition-all duration-300 focus:ring-2 focus:ring-accent focus:border-transparent focus:scale-[1.02] hover:shadow-md"
             placeholder="John Doe"
           />
         </div>
@@ -202,7 +202,7 @@ export default function SignUpPage() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full px-4 py-3 border border-default rounded-lg bg-card text-primary transition-all duration-300 focus:ring-2 focus:ring-accent focus:border-transparent focus:scale-[1.02] hover:shadow-md"
             placeholder="you@example.com"
           />
         </div>
@@ -221,7 +221,7 @@ export default function SignUpPage() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full px-4 py-3 border border-default rounded-lg bg-card text-primary transition-all duration-300 focus:ring-2 focus:ring-accent focus:border-transparent focus:scale-[1.02] hover:shadow-md"
             placeholder="••••••••"
           />
           <p className="mt-1 text-xs text-secondary">
@@ -243,7 +243,7 @@ export default function SignUpPage() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent bg-card text-primary transition-all"
+            className="w-full px-4 py-3 border border-default rounded-lg bg-card text-primary transition-all duration-300 focus:ring-2 focus:ring-accent focus:border-transparent focus:scale-[1.02] hover:shadow-md"
             placeholder="••••••••"
           />
         </div>
@@ -270,9 +270,16 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-4 rounded-lg shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0"
         >
-          {loading ? "Creating account..." : "Create Account"}
+          <span className="inline-flex items-center justify-center gap-2">
+            {loading ? "Creating account..." : "Create Account"}
+            {!loading && (
+              <svg className="w-5 h-5 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            )}
+          </span>
         </button>
       </form>
 
@@ -281,7 +288,7 @@ export default function SignUpPage() {
         Already have an account?{" "}
         <Link
           href="/auth/signin"
-          className="text-accent dark:text-purple-400 font-semibold hover:underline"
+          className="text-accent dark:text-purple-400 font-semibold hover:underline hover:text-purple-700 transition-colors duration-200 dark:hover:text-purple-300"
         >
           Sign in
         </Link>
