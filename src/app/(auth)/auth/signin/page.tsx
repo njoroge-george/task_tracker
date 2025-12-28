@@ -46,12 +46,12 @@ export default function SignInPage() {
   // };
 
   return (
-    <div className="rounded-3xl border border-default bg-[rgb(var(--card-background))] p-10 space-y-8 shadow-2xl backdrop-blur dark:bg-slate-900/80 transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)]">
+    <div className="rounded-3xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-950/30 p-10 space-y-8 shadow-2xl backdrop-blur transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(59,130,246,0.5)] hover:border-blue-400 dark:hover:border-blue-600">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-secondary mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12 shadow-lg">
           <svg
-            className="w-8 h-8 text-accent"
+            className="w-8 h-8 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -64,18 +64,18 @@ export default function SignInPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-primary animate-fade-in">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-fade-in">
           Welcome Back
         </h1>
-        <p className="mt-2 text-secondary animate-fade-in-delay">
+        <p className="mt-2 text-gray-600 dark:text-gray-400 animate-fade-in-delay">
           Sign in to your account to continue
         </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-status-error">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600 rounded-xl p-4 animate-shake">
+          <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
         </div>
       )}
 
@@ -124,10 +124,10 @@ export default function SignInPage() {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-default"></div>
+          <div className="w-full border-t-2 border-gray-200 dark:border-gray-700"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-primary text-secondary">
+          <span className="px-4 bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-400 font-medium">
             Or continue with email
           </span>
         </div>
@@ -138,7 +138,7 @@ export default function SignInPage() {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-primary mb-2"
+            className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
           >
             Email Address
           </label>
@@ -148,7 +148,7 @@ export default function SignInPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] focus:scale-[1.02] hover:shadow-md dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
+            className="w-full rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 px-4 py-3 text-gray-900 dark:text-white font-medium shadow-sm placeholder:text-gray-400 transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:scale-[1.02] hover:border-blue-400 hover:shadow-md"
             placeholder="you@example.com"
           />
         </div>
@@ -156,7 +156,7 @@ export default function SignInPage() {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-primary mb-2"
+            className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
           >
             Password
           </label>
@@ -166,24 +166,24 @@ export default function SignInPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-primary shadow-sm placeholder:text-slate-500 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary-500))] focus:scale-[1.02] hover:shadow-md dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-400"
+            className="w-full rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 px-4 py-3 text-gray-900 dark:text-white font-medium shadow-sm placeholder:text-gray-400 transition-all duration-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:scale-[1.02] hover:border-blue-400 hover:shadow-md"
             placeholder="••••••••"
           />
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center">
+          <label className="flex items-center group cursor-pointer">
             <input
               type="checkbox"
-              className="w-4 h-4 text-accent border-default rounded focus:ring-accent"
+              className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-all"
             />
-            <span className="ml-2 text-sm text-secondary">
+            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               Remember me
             </span>
           </label>
           <Link
             href="/auth/forgot-password"
-            className="text-sm text-blue-600 hover:underline hover:text-blue-700 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Forgot password?
           </Link>
@@ -192,7 +192,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="group w-full rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary-100))] to-[rgb(var(--color-primary-300))] px-4 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:from-[rgb(var(--color-primary-600))] hover:to-[rgb(var(--color-primary-800))] hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
+          className="group w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3.5 font-bold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0 active:scale-95"
         >
           <span className="inline-flex items-center justify-center gap-2">
             {loading ? "Signing in..." : "Sign In"}
@@ -206,11 +206,11 @@ export default function SignInPage() {
       </form>
 
       {/* Sign Up Link */}
-      <p className="text-center text-sm text-secondary">
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400">
         Don't have an account?{" "}
         <Link
           href="/auth/signup"
-          className="font-semibold text-blue-600 hover:underline hover:text-blue-700 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+          className="font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
         >
           Sign up for free
         </Link>

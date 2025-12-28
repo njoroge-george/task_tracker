@@ -82,12 +82,12 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-primary rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)]">
+    <div className="rounded-3xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950/30 p-10 space-y-8 shadow-2xl backdrop-blur transform transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(168,85,247,0.5)] hover:border-purple-400 dark:hover:border-purple-600">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 mb-4 transform transition-all duration-300 hover:scale-110 hover:rotate-12 shadow-lg">
           <svg
-            className="w-8 h-8 text-accent dark:text-purple-400"
+            className="w-8 h-8 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -100,18 +100,18 @@ export default function SignUpPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-primary animate-fade-in">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in">
           Create Account
         </h1>
-        <p className="mt-2 text-secondary animate-fade-in-delay">
+        <p className="mt-2 text-gray-600 dark:text-gray-400 animate-fade-in-delay">
           Start your productivity journey today
         </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-status-error">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600 rounded-xl p-4 animate-shake">
+          <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
         </div>
       )}
 

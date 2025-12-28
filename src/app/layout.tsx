@@ -10,6 +10,7 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
   preload: true,
+  adjustFontFallback: true,
   fallback: [
     "system-ui",
     "-apple-system",
@@ -88,13 +89,23 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <head>
         <meta name="emotion-insertion-point" content="" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <style dangerouslySetInnerHTML={{ __html: `
+          /* Prevent layout shift during font loading */
+          body {
+            font-family: ${inter.style.fontFamily}, system-ui, -apple-system, sans-serif;
+          }
+          /* Ensure smooth font loading */
+          @supports (font-variation-settings: normal) {
+            body { font-feature-settings: "cv11", "ss01"; }
+          }
+        `}} />
       </head>
       <body
         className={`${inter.variable} font-sans antialiased`}
