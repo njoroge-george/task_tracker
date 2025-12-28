@@ -50,8 +50,20 @@ export const RealtimeProvider: React.FC<{
 
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000', {
-      path: '/api/socket',
+    // Use dedicated Socket.IO server on Fly.io for production, local for development
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
+                      (process.env.NODE_ENV === 'production' 
+                        ? 'https://taskflow-socket.fly.dev' 
+                        : 'http://localhost:3000');
+    
+    console.log('🔌 Connecting to Socket.IO server:', socketUrl);
+    
+    const socketInstance = io(socketUrl, {
+      path: process.env.NODE_ENV === 'production' ? '/socket.io' : '/api/socket',
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
     socketInstance.on('connect', () => {

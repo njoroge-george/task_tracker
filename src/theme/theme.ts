@@ -78,7 +78,7 @@ export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
       900: "#312e81",
     },
     background: {
-      primary: "#ffffff",
+      primary: "#ffffffff",
       secondary: "#f8f9ff",
       tertiary: "#eef1ff",
     },
@@ -94,7 +94,7 @@ export const themeTokens: Record<ThemeMode, ThemeDefinition> = {
       dark: "#94a3d3",
     },
     card: {
-      background: "#ffffff",
+      background: "#ffffffff",
       border: "#e0e7ff",
       shadow: "rgba(79, 70, 229, 0.08)",
       foreground: "#0f172a",
