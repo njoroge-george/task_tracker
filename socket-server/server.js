@@ -45,8 +45,12 @@ const io = new Server(httpServer, {
     credentials: true
   },
   transports: ['websocket', 'polling'],
-  pingTimeout: 60000,
-  pingInterval: 25000
+  pingTimeout: 120000,  // 2 minutes (increased from 60s)
+  pingInterval: 25000,  // 25 seconds
+  upgradeTimeout: 30000,
+  maxHttpBufferSize: 1e8,  // 100 MB for screen sharing
+  allowEIO3: true,
+  connectTimeout: 45000,
 });
 
 // Socket.IO connection handler

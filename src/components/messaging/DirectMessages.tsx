@@ -203,26 +203,57 @@ export default function DirectMessages({ currentUserId, users, initialConversati
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedUser) return;
 
+    const tempMessageId = `temp-${Date.now()}`;
+    const tempMessage = {
+      id: tempMessageId,
+      content: newMessage,
+      senderId: currentUserId,
+      recipientId: selectedUser.id,
+      createdAt: new Date(),
+      read: false,
+      sender: {
+        id: currentUserId,
+        name: 'You',
+        email: '',
+      },
+    };
+
+    // Optimistic update - add message immediately
+    setMessages(prev => [...prev, tempMessage as any]);
+    const messageContent = newMessage;
+    setNewMessage(''); // Clear input immediately
+
     try {
       const response = await fetch('/api/messages/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientId: selectedUser.id,
-          content: newMessage,
+          content: messageContent,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setMessages(prev => [...prev, data.message]);
-        setNewMessage('');
         
-        // Emit via socket
+        // Replace temp message with real one
+        setMessages(prev => 
+          prev.map(msg => msg.id === tempMessageId ? data.message : msg)
+        );
+        
+        // Emit via socket for real-time delivery
         socket?.emit('dm:send', data.message);
         socket?.emit('dm:typing', { recipientId: selectedUser.id, isTyping: false });
+      } else {
+        // Rollback on error
+        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+        setNewMessage(messageContent); // Restore message
+        console.error('Failed to send message');
       }
     } catch (error) {
+      // Rollback on error
+      setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+      setNewMessage(messageContent); // Restore message
       console.error('Failed to send message:', error);
     }
   };

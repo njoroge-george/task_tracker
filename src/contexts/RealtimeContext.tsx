@@ -63,7 +63,11 @@ export const RealtimeProvider: React.FC<{
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      reconnectionDelayMax: 5000,
+      timeout: 45000,
+      autoConnect: true,
+      forceNew: false,
     });
 
     socketInstance.on('connect', () => {
@@ -81,8 +85,31 @@ export const RealtimeProvider: React.FC<{
       }
     });
 
-    socketInstance.on('disconnect', () => {
-      console.log('Socket disconnected');
+    socketInstance.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+      setIsConnected(false);
+    });
+
+    socketInstance.on('reconnect', (attemptNumber) => {
+      console.log('Socket reconnected after', attemptNumber, 'attempts');
+      setIsConnected(true);
+      
+      // Rejoin rooms after reconnection
+      if (workspaceId) {
+        socketInstance.emit('join:workspace', workspaceId);
+      }
+      if (userId) {
+        socketInstance.emit('dm:join', userId);
+      }
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setIsConnected(false);
+    });
+
+    socketInstance.on('reconnect_failed', () => {
+      console.error('Socket reconnection failed');
       setIsConnected(false);
     });
 
