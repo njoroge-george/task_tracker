@@ -12,9 +12,13 @@ interface Participant {
   userAvatar?: string;
   socketId: string;
   isMuted: boolean;
+  isVideoOn?: boolean;
+  isScreenSharing?: boolean;
   isSpeaking?: boolean;
   peer?: SimplePeer.Instance;
   stream?: MediaStream;
+  videoStream?: MediaStream;
+  screenStream?: MediaStream;
 }
 
 interface VoiceRoom {
@@ -30,14 +34,25 @@ interface VoiceRoomContextType {
   currentRoom: VoiceRoom | null;
   participants: Participant[];
   localStream: MediaStream | null;
+  localVideoStream: MediaStream | null;
+  localScreenStream: MediaStream | null;
   isMuted: boolean;
   isDeafened: boolean;
+  isVideoOn: boolean;
+  isScreenSharing: boolean;
   isSpeaking: boolean;
   joinRoom: (room: VoiceRoom) => Promise<void>;
   leaveRoom: () => void;
   toggleMute: () => void;
   toggleDeafen: () => void;
+  toggleVideo: () => Promise<void>;
+  toggleScreenShare: () => Promise<void>;
   isConnecting: boolean;
+  // Picture-in-picture
+  pipVideoRef: React.RefObject<HTMLVideoElement | null>;
+  enterPiP: () => Promise<void>;
+  exitPiP: () => void;
+  isPiPActive: boolean;
 }
 
 const VoiceRoomContext = createContext<VoiceRoomContextType | undefined>(undefined);
@@ -58,22 +73,31 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [currentRoom, setCurrentRoom] = useState<VoiceRoom | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(null);
+  const [localScreenStream, setLocalScreenStream] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isPiPActive, setIsPiPActive] = useState(false);
   
   const peersRef = useRef<Map<string, SimplePeer.Instance>>(new Map());
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const pipVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Cleanup function
   const cleanup = useCallback(() => {
-    // Stop local stream
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      setLocalStream(null);
-    }
+    // Stop local streams
+    localStream?.getTracks().forEach(track => track.stop());
+    localVideoStream?.getTracks().forEach(track => track.stop());
+    localScreenStream?.getTracks().forEach(track => track.stop());
+    
+    setLocalStream(null);
+    setLocalVideoStream(null);
+    setLocalScreenStream(null);
     
     // Close all peer connections
     peersRef.current.forEach((peer) => {
@@ -87,13 +111,21 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       audioContextRef.current = null;
     }
     
+    // Exit PiP if active
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().catch(() => {});
+    }
+    
     setParticipants([]);
     setCurrentRoom(null);
     setIsInRoom(false);
     setIsMuted(false);
     setIsDeafened(false);
+    setIsVideoOn(false);
+    setIsScreenSharing(false);
     setIsSpeaking(false);
-  }, [localStream]);
+    setIsPiPActive(false);
+  }, [localStream, localVideoStream, localScreenStream]);
 
   // Voice Activity Detection
   const setupVAD = useCallback((stream: MediaStream) => {
@@ -160,16 +192,39 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     peer.on('stream', (remoteStream) => {
       console.log(`Received stream from ${targetSocketId}`);
+      
+      // Check if it's video or audio stream
+      const hasVideo = remoteStream.getVideoTracks().length > 0;
+      
       setParticipants(prev => prev.map(p => 
         p.socketId === targetSocketId 
-          ? { ...p, stream: remoteStream }
+          ? { 
+              ...p, 
+              stream: hasVideo ? p.stream : remoteStream,
+              videoStream: hasVideo ? remoteStream : p.videoStream,
+            }
           : p
       ));
       
-      // Play audio
-      const audio = new Audio();
-      audio.srcObject = remoteStream;
-      audio.play().catch(console.error);
+      // Play audio if it's an audio stream
+      if (!hasVideo) {
+        const audio = new Audio();
+        audio.srcObject = remoteStream;
+        audio.play().catch(console.error);
+      }
+    });
+
+    peer.on('track', (track, stream) => {
+      console.log(`Received track from ${targetSocketId}:`, track.kind);
+      
+      setParticipants(prev => prev.map(p => {
+        if (p.socketId !== targetSocketId) return p;
+        
+        if (track.kind === 'video') {
+          return { ...p, videoStream: stream };
+        }
+        return p;
+      }));
     });
 
     peer.on('error', (err) => {
@@ -297,6 +352,146 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   }, [participants, currentRoom, socket, session]);
 
+  // Toggle video
+  const toggleVideo = useCallback(async () => {
+    if (!currentRoom || !socket || !session?.user) return;
+
+    if (isVideoOn) {
+      // Turn off video
+      localVideoStream?.getTracks().forEach(track => track.stop());
+      setLocalVideoStream(null);
+      setIsVideoOn(false);
+      
+      socket.emit('voice-room:video-toggle', {
+        roomId: currentRoom.id,
+        userId: session.user.id,
+        isVideoOn: false,
+      });
+    } else {
+      try {
+        // Turn on video
+        const videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720 },
+          audio: false,
+        });
+        
+        setLocalVideoStream(videoStream);
+        setIsVideoOn(true);
+        
+        // Add video track to existing peers
+        peersRef.current.forEach((peer) => {
+          videoStream.getVideoTracks().forEach(track => {
+            peer.addTrack(track, videoStream);
+          });
+        });
+        
+        socket.emit('voice-room:video-toggle', {
+          roomId: currentRoom.id,
+          userId: session.user.id,
+          isVideoOn: true,
+        });
+      } catch (error) {
+        console.error('Failed to enable video:', error);
+        toast.error('Failed to access camera');
+      }
+    }
+  }, [currentRoom, socket, session, isVideoOn, localVideoStream]);
+
+  // Toggle screen sharing
+  const toggleScreenShare = useCallback(async () => {
+    if (!currentRoom || !socket || !session?.user) return;
+
+    if (isScreenSharing) {
+      // Stop screen sharing
+      localScreenStream?.getTracks().forEach(track => track.stop());
+      setLocalScreenStream(null);
+      setIsScreenSharing(false);
+      
+      socket.emit('voice-room:screen-share-stop', {
+        roomId: currentRoom.id,
+        userId: session.user.id,
+        userName: session.user.name,
+      });
+    } else {
+      try {
+        // Start screen sharing
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30 },
+          },
+          audio: true, // Include system audio if available
+        });
+        
+        setLocalScreenStream(screenStream);
+        setIsScreenSharing(true);
+        
+        // Handle when user stops sharing via browser UI
+        screenStream.getVideoTracks()[0].onended = () => {
+          setLocalScreenStream(null);
+          setIsScreenSharing(false);
+          socket.emit('voice-room:screen-share-stop', {
+            roomId: currentRoom.id,
+            userId: session.user.id,
+            userName: session.user.name,
+          });
+        };
+        
+        // Add screen track to existing peers
+        peersRef.current.forEach((peer) => {
+          screenStream.getTracks().forEach(track => {
+            peer.addTrack(track, screenStream);
+          });
+        });
+        
+        socket.emit('voice-room:screen-share-start', {
+          roomId: currentRoom.id,
+          userId: session.user.id,
+          userName: session.user.name,
+        });
+        
+        toast.success('Screen sharing started');
+      } catch (error) {
+        console.error('Failed to start screen sharing:', error);
+        if ((error as Error).name !== 'NotAllowedError') {
+          toast.error('Failed to start screen sharing');
+        }
+      }
+    }
+  }, [currentRoom, socket, session, isScreenSharing, localScreenStream]);
+
+  // Picture-in-Picture
+  const enterPiP = useCallback(async () => {
+    const videoEl = pipVideoRef.current;
+    if (!videoEl) return;
+    
+    // Get the most relevant video to show
+    const screenSharer = participants.find(p => p.isScreenSharing && p.screenStream);
+    const activeVideo = participants.find(p => p.isVideoOn && p.videoStream);
+    
+    const streamToShow = screenSharer?.screenStream || activeVideo?.videoStream || localVideoStream || localScreenStream;
+    
+    if (streamToShow && videoEl) {
+      videoEl.srcObject = streamToShow;
+      try {
+        await videoEl.requestPictureInPicture();
+        setIsPiPActive(true);
+      } catch (error) {
+        console.error('Failed to enter PiP:', error);
+        toast.error('Picture-in-Picture not supported');
+      }
+    }
+  }, [participants, localVideoStream, localScreenStream]);
+
+  const exitPiP = useCallback(() => {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().then(() => {
+        setIsPiPActive(false);
+      }).catch(console.error);
+    }
+  }, []);
+
   // Socket event listeners
   useEffect(() => {
     if (!socket) return;
@@ -365,6 +560,28 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ));
     });
 
+    // User video toggled
+    socket.on('voice-room:user-video-toggled', (data: { userId: string; isVideoOn: boolean }) => {
+      setParticipants(prev => prev.map(p => 
+        p.userId === data.userId ? { ...p, isVideoOn: data.isVideoOn } : p
+      ));
+    });
+
+    // Screen share started
+    socket.on('voice-room:screen-share-started', (data: { userId: string; userName: string }) => {
+      setParticipants(prev => prev.map(p => 
+        p.userId === data.userId ? { ...p, isScreenSharing: true } : p
+      ));
+      toast.info(`${data.userName} started screen sharing`);
+    });
+
+    // Screen share stopped
+    socket.on('voice-room:screen-share-stopped', (data: { userId: string; userName: string }) => {
+      setParticipants(prev => prev.map(p => 
+        p.userId === data.userId ? { ...p, isScreenSharing: false, screenStream: undefined } : p
+      ));
+    });
+
     return () => {
       socket.off('voice-room:participants');
       socket.off('voice-room:user-joined');
@@ -372,6 +589,9 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       socket.off('voice-room:signal');
       socket.off('voice-room:user-muted');
       socket.off('voice-room:user-speaking');
+      socket.off('voice-room:user-video-toggled');
+      socket.off('voice-room:screen-share-started');
+      socket.off('voice-room:screen-share-stopped');
     };
   }, [socket, localStream, createPeer]);
 
@@ -391,17 +611,35 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         currentRoom,
         participants,
         localStream,
+        localVideoStream,
+        localScreenStream,
         isMuted,
         isDeafened,
+        isVideoOn,
+        isScreenSharing,
         isSpeaking,
         joinRoom,
         leaveRoom,
         toggleMute,
         toggleDeafen,
+        toggleVideo,
+        toggleScreenShare,
         isConnecting,
+        pipVideoRef,
+        enterPiP,
+        exitPiP,
+        isPiPActive,
       }}
     >
       {children}
+      {/* Hidden video element for PiP */}
+      <video
+        ref={pipVideoRef}
+        autoPlay
+        playsInline
+        muted
+        style={{ position: 'fixed', opacity: 0, pointerEvents: 'none', width: 1, height: 1 }}
+      />
     </VoiceRoomContext.Provider>
   );
 };

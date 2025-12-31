@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -32,9 +33,17 @@ import {
   Loader2,
   Settings,
   Trash2,
+  Video,
+  VideoOff,
+  MonitorUp,
+  MonitorOff,
+  PictureInPicture,
+  Maximize2,
+  Grid3X3,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { VideoGrid } from '@/components/rooms/VideoGrid';
 
 interface VoiceRoom {
   id: string;
@@ -67,14 +76,23 @@ export default function VoiceRoomsPage() {
     isInRoom,
     currentRoom,
     participants,
+    localVideoStream,
+    localScreenStream,
     isMuted,
     isDeafened,
+    isVideoOn,
+    isScreenSharing,
     isSpeaking,
     joinRoom,
     leaveRoom,
     toggleMute,
     toggleDeafen,
+    toggleVideo,
+    toggleScreenShare,
     isConnecting,
+    enterPiP,
+    exitPiP,
+    isPiPActive,
   } = useVoiceRoom();
 
   const [rooms, setRooms] = useState<VoiceRoom[]>([]);
@@ -83,6 +101,7 @@ export default function VoiceRoomsPage() {
   const [creating, setCreating] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
   const [newRoomDescription, setNewRoomDescription] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Fetch voice rooms
   const fetchRooms = useCallback(async () => {
@@ -225,6 +244,7 @@ export default function VoiceRoomsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Mute */}
                 <Button
                   variant={isMuted ? "destructive" : "secondary"}
                   size="icon"
@@ -233,6 +253,7 @@ export default function VoiceRoomsPage() {
                 >
                   {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </Button>
+                {/* Deafen */}
                 <Button
                   variant={isDeafened ? "destructive" : "secondary"}
                   size="icon"
@@ -241,6 +262,44 @@ export default function VoiceRoomsPage() {
                 >
                   {isDeafened ? <HeadphoneOff className="w-4 h-4" /> : <Headphones className="w-4 h-4" />}
                 </Button>
+                {/* Video toggle */}
+                <Button
+                  variant={isVideoOn ? "default" : "secondary"}
+                  size="icon"
+                  onClick={toggleVideo}
+                  title={isVideoOn ? 'Turn off camera' : 'Turn on camera'}
+                >
+                  {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                </Button>
+                {/* Screen share toggle */}
+                <Button
+                  variant={isScreenSharing ? "default" : "secondary"}
+                  size="icon"
+                  onClick={toggleScreenShare}
+                  title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
+                >
+                  {isScreenSharing ? <MonitorOff className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}
+                </Button>
+                {/* Picture-in-Picture */}
+                <Button
+                  variant={isPiPActive ? "default" : "secondary"}
+                  size="icon"
+                  onClick={isPiPActive ? exitPiP : enterPiP}
+                  title={isPiPActive ? 'Exit PiP' : 'Picture-in-Picture'}
+                  disabled={!isVideoOn && !isScreenSharing && !participants.some(p => p.isVideoOn || p.isScreenSharing)}
+                >
+                  <PictureInPicture className="w-4 h-4" />
+                </Button>
+                {/* View mode toggle */}
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
+                  title={viewMode === 'grid' ? 'List view' : 'Grid view'}
+                >
+                  {viewMode === 'grid' ? <Users className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
+                </Button>
+                {/* Leave */}
                 <Button
                   variant="destructive"
                   size="icon"
@@ -253,34 +312,67 @@ export default function VoiceRoomsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {/* Current user */}
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background">
-                <Avatar className={cn(
-                  "w-8 h-8 ring-2",
-                  isSpeaking ? "ring-green-500" : "ring-transparent"
-                )}>
-                  <AvatarImage src={session?.user?.image || ''} />
-                  <AvatarFallback>{session?.user?.name?.[0] || 'U'}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{session?.user?.name} (You)</span>
-                {isMuted && <MicOff className="w-3 h-3 text-destructive" />}
+            {viewMode === 'grid' && (isVideoOn || isScreenSharing || participants.some(p => p.isVideoOn || p.isScreenSharing)) ? (
+              /* Video Grid View */
+              <div className="h-[400px] bg-slate-900 rounded-xl overflow-hidden">
+                <VideoGrid
+                  participants={participants.map(p => ({
+                    oderId: p.userId,
+                    odeName: p.userName,
+                    oderAvatar: p.userAvatar,
+                    socketId: p.socketId,
+                    isMuted: p.isMuted,
+                    isVideoOn: p.isVideoOn,
+                    isScreenSharing: p.isScreenSharing,
+                    isSpeaking: p.isSpeaking,
+                    videoStream: p.videoStream,
+                    screenStream: p.screenStream,
+                    stream: p.stream,
+                  }))}
+                  localVideoStream={localVideoStream}
+                  localScreenStream={localScreenStream}
+                  isLocalVideoOn={isVideoOn}
+                  isLocalScreenSharing={isScreenSharing}
+                  isLocalMuted={isMuted}
+                  localUserName={session?.user?.name || 'You'}
+                  localUserAvatar={session?.user?.image || undefined}
+                />
               </div>
-              {/* Other participants */}
-              {participants.map((p) => (
-                <div key={p.socketId} className="flex items-center gap-2 p-2 rounded-lg bg-background">
+            ) : (
+              /* Participant List View */
+              <div className="flex flex-wrap gap-3">
+                {/* Current user */}
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-background">
                   <Avatar className={cn(
                     "w-8 h-8 ring-2",
-                    p.isSpeaking ? "ring-green-500" : "ring-transparent"
+                    isSpeaking ? "ring-green-500" : "ring-transparent"
                   )}>
-                    <AvatarImage src={p.userAvatar || ''} />
-                    <AvatarFallback>{p.userName?.[0] || 'U'}</AvatarFallback>
+                    <AvatarImage src={session?.user?.image || ''} />
+                    <AvatarFallback>{session?.user?.name?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium">{p.userName}</span>
-                  {p.isMuted && <MicOff className="w-3 h-3 text-destructive" />}
+                  <span className="text-sm font-medium">{session?.user?.name} (You)</span>
+                  {isMuted && <MicOff className="w-3 h-3 text-destructive" />}
+                  {isVideoOn && <Video className="w-3 h-3 text-green-500" />}
+                  {isScreenSharing && <MonitorUp className="w-3 h-3 text-blue-500" />}
                 </div>
-              ))}
-            </div>
+                {/* Other participants */}
+                {participants.map((p) => (
+                  <div key={p.socketId} className="flex items-center gap-2 p-2 rounded-lg bg-background">
+                    <Avatar className={cn(
+                      "w-8 h-8 ring-2",
+                      p.isSpeaking ? "ring-green-500" : "ring-transparent"
+                    )}>
+                      <AvatarImage src={p.userAvatar || ''} />
+                      <AvatarFallback>{p.userName?.[0] || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{p.userName}</span>
+                    {p.isMuted && <MicOff className="w-3 h-3 text-destructive" />}
+                    {p.isVideoOn && <Video className="w-3 h-3 text-green-500" />}
+                    {p.isScreenSharing && <MonitorUp className="w-3 h-3 text-blue-500" />}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

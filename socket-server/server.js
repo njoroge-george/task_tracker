@@ -325,6 +325,8 @@ io.on('connection', (socket) => {
             userAvatar: s.voiceUserAvatar,
             socketId: socketId,
             isMuted: s.voiceIsMuted || false,
+            isVideoOn: s.voiceIsVideoOn || false,
+            isScreenSharing: s.voiceIsScreenSharing || false,
           });
         }
       });
@@ -395,6 +397,53 @@ io.on('connection', (socket) => {
     socket.to(`voice:${roomId}`).emit('voice-room:user-speaking', {
       userId: userId,
       isSpeaking,
+    });
+  });
+
+  // Toggle video status
+  socket.on('voice-room:video-toggle', (data) => {
+    const { roomId, userId, isVideoOn } = data;
+    socket.voiceIsVideoOn = isVideoOn;
+    console.log(`📹 ${userId} video ${isVideoOn ? 'ON' : 'OFF'} in room ${roomId}`);
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:user-video-toggled', {
+      userId: userId,
+      isVideoOn,
+    });
+  });
+
+  // Screen sharing in voice room
+  socket.on('voice-room:screen-share-start', (data) => {
+    const { roomId, userId, userName } = data;
+    socket.voiceIsScreenSharing = true;
+    console.log(`🖥️ ${userName} started screen sharing in voice room: ${roomId}`);
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:screen-share-started', {
+      userId: userId,
+      userName,
+      socketId: socket.id,
+    });
+  });
+
+  socket.on('voice-room:screen-share-stop', (data) => {
+    const { roomId, userId, userName } = data;
+    socket.voiceIsScreenSharing = false;
+    console.log(`🖥️ ${userName} stopped screen sharing in voice room: ${roomId}`);
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:screen-share-stopped', {
+      userId: userId,
+      userName,
+    });
+  });
+
+  // Screen share signal (for WebRTC renegotiation when adding screen track)
+  socket.on('voice-room:screen-signal', (data) => {
+    const { targetSocketId, signal, userId } = data;
+    
+    io.to(targetSocketId).emit('voice-room:screen-signal', {
+      signal,
+      callerSocketId: socket.id,
+      callerId: userId,
     });
   });
 
