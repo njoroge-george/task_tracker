@@ -52,18 +52,18 @@ function AuthErrorContent() {
           </div>
           
           <div className="flex flex-col gap-3">
-            <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700">
-              <Link href="/auth/signin">
+            <Link href="/auth/signin" className="w-full">
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full border-slate-600 hover:bg-slate-700">
-              <Link href="/">
+              </Button>
+            </Link>
+            <Link href="/" className="w-full">
+              <Button variant="outline" className="w-full border-slate-600 hover:bg-slate-700">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
           
           <p className="text-center text-sm text-slate-500">
