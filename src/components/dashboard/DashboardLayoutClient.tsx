@@ -6,6 +6,7 @@ import DashboardNav from '@/components/dashboard/DashboardNav';
 import Sidebar from '@/components/dashboard/Sidebar';
 import RealtimeNotifications from '@/components/realtime/RealtimeNotifications';
 import FloatingScreenShare from '@/components/screen-share/FloatingScreenShare';
+import VoiceRoomWidget from '@/components/rooms/VoiceRoomWidget';
 
 interface DashboardLayoutClientProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export function DashboardLayoutClient({ children, session }: DashboardLayoutClie
       </Box>
       <RealtimeNotifications />
       <FloatingScreenShare />
+      <VoiceRoomWidget position="bottom-right" />
     </Box>
   );
 }

@@ -21,6 +21,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import {
   Mic,
   MicOff,
   Headphones,
@@ -40,6 +48,11 @@ import {
   PictureInPicture,
   Maximize2,
   Grid3X3,
+  Monitor,
+  AppWindow,
+  Camera,
+  ChevronDown,
+  Square,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -82,13 +95,16 @@ export default function VoiceRoomsPage() {
     isDeafened,
     isVideoOn,
     isScreenSharing,
+    screenShareMode,
     isSpeaking,
     joinRoom,
     leaveRoom,
     toggleMute,
     toggleDeafen,
     toggleVideo,
-    toggleScreenShare,
+    startScreenShare,
+    stopScreenShare,
+    canShareScreen,
     isConnecting,
     enterPiP,
     exitPiP,
@@ -98,6 +114,7 @@ export default function VoiceRoomsPage() {
   const [rooms, setRooms] = useState<VoiceRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
   const [newRoomDescription, setNewRoomDescription] = useState('');
@@ -117,7 +134,7 @@ export default function VoiceRoomsPage() {
       await toggleVideo();
     }
     if (isScreenSharing) {
-      await toggleScreenShare();
+      stopScreenShare();
     }
     setCallMode('voice');
   };
@@ -334,15 +351,89 @@ export default function VoiceRoomsPage() {
                     >
                       {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
                     </Button>
-                    {/* Screen share toggle */}
-                    <Button
-                      variant={isScreenSharing ? "default" : "secondary"}
-                      size="icon"
-                      onClick={toggleScreenShare}
-                      title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
-                    >
-                      {isScreenSharing ? <MonitorOff className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}
-                    </Button>
+                    
+                    {/* Screen share dropdown */}
+                    {isScreenSharing ? (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={stopScreenShare}
+                        className="gap-2 bg-red-600 hover:bg-red-700"
+                        title="Stop sharing"
+                      >
+                        <Square className="w-4 h-4" />
+                        Stop {screenShareMode === 'camera' ? 'Camera' : 'Sharing'}
+                      </Button>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <MonitorUp className="w-4 h-4" />
+                            Share
+                            <ChevronDown className="w-3 h-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-56">
+                          <DropdownMenuLabel>Share Options</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          
+                          {canShareScreen && (
+                            <>
+                              <DropdownMenuItem 
+                                onClick={() => startScreenShare('screen')}
+                                className="gap-3 cursor-pointer"
+                              >
+                                <Monitor className="w-4 h-4" />
+                                <div>
+                                  <div className="font-medium">Entire Screen</div>
+                                  <div className="text-xs text-muted-foreground">Share your full screen</div>
+                                </div>
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem 
+                                onClick={() => startScreenShare('window')}
+                                className="gap-3 cursor-pointer"
+                              >
+                                <AppWindow className="w-4 h-4" />
+                                <div>
+                                  <div className="font-medium">Window</div>
+                                  <div className="text-xs text-muted-foreground">Share a specific window</div>
+                                </div>
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
+                          
+                          <DropdownMenuItem 
+                            onClick={() => startScreenShare('camera')}
+                            className="gap-3 cursor-pointer"
+                          >
+                            <Camera className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Document Camera</div>
+                              <div className="text-xs text-muted-foreground">
+                                {canShareScreen ? 'Use rear camera to share documents' : 'Share using your camera (mobile)'}
+                              </div>
+                            </div>
+                          </DropdownMenuItem>
+                          
+                          {!canShareScreen && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                                Screen sharing requires a desktop browser
+                              </div>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                    
                     {/* Picture-in-Picture */}
                     <Button
                       variant={isPiPActive ? "default" : "secondary"}
