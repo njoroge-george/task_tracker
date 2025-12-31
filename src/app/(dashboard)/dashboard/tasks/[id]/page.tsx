@@ -28,12 +28,18 @@ export default async function TaskDetailPage({ params }: Props) {
   }
 
   // Fetch task with all related data
+  // Task can belong to workspace directly OR via project
   const task = await prisma.task.findFirst({
     where: {
       id,
-      project: {
-        workspaceId: workspaceMember.workspaceId,
-      },
+      OR: [
+        // Task belongs to workspace directly
+        { workspaceId: workspaceMember.workspaceId },
+        // Task belongs to workspace via project
+        { project: { workspaceId: workspaceMember.workspaceId } },
+        // Task is assigned to the user (fallback for orphan tasks)
+        { assigneeId: session.user.id },
+      ],
     },
     include: {
       assignee: {

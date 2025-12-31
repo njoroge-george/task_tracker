@@ -362,7 +362,19 @@ export default function VoiceRoomsPage() {
                         title="Stop sharing"
                       >
                         <Square className="w-4 h-4" />
-                        Stop {screenShareMode === 'camera' ? 'Camera' : 'Sharing'}
+                        <span className="hidden sm:inline">Stop {screenShareMode === 'camera' ? 'Camera' : 'Sharing'}</span>
+                      </Button>
+                    ) : !canShareScreen ? (
+                      /* Mobile: Direct button for document camera */
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => startScreenShare('camera')}
+                        className="gap-2"
+                        title="Share using camera"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span className="hidden sm:inline">Share Camera</span>
                       </Button>
                     ) : (
                       <DropdownMenu>
@@ -416,20 +428,9 @@ export default function VoiceRoomsPage() {
                             <Camera className="w-4 h-4" />
                             <div>
                               <div className="font-medium">Document Camera</div>
-                              <div className="text-xs text-muted-foreground">
-                                {canShareScreen ? 'Use rear camera to share documents' : 'Share using your camera (mobile)'}
-                              </div>
+                              <div className="text-xs text-muted-foreground">Use rear camera to share documents</div>
                             </div>
                           </DropdownMenuItem>
-                          
-                          {!canShareScreen && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                                Screen sharing requires a desktop browser
-                              </div>
-                            </>
-                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
