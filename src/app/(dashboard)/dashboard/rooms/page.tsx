@@ -105,6 +105,7 @@ export default function VoiceRoomsPage() {
     startScreenShare,
     stopScreenShare,
     canShareScreen,
+    isMobileOrTablet,
     isConnecting,
     enterPiP,
     exitPiP,
@@ -364,13 +365,21 @@ export default function VoiceRoomsPage() {
                         <Square className="w-4 h-4" />
                         <span className="hidden sm:inline">Stop {screenShareMode === 'camera' ? 'Camera' : 'Sharing'}</span>
                       </Button>
-                    ) : !canShareScreen ? (
-                      /* Mobile: Direct button for document camera */
+                    ) : isMobileOrTablet ? (
+                      /* Mobile/Tablet: Direct button for document camera */
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => startScreenShare('camera')}
-                        className="gap-2"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          try {
+                            await startScreenShare('camera');
+                          } catch (err) {
+                            console.error('Failed to start camera share:', err);
+                          }
+                        }}
+                        className="gap-2 active:scale-95 transition-transform touch-manipulation"
                         title="Share using camera"
                       >
                         <Camera className="w-4 h-4" />

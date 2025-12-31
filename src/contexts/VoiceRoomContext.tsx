@@ -53,6 +53,7 @@ interface VoiceRoomContextType {
   startScreenShare: (mode?: 'screen' | 'window' | 'camera') => Promise<void>;
   stopScreenShare: () => void;
   canShareScreen: boolean;
+  isMobileOrTablet: boolean;
   isConnecting: boolean;
   // Picture-in-picture
   pipVideoRef: React.RefObject<HTMLVideoElement | null>;
@@ -95,10 +96,16 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const analyserRef = useRef<AnalyserNode | null>(null);
   const pipVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Check if device supports screen sharing (desktop browsers)
+  // Check if device is mobile/tablet
+  const isMobileOrTablet = typeof navigator !== 'undefined' && 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Check if device supports screen sharing (desktop browsers only)
+  // On mobile/tablet, getDisplayMedia may exist but typically fails
   const canShareScreen = typeof navigator !== 'undefined' && 
     'mediaDevices' in navigator && 
-    'getDisplayMedia' in (navigator.mediaDevices || {});
+    'getDisplayMedia' in (navigator.mediaDevices || {}) &&
+    !isMobileOrTablet;
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -766,6 +773,7 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         startScreenShare,
         stopScreenShare,
         canShareScreen,
+        isMobileOrTablet,
         isConnecting,
         pipVideoRef,
         enterPiP,

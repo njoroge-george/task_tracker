@@ -52,6 +52,7 @@ export const VoiceRoomWidget: React.FC<VoiceRoomWidgetProps> = ({
     stopScreenShare,
     leaveRoom,
     canShareScreen,
+    isMobileOrTablet,
   } = useVoiceRoom();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -222,7 +223,29 @@ export const VoiceRoomWidget: React.FC<VoiceRoomWidgetProps> = ({
           {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
         </Button>
         
-        {canShareScreen ? (
+        {isMobileOrTablet ? (
+          <Button
+            variant={isScreenSharing ? 'default' : 'secondary'}
+            size="icon"
+            className="h-9 w-9 active:scale-95 transition-transform touch-manipulation"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isScreenSharing) {
+                stopScreenShare();
+              } else {
+                try {
+                  await startScreenShare('camera');
+                } catch (err) {
+                  console.error('Failed to start camera share:', err);
+                }
+              }
+            }}
+            title={isScreenSharing ? 'Stop sharing' : 'Share camera'}
+          >
+            <Camera className="w-4 h-4" />
+          </Button>
+        ) : (
           <Button
             variant={isScreenSharing ? 'default' : 'secondary'}
             size="icon"
@@ -231,16 +254,6 @@ export const VoiceRoomWidget: React.FC<VoiceRoomWidgetProps> = ({
             title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
           >
             <MonitorUp className="w-4 h-4" />
-          </Button>
-        ) : (
-          <Button
-            variant={isScreenSharing ? 'default' : 'secondary'}
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => isScreenSharing ? stopScreenShare() : startScreenShare('camera')}
-            title={isScreenSharing ? 'Stop sharing' : 'Share camera'}
-          >
-            <Camera className="w-4 h-4" />
           </Button>
         )}
         
