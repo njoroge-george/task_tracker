@@ -276,9 +276,140 @@ io.on('connection', (socket) => {
     });
   });
 
+  // ==========================================
+  // Voice Room Events for Team Meetings
+  // ==========================================
+
+  // Track which voice room each socket is in
+  socket.voiceRoom = null;
+
+  // Join a voice room
+  socket.on('voice-room:join', (data) => {
+    const { roomId, userId, userName, userAvatar } = data;
+    console.log(`🎙️ ${userName} (${userId}) joining voice room: ${roomId}`);
+    
+    // Leave previous room if in one
+    if (socket.voiceRoom) {
+      socket.leave(`voice:${socket.voiceRoom}`);
+      socket.to(`voice:${socket.voiceRoom}`).emit('voice-room:user-left', {
+        userId: userId,
+        userName,
+      });
+    }
+    
+    socket.voiceRoom = roomId;
+    socket.voiceUserId = userId;
+    socket.voiceUserName = userName;
+    socket.voiceUserAvatar = userAvatar;
+    
+    socket.join(`voice:${roomId}`);
+    
+    // Notify others in the room
+    socket.to(`voice:${roomId}`).emit('voice-room:user-joined', {
+      userId: userId,
+      userName,
+      userAvatar,
+      socketId: socket.id,
+    });
+    
+    // Get current participants in the room
+    const room = io.sockets.adapter.rooms.get(`voice:${roomId}`);
+    const participants = [];
+    if (room) {
+      room.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.voiceUserId && socketId !== socket.id) {
+          participants.push({
+            userId: s.voiceUserId,
+            userName: s.voiceUserName,
+            userAvatar: s.voiceUserAvatar,
+            socketId: socketId,
+            isMuted: s.voiceIsMuted || false,
+          });
+        }
+      });
+    }
+    
+    // Send current participants to the new joiner
+    socket.emit('voice-room:participants', {
+      roomId,
+      participants,
+    });
+    
+    console.log(`   Room ${roomId} now has ${participants.length + 1} participants`);
+  });
+
+  // Leave voice room
+  socket.on('voice-room:leave', (data) => {
+    const { roomId, userId, userName } = data;
+    console.log(`🚪 ${userName} leaving voice room: ${roomId}`);
+    
+    socket.leave(`voice:${roomId}`);
+    socket.voiceRoom = null;
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:user-left', {
+      userId: userId,
+      userName,
+      socketId: socket.id,
+    });
+  });
+
+  // WebRTC signaling for voice room
+  socket.on('voice-room:signal', (data) => {
+    const { targetSocketId, signal, userId, userName } = data;
+    console.log(`📡 Voice signal from ${userName} to socket ${targetSocketId}`);
+    
+    io.to(targetSocketId).emit('voice-room:signal', {
+      signal,
+      callerSocketId: socket.id,
+      callerId: userId,
+      callerName: userName,
+    });
+  });
+
+  // Toggle mute status
+  socket.on('voice-room:mute', (data) => {
+    const { roomId, userId, isMuted } = data;
+    socket.voiceIsMuted = isMuted;
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:user-muted', {
+      userId: userId,
+      isMuted,
+    });
+  });
+
+  // Toggle deafen status  
+  socket.on('voice-room:deafen', (data) => {
+    const { roomId, userId, isDeafened } = data;
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:user-deafened', {
+      userId: userId,
+      isDeafened,
+    });
+  });
+
+  // Speaking indicator (voice activity detection)
+  socket.on('voice-room:speaking', (data) => {
+    const { roomId, userId, isSpeaking } = data;
+    
+    socket.to(`voice:${roomId}`).emit('voice-room:user-speaking', {
+      userId: userId,
+      isSpeaking,
+    });
+  });
+
   // Disconnect
   socket.on('disconnect', () => {
     console.log('❌ Client disconnected:', socket.id);
+    
+    // Clean up voice room on disconnect
+    if (socket.voiceRoom) {
+      socket.to(`voice:${socket.voiceRoom}`).emit('voice-room:user-left', {
+        userId: socket.voiceUserId,
+        userName: socket.voiceUserName,
+        socketId: socket.id,
+      });
+    }
   });
 });
 

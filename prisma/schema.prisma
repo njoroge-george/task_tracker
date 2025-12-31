@@ -51,6 +51,8 @@ model User {
   ownedWorkspaces         Workspace[]
   sentInvitations         WorkspaceInvitation[] @relation("SentInvitations")
   workspaceMembers        WorkspaceMember[]
+  createdVoiceRooms       VoiceRoom[]           @relation("CreatedVoiceRooms")
+  voiceRoomParticipations VoiceRoomParticipant[]
 
   @@index([email])
 }
@@ -108,6 +110,7 @@ model Workspace {
   owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   invitations WorkspaceInvitation[]
   members     WorkspaceMember[]
+  voiceRooms  VoiceRoom[]
 
   @@index([ownerId])
   @@index([slug])
@@ -560,4 +563,40 @@ enum ManualPaymentStatus {
   VERIFIED
   REJECTED
   EXPIRED
+}
+
+// Voice Rooms for team meetings
+model VoiceRoom {
+  id           String                 @id @default(cuid())
+  name         String
+  description  String?
+  workspaceId  String
+  createdById  String
+  isActive     Boolean                @default(true)
+  isPersistent Boolean                @default(true)
+  maxMembers   Int                    @default(10)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  workspace    Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy    User                   @relation("CreatedVoiceRooms", fields: [createdById], references: [id])
+  participants VoiceRoomParticipant[]
+
+  @@index([workspaceId])
+  @@index([createdById])
+}
+
+model VoiceRoomParticipant {
+  id        String    @id @default(cuid())
+  roomId    String
+  userId    String
+  isMuted   Boolean   @default(false)
+  isDeafened Boolean  @default(false)
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+  room      VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId, joinedAt])
+  @@index([roomId])
+  @@index([userId])
 }

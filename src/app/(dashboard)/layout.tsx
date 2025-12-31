@@ -7,6 +7,7 @@ import KeyboardShortcutsProvider from "@/contexts/KeyboardShortcutsContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { DashboardLayoutClient } from "@/components/dashboard/DashboardLayoutClient";
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { VoiceRoomProvider } from "@/contexts/VoiceRoomContext";
 
 export default async function DashboardLayout({
   children,
@@ -31,15 +32,17 @@ export default async function DashboardLayout({
       workspaceId={workspaceMember?.workspaceId}
     >
       <CallProviderWrapper>
-        <WorkspaceProvider>
-          <KeyboardShortcutsProvider>
-            <SidebarProvider>
-              <DashboardLayoutClient session={session} workspaceId={workspaceMember?.workspaceId}>
-                {children}
-              </DashboardLayoutClient>
-            </SidebarProvider>
-          </KeyboardShortcutsProvider>
-        </WorkspaceProvider>
+        <VoiceRoomProvider>
+          <WorkspaceProvider>
+            <KeyboardShortcutsProvider>
+              <SidebarProvider>
+                <DashboardLayoutClient session={session} workspaceId={workspaceMember?.workspaceId}>
+                  {children}
+                </DashboardLayoutClient>
+              </SidebarProvider>
+            </KeyboardShortcutsProvider>
+          </WorkspaceProvider>
+        </VoiceRoomProvider>
       </CallProviderWrapper>
     </RealtimeProvider>
   );
