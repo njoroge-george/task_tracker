@@ -389,46 +389,49 @@ export default function VoiceRoomsPage() {
                             <ChevronDown className="w-3 h-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="w-56">
-                          <DropdownMenuLabel>Share Options</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
+                        <DropdownMenuContent 
+                          align="center" 
+                          className="w-56 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-xl"
+                        >
+                          <DropdownMenuLabel className="text-gray-900 dark:text-gray-100">Share Options</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-gray-200 dark:bg-zinc-700" />
                           
                           {canShareScreen && (
                             <>
                               <DropdownMenuItem 
                                 onClick={() => startScreenShare('screen')}
-                                className="gap-3 cursor-pointer"
+                                className="gap-3 cursor-pointer text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-800 focus:bg-gray-100 dark:focus:bg-zinc-800"
                               >
                                 <Monitor className="w-4 h-4" />
                                 <div>
                                   <div className="font-medium">Entire Screen</div>
-                                  <div className="text-xs text-muted-foreground">Share your full screen</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">Share your full screen</div>
                                 </div>
                               </DropdownMenuItem>
                               
                               <DropdownMenuItem 
                                 onClick={() => startScreenShare('window')}
-                                className="gap-3 cursor-pointer"
+                                className="gap-3 cursor-pointer text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-800 focus:bg-gray-100 dark:focus:bg-zinc-800"
                               >
                                 <AppWindow className="w-4 h-4" />
                                 <div>
                                   <div className="font-medium">Window</div>
-                                  <div className="text-xs text-muted-foreground">Share a specific window</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">Share a specific window</div>
                                 </div>
                               </DropdownMenuItem>
                               
-                              <DropdownMenuSeparator />
+                              <DropdownMenuSeparator className="bg-gray-200 dark:bg-zinc-700" />
                             </>
                           )}
                           
                           <DropdownMenuItem 
                             onClick={() => startScreenShare('camera')}
-                            className="gap-3 cursor-pointer"
+                            className="gap-3 cursor-pointer text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-800 focus:bg-gray-100 dark:focus:bg-zinc-800"
                           >
                             <Camera className="w-4 h-4" />
                             <div>
                               <div className="font-medium">Document Camera</div>
-                              <div className="text-xs text-muted-foreground">Use rear camera to share documents</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Use rear camera to share documents</div>
                             </div>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
