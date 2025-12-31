@@ -102,6 +102,25 @@ export default function VoiceRoomsPage() {
   const [newRoomName, setNewRoomName] = useState('');
   const [newRoomDescription, setNewRoomDescription] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [callMode, setCallMode] = useState<'voice' | 'video'>('voice');
+
+  // Switch call mode
+  const switchToVideo = async () => {
+    if (!isVideoOn) {
+      await toggleVideo();
+    }
+    setCallMode('video');
+  };
+
+  const switchToVoice = async () => {
+    if (isVideoOn) {
+      await toggleVideo();
+    }
+    if (isScreenSharing) {
+      await toggleScreenShare();
+    }
+    setCallMode('voice');
+  };
 
   // Fetch voice rooms
   const fetchRooms = useCallback(async () => {
@@ -228,21 +247,62 @@ export default function VoiceRoomsPage() {
       {isInRoom && currentRoom && (
         <Card className="mb-8 border-primary/50 bg-primary/5">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Volume2 className={cn(
-                    "w-5 h-5",
-                    isSpeaking ? "text-green-500 animate-pulse" : "text-muted-foreground"
-                  )} />
+                  {callMode === 'video' ? (
+                    <Video className={cn(
+                      "w-5 h-5",
+                      isVideoOn ? "text-green-500" : "text-muted-foreground"
+                    )} />
+                  ) : (
+                    <Volume2 className={cn(
+                      "w-5 h-5",
+                      isSpeaking ? "text-green-500 animate-pulse" : "text-muted-foreground"
+                    )} />
+                  )}
                 </div>
                 <div>
-                  <CardTitle className="text-lg">{currentRoom.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">{currentRoom.name}</CardTitle>
+                    <Badge variant={callMode === 'video' ? 'default' : 'secondary'} className="text-xs">
+                      {callMode === 'video' ? 'Video Call' : 'Voice Call'}
+                    </Badge>
+                  </div>
                   <CardDescription>
                     {participants.length + 1} participant{participants.length !== 0 && 's'}
                   </CardDescription>
                 </div>
               </div>
+              
+              {/* Call Mode Switch */}
+              <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg p-1">
+                <Button
+                  variant={callMode === 'voice' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={switchToVoice}
+                  className={cn(
+                    "gap-2",
+                    callMode === 'voice' ? 'bg-indigo-600 hover:bg-indigo-700' : 'hover:bg-slate-700'
+                  )}
+                >
+                  <Volume2 className="w-4 h-4" />
+                  Voice
+                </Button>
+                <Button
+                  variant={callMode === 'video' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={switchToVideo}
+                  className={cn(
+                    "gap-2",
+                    callMode === 'video' ? 'bg-indigo-600 hover:bg-indigo-700' : 'hover:bg-slate-700'
+                  )}
+                >
+                  <Video className="w-4 h-4" />
+                  Video
+                </Button>
+              </div>
+
               <div className="flex items-center gap-2">
                 {/* Mute */}
                 <Button
@@ -262,43 +322,49 @@ export default function VoiceRoomsPage() {
                 >
                   {isDeafened ? <HeadphoneOff className="w-4 h-4" /> : <Headphones className="w-4 h-4" />}
                 </Button>
-                {/* Video toggle */}
-                <Button
-                  variant={isVideoOn ? "default" : "secondary"}
-                  size="icon"
-                  onClick={toggleVideo}
-                  title={isVideoOn ? 'Turn off camera' : 'Turn on camera'}
-                >
-                  {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
-                </Button>
-                {/* Screen share toggle */}
-                <Button
-                  variant={isScreenSharing ? "default" : "secondary"}
-                  size="icon"
-                  onClick={toggleScreenShare}
-                  title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
-                >
-                  {isScreenSharing ? <MonitorOff className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}
-                </Button>
-                {/* Picture-in-Picture */}
-                <Button
-                  variant={isPiPActive ? "default" : "secondary"}
-                  size="icon"
-                  onClick={isPiPActive ? exitPiP : enterPiP}
-                  title={isPiPActive ? 'Exit PiP' : 'Picture-in-Picture'}
-                  disabled={!isVideoOn && !isScreenSharing && !participants.some(p => p.isVideoOn || p.isScreenSharing)}
-                >
-                  <PictureInPicture className="w-4 h-4" />
-                </Button>
-                {/* View mode toggle */}
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
-                  title={viewMode === 'grid' ? 'List view' : 'Grid view'}
-                >
-                  {viewMode === 'grid' ? <Users className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
-                </Button>
+                
+                {/* Video toggle - only show in video mode */}
+                {callMode === 'video' && (
+                  <>
+                    <Button
+                      variant={isVideoOn ? "default" : "secondary"}
+                      size="icon"
+                      onClick={toggleVideo}
+                      title={isVideoOn ? 'Turn off camera' : 'Turn on camera'}
+                    >
+                      {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                    </Button>
+                    {/* Screen share toggle */}
+                    <Button
+                      variant={isScreenSharing ? "default" : "secondary"}
+                      size="icon"
+                      onClick={toggleScreenShare}
+                      title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
+                    >
+                      {isScreenSharing ? <MonitorOff className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}
+                    </Button>
+                    {/* Picture-in-Picture */}
+                    <Button
+                      variant={isPiPActive ? "default" : "secondary"}
+                      size="icon"
+                      onClick={isPiPActive ? exitPiP : enterPiP}
+                      title={isPiPActive ? 'Exit PiP' : 'Picture-in-Picture'}
+                      disabled={!isVideoOn && !isScreenSharing && !participants.some(p => p.isVideoOn || p.isScreenSharing)}
+                    >
+                      <PictureInPicture className="w-4 h-4" />
+                    </Button>
+                    {/* View mode toggle */}
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
+                      title={viewMode === 'grid' ? 'List view' : 'Grid view'}
+                    >
+                      {viewMode === 'grid' ? <Users className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
+                    </Button>
+                  </>
+                )}
+                
                 {/* Leave */}
                 <Button
                   variant="destructive"
@@ -312,8 +378,8 @@ export default function VoiceRoomsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {viewMode === 'grid' && (isVideoOn || isScreenSharing || participants.some(p => p.isVideoOn || p.isScreenSharing)) ? (
-              /* Video Grid View */
+            {callMode === 'video' ? (
+              /* Video Mode - Always show video grid */
               <div className="h-[400px] bg-slate-900 rounded-xl overflow-hidden">
                 <VideoGrid
                   participants={participants.map(p => ({
@@ -339,38 +405,66 @@ export default function VoiceRoomsPage() {
                 />
               </div>
             ) : (
-              /* Participant List View */
+              /* Voice Mode - Show participant avatars */
               <div className="flex flex-wrap gap-3">
                 {/* Current user */}
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-background">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-background border">
                   <Avatar className={cn(
-                    "w-8 h-8 ring-2",
+                    "w-10 h-10 ring-2",
                     isSpeaking ? "ring-green-500" : "ring-transparent"
                   )}>
                     <AvatarImage src={session?.user?.image || ''} />
                     <AvatarFallback>{session?.user?.name?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium">{session?.user?.name} (You)</span>
-                  {isMuted && <MicOff className="w-3 h-3 text-destructive" />}
-                  {isVideoOn && <Video className="w-3 h-3 text-green-500" />}
-                  {isScreenSharing && <MonitorUp className="w-3 h-3 text-blue-500" />}
+                  <div>
+                    <span className="text-sm font-medium block">{session?.user?.name} (You)</span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {isMuted ? (
+                        <MicOff className="w-3 h-3 text-destructive" />
+                      ) : (
+                        <Mic className="w-3 h-3 text-green-500" />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 {/* Other participants */}
                 {participants.map((p) => (
-                  <div key={p.socketId} className="flex items-center gap-2 p-2 rounded-lg bg-background">
+                  <div key={p.socketId} className="flex items-center gap-2 p-3 rounded-lg bg-background border">
                     <Avatar className={cn(
-                      "w-8 h-8 ring-2",
+                      "w-10 h-10 ring-2",
                       p.isSpeaking ? "ring-green-500" : "ring-transparent"
                     )}>
                       <AvatarImage src={p.userAvatar || ''} />
                       <AvatarFallback>{p.userName?.[0] || 'U'}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium">{p.userName}</span>
-                    {p.isMuted && <MicOff className="w-3 h-3 text-destructive" />}
-                    {p.isVideoOn && <Video className="w-3 h-3 text-green-500" />}
-                    {p.isScreenSharing && <MonitorUp className="w-3 h-3 text-blue-500" />}
+                    <div>
+                      <span className="text-sm font-medium block">{p.userName}</span>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {p.isMuted ? (
+                          <MicOff className="w-3 h-3 text-destructive" />
+                        ) : (
+                          <Mic className="w-3 h-3 text-green-500" />
+                        )}
+                        {p.isVideoOn && <Video className="w-3 h-3 text-blue-500" />}
+                      </div>
+                    </div>
                   </div>
                 ))}
+                
+                {/* Prompt to switch to video */}
+                {participants.some(p => p.isVideoOn) && (
+                  <div className="w-full mt-3 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4 text-indigo-400" />
+                      <span className="text-sm text-indigo-300">
+                        {participants.filter(p => p.isVideoOn).length} participant(s) have video on
+                      </span>
+                    </div>
+                    <Button size="sm" onClick={switchToVideo} className="bg-indigo-600 hover:bg-indigo-700">
+                      Switch to Video
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
