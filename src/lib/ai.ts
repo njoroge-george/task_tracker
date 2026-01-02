@@ -5,8 +5,15 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
 
-// Check if AI is enabled
-const isAIEnabled = () => !!process.env.OPENAI_API_KEY;
+// Check if AI is enabled - exported for use in API routes
+export const isAIEnabled = () => !!process.env.OPENAI_API_KEY;
+
+export interface TaskSuggestionContext {
+  projectName?: string;
+  projectDescription?: string;
+  existingTasks?: string[];
+  timestamp?: number; // For uniqueness in suggestions
+}
 
 export interface TaskSuggestion {
   description: string;
@@ -29,10 +36,7 @@ export interface NaturalLanguageTask {
  */
 export async function generateTaskSuggestions(
   title: string,
-  context?: {
-    projectName?: string;
-    existingTasks?: string[];
-  }
+  context?: TaskSuggestionContext
 ): Promise<TaskSuggestion> {
   // Return mock suggestions if API key is not configured
   if (!isAIEnabled()) {
@@ -41,34 +45,44 @@ export async function generateTaskSuggestions(
   }
 
   try {
-    const prompt = `You are a helpful task management assistant. Given a task title, provide intelligent suggestions.
+    // Create a unique seed for varied responses
+    const uniqueSeed = context?.timestamp || Date.now();
+    const randomModifier = uniqueSeed % 100;
+
+    const prompt = `You are a helpful task management assistant. Given a task title, provide intelligent and UNIQUE suggestions.
 
 Task Title: "${title}"
 ${context?.projectName ? `Project: ${context.projectName}` : ''}
-${context?.existingTasks?.length ? `Related Tasks: ${context.existingTasks.join(', ')}` : ''}
+${context?.projectDescription ? `Project Description: ${context.projectDescription}` : ''}
+${context?.existingTasks?.length ? `Existing Tasks in Project (avoid duplicating these): ${context.existingTasks.slice(0, 10).join(', ')}` : ''}
+
+Request ID: ${randomModifier} (use this to vary your response style)
 
 Provide suggestions in JSON format:
 {
-  "description": "A clear, concise description (2-3 sentences)",
+  "description": "A clear, concise, UNIQUE description (2-3 sentences) - make it specific to this exact task, not generic",
   "priority": "LOW|MEDIUM|HIGH|URGENT",
   "estimatedMinutes": <number>,
-  "tags": ["tag1", "tag2"],
+  "tags": ["tag1", "tag2", "tag3"],
   "suggestedDueDate": "YYYY-MM-DD or null"
 }
 
-Rules:
-- Priority based on urgency keywords (urgent, asap, critical = HIGH/URGENT)
-- Estimate time realistically (simple tasks: 15-60 min, complex: 120-480 min)
-- Suggest 2-4 relevant tags
-- Only suggest due date if implied in title
-- Description should expand on the title with actionable details`;
+IMPORTANT Rules:
+- Generate a UNIQUE, specific description that directly relates to "${title}" - avoid generic phrases
+- Priority based on urgency keywords (urgent, asap, critical = HIGH/URGENT; normal tasks = MEDIUM)
+- Estimate time realistically based on task complexity (simple: 15-60 min, medium: 60-180 min, complex: 180-480 min)
+- Suggest 2-4 relevant, specific tags based on the task content
+- Only suggest due date if implied in title or urgency level warrants it
+- Make sure the description adds value and context, not just rephrasing the title
+- Consider the project context when generating suggestions
+- DO NOT repeat or closely match any existing task descriptions`;
 
     const completion = await openai!.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a task management AI that provides structured suggestions in JSON format.',
+          content: 'You are a task management AI that provides structured, UNIQUE suggestions in JSON format. Each response should be tailored specifically to the task title provided. Never give generic or repetitive suggestions.',
         },
         {
           role: 'user',
@@ -76,11 +90,13 @@ Rules:
         },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.7,
+      temperature: 0.8, // Increased for more variety
       max_tokens: 500,
     });
 
     const result = JSON.parse(completion.choices[0].message.content || '{}');
+
+    console.log('[AI] OpenAI suggestion generated successfully for:', title);
 
     return {
       description: result.description || '',
@@ -90,7 +106,7 @@ Rules:
       suggestedDueDate: result.suggestedDueDate ? new Date(result.suggestedDueDate) : undefined,
     };
   } catch (error) {
-    console.error('Error generating task suggestions:', error);
+    console.error('Error generating task suggestions with OpenAI:', error);
     // Fallback to mock suggestions on error
     return generateMockSuggestions(title, context);
   }
@@ -356,15 +372,17 @@ export const aiService = {
 
 /**
  * Generate mock suggestions when API key is not configured
+ * Now with more variety to avoid repetitive suggestions
  */
 function generateMockSuggestions(
   title: string,
-  context?: {
-    projectName?: string;
-    existingTasks?: string[];
-  }
+  context?: TaskSuggestionContext
 ): TaskSuggestion {
   const lowerTitle = title.toLowerCase();
+  const timestamp = context?.timestamp || Date.now();
+  
+  // Use timestamp to add variety
+  const varietyIndex = timestamp % 5;
   
   // Determine priority based on keywords
   let priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' = 'MEDIUM';
@@ -380,19 +398,26 @@ function generateMockSuggestions(
     priority = 'LOW';
   }
   
-  // Generate description
-  let description = `Complete the task: ${title}.`;
-  if (context?.projectName) {
-    description += ` This is part of the ${context.projectName} project.`;
-  }
-  description += ' Review requirements and implement necessary changes.';
+  // Generate varied descriptions based on task type and variety index
+  const descriptionTemplates = [
+    `Implement and complete: ${title}. Ensure all requirements are met and properly tested before marking as done.`,
+    `Work on ${title} with attention to detail. Document any decisions made and update relevant stakeholders.`,
+    `Focus on delivering ${title}. Break down into smaller subtasks if needed and track progress.`,
+    `Complete ${title} following best practices. Review existing code/documentation for context.`,
+    `Address ${title} systematically. Validate the solution against acceptance criteria.`,
+  ];
   
-  // Estimate time based on keywords
-  let estimatedMinutes = 60;
+  let description = descriptionTemplates[varietyIndex];
+  if (context?.projectName) {
+    description += ` This contributes to the ${context.projectName} project goals.`;
+  }
+  
+  // Estimate time based on keywords with some variety
+  let estimatedMinutes = 60 + (varietyIndex * 15); // Base varies 60-120
   if (lowerTitle.includes('quick') || lowerTitle.includes('small') || lowerTitle.includes('minor')) {
-    estimatedMinutes = 30;
+    estimatedMinutes = 20 + (varietyIndex * 5);
   } else if (lowerTitle.includes('large') || lowerTitle.includes('complex') || lowerTitle.includes('major') || lowerTitle.includes('implement')) {
-    estimatedMinutes = 240;
+    estimatedMinutes = 180 + (varietyIndex * 30);
   }
   
   // Generate tags based on keywords
@@ -409,10 +434,20 @@ function generateMockSuggestions(
   if (lowerTitle.includes('backend') || lowerTitle.includes('server')) tags.push('backend');
   if (lowerTitle.includes('performance') || lowerTitle.includes('optimize')) tags.push('performance');
   if (lowerTitle.includes('security')) tags.push('security');
+  if (lowerTitle.includes('review')) tags.push('review');
+  if (lowerTitle.includes('deploy') || lowerTitle.includes('release')) tags.push('deployment');
+  if (lowerTitle.includes('config') || lowerTitle.includes('setup')) tags.push('configuration');
   
-  // If no tags matched, add generic ones
+  // If no tags matched, add contextual ones
   if (tags.length === 0) {
-    tags.push('task');
+    const defaultTagSets = [
+      ['task', 'todo'],
+      ['work-item', 'action'],
+      ['task', 'pending'],
+      ['item', 'backlog'],
+      ['task', 'queue'],
+    ];
+    tags.push(...defaultTagSets[varietyIndex]);
     if (context?.projectName) {
       tags.push(context.projectName.toLowerCase().replace(/\s+/g, '-'));
     }
