@@ -204,7 +204,25 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
           { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' },
+          // Free TURN servers for NAT traversal
+          {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+          },
         ],
+      },
+      // Request both audio and video capabilities
+      offerOptions: {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
       },
     });
 
@@ -219,27 +237,35 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     peer.on('stream', (remoteStream) => {
-      console.log(`Received stream from ${targetSocketId}, tracks:`, remoteStream.getTracks().map(t => t.kind));
+      console.log(`Received stream from ${targetSocketId}, tracks:`, remoteStream.getTracks().map(t => ({ kind: t.kind, enabled: t.enabled, id: t.id })));
       
-      // Check if it has video
-      const hasVideo = remoteStream.getVideoTracks().length > 0;
-      const hasAudio = remoteStream.getAudioTracks().length > 0;
+      // Check what tracks we received
+      const videoTracks = remoteStream.getVideoTracks();
+      const audioTracks = remoteStream.getAudioTracks();
+      const hasVideo = videoTracks.length > 0;
+      const hasAudio = audioTracks.length > 0;
+      
+      console.log(`Stream has video: ${hasVideo}, audio: ${hasAudio}`);
       
       setParticipants(prev => prev.map(p => {
         if (p.socketId !== targetSocketId) return p;
         
-        // Store stream based on what tracks it has
         const updates: Partial<Participant> = {};
         
-        if (hasAudio && !hasVideo) {
-          updates.stream = remoteStream;
-          // Play audio
+        // Always store the stream for reference
+        updates.stream = remoteStream;
+        
+        // Handle audio - create audio element for playback
+        if (hasAudio) {
           const audio = new Audio();
           audio.srcObject = remoteStream;
-          audio.play().catch(console.error);
+          audio.autoplay = true;
+          audio.play().catch(err => console.error('Audio play error:', err));
         }
         
+        // Handle video - store the video stream
         if (hasVideo) {
+          console.log(`Setting video stream for participant ${targetSocketId}`);
           updates.videoStream = remoteStream;
           updates.isVideoOn = true;
         }
@@ -249,18 +275,20 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     peer.on('track', (track, stream) => {
-      console.log(`Received track from ${targetSocketId}:`, track.kind);
+      console.log(`Received track from ${targetSocketId}:`, track.kind, 'enabled:', track.enabled);
       
       setParticipants(prev => prev.map(p => {
         if (p.socketId !== targetSocketId) return p;
         
         if (track.kind === 'video') {
+          console.log(`Video track received for ${targetSocketId}, setting videoStream`);
           return { ...p, videoStream: stream, isVideoOn: true };
         } else if (track.kind === 'audio') {
-          // Play audio
+          // Play audio through an audio element
           const audio = new Audio();
           audio.srcObject = stream;
-          audio.play().catch(console.error);
+          audio.autoplay = true;
+          audio.play().catch(err => console.error('Audio play error:', err));
           return { ...p, stream };
         }
         return p;
@@ -409,15 +437,31 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       combinedStream.addTrack(track);
     });
     
-    // Rebuild each peer connection
-    const participantSocketIds = Array.from(peersRef.current.keys());
-    participantSocketIds.forEach(socketId => {
-      const existingPeer = peersRef.current.get(socketId);
-      if (existingPeer) {
-        existingPeer.destroy();
+    console.log('Rebuilding peer connections with combined stream, tracks:', combinedStream.getTracks().map(t => t.kind));
+    
+    // For each existing peer, add the video track
+    peersRef.current.forEach((peer, socketId) => {
+      try {
+        // Try to add the video track to existing peer
+        const videoTrack = newStream.getVideoTracks()[0];
+        if (videoTrack && !peer.destroyed) {
+          // Check if we can add track directly
+          try {
+            peer.addTrack(videoTrack, combinedStream);
+            console.log(`Added video track to peer ${socketId}`);
+          } catch (addError) {
+            console.log(`Could not add track to peer ${socketId}, rebuilding connection`);
+            // If adding track fails, rebuild the peer
+            peer.destroy();
+            createPeer(socketId, true, combinedStream);
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to update peer ${socketId}:`, err);
+        // Fallback: destroy and recreate
+        peer.destroy();
+        createPeer(socketId, true, combinedStream);
       }
-      // Create new peer with combined stream
-      createPeer(socketId, true, combinedStream);
     });
   }, [localStream, createPeer]);
 
@@ -478,7 +522,7 @@ export const VoiceRoomProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         toast.error('Failed to access camera');
       }
     }
-  }, [currentRoom, socket, session, isVideoOn, localVideoStream]);
+  }, [currentRoom, socket, session, isVideoOn, localVideoStream, localStream, createPeer, rebuildPeerConnections]);
 
   // Stop screen sharing
   const stopScreenShare = useCallback(() => {

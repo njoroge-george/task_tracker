@@ -2,13 +2,9 @@
 
 import * as React from "react";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material";
-import { CacheProvider } from "@emotion/react";
 import { useTheme as useNextTheme } from "next-themes";
 import getMuiTheme, { type ColorMode } from "@/theme/muiTheme";
-import createEmotionCache from "@/lib/emotion-cache";
-
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
+import EmotionRegistry from "@/lib/EmotionRegistry";
 
 export default function MuiProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = React.useState(false);
@@ -23,19 +19,19 @@ export default function MuiProvider({ children }: { children: React.ReactNode })
   // Prevent hydration mismatch by not rendering theme-dependent content until mounted
   if (!mounted) {
     return (
-      <CacheProvider value={clientSideEmotionCache}>
+      <EmotionRegistry>
         <MuiThemeProvider theme={getMuiTheme("light")}>
           {children}
         </MuiThemeProvider>
-      </CacheProvider>
+      </EmotionRegistry>
     );
   }
 
   return (
-    <CacheProvider value={clientSideEmotionCache}>
+    <EmotionRegistry>
       <MuiThemeProvider theme={muiTheme}>
         {children}
       </MuiThemeProvider>
-    </CacheProvider>
+    </EmotionRegistry>
   );
 }

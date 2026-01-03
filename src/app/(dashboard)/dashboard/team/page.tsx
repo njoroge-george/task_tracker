@@ -86,6 +86,13 @@ const roleColors = {
   VIEWER: 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400',
 };
 
+const statusColors = {
+  PENDING: 'text-orange-600 border-orange-600 bg-orange-50 dark:bg-orange-900/20',
+  ACCEPTED: 'text-green-600 border-green-600 bg-green-50 dark:bg-green-900/20',
+  DECLINED: 'text-red-600 border-red-600 bg-red-50 dark:bg-red-900/20',
+  EXPIRED: 'text-gray-600 border-gray-600 bg-gray-50 dark:bg-gray-900/20',
+};
+
 export default function TeamManagementPage() {
   const { currentWorkspace, userRole, canInvite, canManageMembers } = useWorkspace();
   const [members, setMembers] = useState<Member[]>([]);
@@ -370,79 +377,150 @@ export default function TeamManagementPage() {
         </CardContent>
       </Card>
 
-      {/* Pending Invitations Section */}
-      {invitations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Invitations ({invitations.length})</CardTitle>
-            <CardDescription>Invitations waiting to be accepted</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {invitations.map((invitation) => {
-                const RoleIcon = roleIcons[invitation.role as keyof typeof roleIcons];
-                const isExpired = new Date(invitation.expiresAt) < new Date();
-                
-                return (
-                  <div
-                    key={invitation.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Mail className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+      {/* Invitations Section */}
+      {invitations.length > 0 && (() => {
+        const pendingInvitations = invitations.filter(inv => inv.status === 'PENDING');
+        const processedInvitations = invitations.filter(inv => inv.status !== 'PENDING');
+        
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Invitations ({invitations.length})
+                {pendingInvitations.length > 0 && (
+                  <Badge variant="outline" className="ml-2 text-orange-600 border-orange-600">
+                    {pendingInvitations.length} pending
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription>Manage workspace invitations</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Pending invitations first */}
+                {pendingInvitations.map((invitation) => {
+                  const RoleIcon = roleIcons[invitation.role as keyof typeof roleIcons];
+                  const isExpired = new Date(invitation.expiresAt) < new Date();
+                  
+                  return (
+                    <div
+                      key={invitation.id}
+                      className="flex items-center justify-between p-4 rounded-lg border border-orange-200 dark:border-orange-700/50 bg-orange-50/50 dark:bg-orange-900/10 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-800/30 flex items-center justify-center">
+                          <Mail className="h-6 w-6 text-orange-500 dark:text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {invitation.email}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Invited by {invitation.invitedByUser.name || invitation.invitedByUser.email}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {isExpired ? (
+                              <span className="text-red-500">Expired</span>
+                            ) : (
+                              <>
+                                Expires{' '}
+                                {new Date(invitation.expiresAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {invitation.email}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Invited by {invitation.invitedByUser.name || invitation.invitedByUser.email}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          {isExpired ? (
-                            <span className="text-red-500">Expired</span>
-                          ) : (
-                            <>
-                              Expires{' '}
-                              {new Date(invitation.expiresAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        variant="secondary"
-                        className={`gap-1 ${roleColors[invitation.role as keyof typeof roleColors]}`}
-                      >
-                        <RoleIcon className="h-3 w-3" />
-                        {invitation.role}
-                      </Badge>
-                      <Badge variant="outline" className="text-orange-600 border-orange-600">
-                        {invitation.status}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCancelInvitation(invitation.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="secondary"
+                          className={`gap-1 ${roleColors[invitation.role as keyof typeof roleColors]}`}
+                        >
+                          <RoleIcon className="h-3 w-3" />
+                          {invitation.role}
+                        </Badge>
+                        <Badge variant="outline" className={statusColors[invitation.status as keyof typeof statusColors]}>
+                          {invitation.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCancelInvitation(invitation.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  );
+                })}
+                
+                {/* Processed invitations (accepted, declined, expired) */}
+                {processedInvitations.length > 0 && pendingInvitations.length > 0 && (
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-4" />
+                )}
+                {processedInvitations.map((invitation) => {
+                  const RoleIcon = roleIcons[invitation.role as keyof typeof roleIcons];
+                  const statusColor = statusColors[invitation.status as keyof typeof statusColors] || statusColors.PENDING;
+                  
+                  return (
+                    <div
+                      key={invitation.id}
+                      className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors opacity-75"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          <Mail className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {invitation.email}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Invited by {invitation.invitedByUser.name || invitation.invitedByUser.email}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {invitation.status === 'ACCEPTED' && 'Joined the workspace'}
+                            {invitation.status === 'DECLINED' && 'Invitation declined'}
+                            {invitation.status === 'EXPIRED' && 'Invitation expired'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="secondary"
+                          className={`gap-1 ${roleColors[invitation.role as keyof typeof roleColors]}`}
+                        >
+                          <RoleIcon className="h-3 w-3" />
+                          {invitation.role}
+                        </Badge>
+                        <Badge variant="outline" className={statusColor}>
+                          {invitation.status}
+                        </Badge>
+                        {/* Only show delete for processed invitations to clean up */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCancelInvitation(invitation.id)}
+                          className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          title="Remove from list"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Invite Dialog */}
       <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>

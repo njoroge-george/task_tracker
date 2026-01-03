@@ -59,10 +59,39 @@ const VideoTile: React.FC<VideoTileProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+    const videoEl = videoRef.current;
+    if (videoEl && stream) {
+      console.log(`VideoTile: Setting stream for ${name}, tracks:`, stream.getTracks().map(t => ({ kind: t.kind, enabled: t.enabled })));
+      videoEl.srcObject = stream;
+      // Ensure video plays
+      videoEl.play().catch(err => {
+        console.log('Video autoplay prevented:', err);
+      });
+    } else if (videoEl && !stream) {
+      videoEl.srcObject = null;
     }
-  }, [stream]);
+  }, [stream, name]);
+
+  // Also handle stream track changes
+  useEffect(() => {
+    if (!stream) return;
+    
+    const handleTrackAdded = () => {
+      const videoEl = videoRef.current;
+      if (videoEl) {
+        console.log(`VideoTile: Track added for ${name}, refreshing srcObject`);
+        videoEl.srcObject = stream;
+        videoEl.play().catch(() => {});
+      }
+    };
+    
+    stream.addEventListener('addtrack', handleTrackAdded);
+    return () => {
+      stream.removeEventListener('addtrack', handleTrackAdded);
+    };
+  }, [stream, name]);
+
+  const hasVideoToShow = (isVideoOn || isScreenSharing) && stream && stream.getVideoTracks().length > 0;
 
   return (
     <div
@@ -73,7 +102,7 @@ const VideoTile: React.FC<VideoTileProps> = ({
       )}
     >
       {/* Video element */}
-      {(isVideoOn || isScreenSharing) && stream ? (
+      {hasVideoToShow ? (
         <video
           ref={videoRef}
           autoPlay
@@ -217,10 +246,12 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
     if (mainVideoRef.current && isOneOnOne && participants[0]) {
       const stream = participants[0].screenStream || participants[0].videoStream;
       if (stream) {
+        console.log('1:1 mode: Setting main video stream, tracks:', stream.getTracks().map(t => t.kind));
         mainVideoRef.current.srcObject = stream;
+        mainVideoRef.current.play().catch(err => console.log('Main video autoplay prevented:', err));
       }
     }
-  }, [isOneOnOne, participants]);
+  }, [isOneOnOne, participants, participants[0]?.videoStream, participants[0]?.screenStream]);
 
   // Cycle self-view position
   const cycleSelfViewPosition = () => {
@@ -241,7 +272,8 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
   if (isOneOnOne && !pinnedId) {
     const remoteParticipant = participants[0];
     const remoteStream = remoteParticipant?.screenStream || remoteParticipant?.videoStream;
-    const hasRemoteVideo = remoteParticipant?.isVideoOn || remoteParticipant?.isScreenSharing;
+    const remoteHasVideoTrack = remoteStream && remoteStream.getVideoTracks().length > 0;
+    const hasRemoteVideo = (remoteParticipant?.isVideoOn || remoteParticipant?.isScreenSharing) && remoteHasVideoTrack;
     const hasLocalVideo = isLocalVideoOn || isLocalScreenSharing;
 
     return (
